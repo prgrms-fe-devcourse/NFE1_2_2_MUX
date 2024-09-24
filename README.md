@@ -68,6 +68,6 @@ git push origin --delete feature/your-feature-name  # 원격에서 삭제
 6.다른 팀원들의 작업 내용을 주기적으로 받아오기 위해 main 브랜치를 최신 상태로 유지
 
 ```
-git checkout main
-git pull origin main
+git checkout develop
+git pull origin develop
 ```
