@@ -17,21 +17,25 @@ git clone https://github.com/prgrms-fe-devcourse/NFE1_2_MUX.git
 : 클론 후 해당 디렉터리로 이동하여 설치 진행
 
 ```
-nayoung@nayeong-ui-MacBookPro projects % cd NFE1_2_MUX
+cd NFE1_2_MUX
 
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install
+git checkout develop
 
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm run dev
+git pull
 
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm i --save-dev prettier
+npm install
 
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install react-router-dom --save
+npm install vite --save-dev
+
+npm i --save-dev prettier
+
+npm install react-router-dom --save
 
 nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install axios
 
 nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install styled-components
 
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX %
+nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm run dev
 
 ```
 
