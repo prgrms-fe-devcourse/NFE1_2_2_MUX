@@ -62,22 +62,4 @@ git checkout main
 git pull origin main
 ``` 
 
-```bash
-nayoung@nayeong-ui-MacBookPro projects % cd NFE1_2_MUX
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm run dev
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm i --save-dev prettier
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install react-router-dom --save 
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install axios
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % npm install styled-components
-
-nayoung@nayeong-ui-MacBookPro NFE1_2_MUX % 
-
-```
 
