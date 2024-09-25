@@ -55,7 +55,7 @@ git checkout -b feature/자신이 생성한 이슈 번호(ex. #1)
 
 ```
 git add .
-git commit -m "작업 내용 설명"
+git commit -m "자신이 생성한 이슈 번호(ex. #1) + 작업 내용 설명"
 ```
 
 3.로컬 브랜치를 원격 리포지토리로 푸시
