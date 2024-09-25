@@ -37,3 +37,4 @@ export const getUserData = async (userId, token) => {
 
   return response.data; // 응답 데이터 반환
 };
+
