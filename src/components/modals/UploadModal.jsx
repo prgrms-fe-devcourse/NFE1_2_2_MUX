@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import CloseIcon from '../../assets/icons/Close.png'
 import TrackIcon from '../../assets/icons/Track.png';
-import PostIcon from '../../assets/icons/Post.png';
 
-const UploadModal = ({ onClose }) => {
+const UploadModal = () => {
   const [activeTab, setActiveTab] = useState('track');
 
   return (
@@ -12,7 +11,16 @@ const UploadModal = ({ onClose }) => {
       {/* Modal Header */}
       <Header>
         <TabWrapper>
-          
+          <TabButton
+            isActive={activeTab === 'track'}
+            onClick={() => setActiveTab('track')}>
+            <TabIcon
+              src={TrackIcon}
+              alt="Track Icon"
+              invert={activeTab === 'track'}
+            />
+            음원 업로드
+          </TabButton>
         </TabWrapper>
       </Header>
 
@@ -50,7 +58,6 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 25px;
   background-color: #fff;
   border-bottom: 1px solid #000;
 `;
@@ -58,6 +65,29 @@ const Header = styled.div`
 const TabWrapper = styled.div`
   display: flex;
   align-items: center;
+`;
+
+const TabButton = styled.button`
+  padding: 10px 25px;
+  cursor: pointer;
+  background-color: ${(props) => (props.isActive ? '#000' : '#fff')};
+  color: ${(props) => (props.isActive ? '#fff' : '#000')};
+  border: 0;
+  border-right: 1px solid #000;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+`;
+
+const TabIcon = styled.img`
+  margin-right: 8px;
+  width: 18px;
+  height: 18px; 
+  filter: ${(props) => (props.invert ? 'invert(1)' : 'none')};
 `;
 
 const Content = styled.div`
