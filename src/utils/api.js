@@ -37,3 +37,20 @@ export const getUserData = async (userId, token) => {
 
   return response.data; // 응답 데이터 반환
 };
+
+// 프로필 이미지 업로드 API 호출
+export const uploadProfileImage = async (formData, token) => {
+  try {
+    const response = await axios.post('/api/users/upload-photo', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,  // 토큰을 헤더로 전송
+        'Content-Type': 'multipart/form-data',  // 파일 업로드 시 필요한 헤더
+      },
+    });
+    return response.data;  // 응답 데이터 반환
+  } catch (error) {
+    console.error('프로필 이미지를 업로드할 수 없습니다.', error);
+    throw error;
+  }
+};
+

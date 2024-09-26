@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import ProfileEditModal from '../components/modals/ProfileEditModal';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);  // 모달 상태 추가
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,6 +35,15 @@ const Dashboard = () => {
     return <p>Loading...</p>;
   }
 
+  // 모달 열기/닫기 핸들러
+  const openModalHandler = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModalHandler = () => {
+    setIsModalOpen(false);
+  };
+
   
   return (
     <DashboardContainer>
@@ -42,6 +53,16 @@ const Dashboard = () => {
         <p><strong>Full Name:</strong> {user.fullName.fullName}</p>
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
       </UserInfo>
+      <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton> {/* 버튼 추가 */}
+
+       {/* 모달 추가 */}
+       {isModalOpen && (
+        <ProfileEditModal
+          userId={user.id}
+          token={localStorage.getItem('token')}
+          onClose={closeModalHandler}  // 모달 닫기 핸들러
+        />
+      )}
     </DashboardContainer>
   );
 };
@@ -81,4 +102,18 @@ const LoadingMessage = styled.p`
   font-size: 18px;
   color: #333;
   margin-top: 20px;
+`;
+
+const EditProfileButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #6c5dd3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #5a4bbd;
+  }
 `;
