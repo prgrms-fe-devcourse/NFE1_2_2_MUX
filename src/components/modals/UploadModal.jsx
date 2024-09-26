@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import CloseIcon from '../../assets/icons/Close.png'
 import TrackIcon from '../../assets/icons/Track.png';
 import PostIcon from '../../assets/icons/Post.png';
 
-const UploadModal = () => {
+const UploadModal = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('track');
 
   return (
@@ -32,6 +33,7 @@ const UploadModal = () => {
             추천 포스트 업로드
           </TabButton>
         </TabWrapper>
+        <CloseButton onClick={onClose} />
       </Header>
 
       {/* Modal Content */}
@@ -98,6 +100,19 @@ const TabIcon = styled.img`
   width: 18px;
   height: 18px; 
   filter: ${(props) => (props.invert ? 'invert(1)' : 'none')};
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  margin-right: 1%;
+  background-image: url(${CloseIcon});
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 `;
 
 const Content = styled.div`
