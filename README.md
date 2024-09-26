@@ -34,6 +34,30 @@ npm install styled-components
 npm run dev
 
 ```
+1. prettier code formatter 확장 설치
+2. settings.json 열기
+- Windows/Linux: Ctrl + Shift + P
+- Mac: Cmd + Shift + P
+검색창에 settings.json 입력
+아래 쪽으로 내려서
+```
+    "[css]": {
+        "editor.formatOnSave": true, //추가
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[html]": {
+        "editor.formatOnSave": true, //추가
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "git.suggestSmartCommit": false,
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "git.openRepositoryInParentFolders": "never",
+    "[javascript]": {
+        "editor.formatOnSave": true, //추가
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+```
 
 협업 예시
 
