@@ -1,13 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Signup from './pages/Signup';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import Signup from './auth/Signup';
+import Login from './auth/Login';
+import Dashboard from './auth/Dashboard';
 import styled from 'styled-components';
+import Navigation from './components/main/Navigation';
 
 const App = () => {
   return (
     <Router>
+      <div>
+        <Navigation />
+      </div>
       <Container>
         {/* 네비게이션 버튼 */}
         <Nav>
