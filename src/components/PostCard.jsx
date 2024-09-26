@@ -33,5 +33,33 @@ const PostList = ({ posts }) => {
   );
 };
 
+// 테스트를 위한 App 컴포넌트
+const App = () => {
+  // 예시 포스트 데이터
+  const posts = [
+    {
+      _id: "1",
+      image: "https://example.com/image1.jpg",
+      title: "추천 음악 1",
+      author: { name: "작성자 A" },
+      comments: [{ text: "이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요!" }],
+    },
+    {
+      _id: "2",
+      image: "https://example.com/image2.jpg",
+      title: "추천 음악 2",
+      author: { name: "작성자 B" },
+      comments: [{ text: "이 곡을 꼭 들어보세요!" }],
+    },
+  ];
+
+  return (
+    <div>
+      <h1>포스트 카드</h1> {/* 페이지 제목 */}
+      <PostList posts={posts} /> {/* 포스트 리스트 렌더링 */}
+    </div>
+  );
+};
 
 export default App;
+
