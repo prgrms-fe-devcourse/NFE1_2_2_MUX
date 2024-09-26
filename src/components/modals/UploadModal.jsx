@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import CloseIcon from '../../assets/icons/Close.png'
 import TrackIcon from '../../assets/icons/Track.png';
+import PostIcon from '../../assets/icons/Post.png';
 
 const UploadModal = () => {
   const [activeTab, setActiveTab] = useState('track');
@@ -20,6 +20,16 @@ const UploadModal = () => {
               invert={activeTab === 'track'}
             />
             음원 업로드
+          </TabButton>
+          <TabButton
+            isActive={activeTab === 'post'}
+            onClick={() => setActiveTab('post')}>
+            <TabIcon
+              src={PostIcon}
+              alt="Post Icon"
+              invert={activeTab === 'post'}
+            />
+            추천 포스트 업로드
           </TabButton>
         </TabWrapper>
       </Header>
@@ -104,4 +114,3 @@ const Footer = styled.div`
   background-color: #fff;
   border-top: 1px solid #000;
 `;
-
