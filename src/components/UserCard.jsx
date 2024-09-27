@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Example from '../assets/images/DefaultProfile.png'; // 예시 이미지 경로
 import axios from "axios"; // 나중에 사용하게 될 axios
+import { useNavigate } from "react-router-dom";
 
 // UserCard 컴포넌트
-const UserCard = ({ user }) => {
-  const { image, fullName, role, comment } = user;
-    // 코멘트가 50자를 넘을 경우 자르고 '...'을 붙임
-    const truncatedComment = comment.length > 50 ? comment.slice(0, 50) + '...' : comment;
-
+const UserCard = ({ user, navigate }) => {
+  const { image, fullName, role, comment, _id } = user;
+  // 코멘트가 50자를 넘을 경우 자르고 '...'을 붙임
+  const truncatedComment = comment.length > 50 ? comment.slice(0, 50) + '...' : comment;
 
   return (
-    <Card>
+    <Card onClick={() => navigate(`/userpage/${_id}`)}> 
       <ProfileImage src={image || Example} alt={fullName} /> {/* 프로필 이미지 */}
       <UserInfo>
         <UserName>{fullName}</UserName> {/* 유저 이름 */}
@@ -25,6 +25,7 @@ const UserCard = ({ user }) => {
 // 테스트를 위한 App 컴포넌트
 const App = () => {
   const [users, setUsers] = useState([]);
+  const navigate = useNavigate(); // useNavigate 훅 사용
 
   // 더미 데이터 설정
   useEffect(() => {
@@ -42,22 +43,25 @@ const App = () => {
     // 임시 더미 데이터
     const dummyUsers = [
       {
+        _id: "1", // 더미 ID 추가
         image: "", // 프로필 이미지 URL
         fullName: "커트코베인", // 이름
         role: "RockStar", // 칭호(역할)
         comment: "아무튼 나락도 락이니까..." // 자기소개
       },
       {
+        _id: "2", // 더미 ID 추가
         image: "", // 프로필 이미지 URL
         fullName: "아라이카즈키", // 이름
         role: "JazzMaster", // 칭호(역할)
-        comment: "재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다." // 자기소개
+        comment: "재즈베이스 마스터? 어렵지 않습니다. 재즈베이스 마스터? 어렵지 않습니다." // 자기소개
       },
       {
+        _id: "3", // 더미 ID 추가
         image: "", // 프로필 이미지 URL
         fullName: "모차르트", // 이름
         role: "Maestro", // 칭호(역할)
-        comment: "제 신곡 많이 들어주세요. " // 자기소개
+        comment: "제 신곡 많이 들어주세요." // 자기소개
       }
     ];
     
@@ -68,8 +72,8 @@ const App = () => {
     <div>
       <h1>유저 카드 리스트</h1>
       <UserList>
-        {users.map((user, index) => (
-          <UserCard key={index} user={user} />
+        {users.map((user) => (
+          <UserCard key={user._id} user={user} navigate={navigate} /> // navigate를 UserCard에 전달
         ))}
       </UserList>
     </div>
