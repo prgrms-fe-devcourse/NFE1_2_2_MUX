@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PostCard from '../components/PostCard';
-
+import UserCard from '../components/UserCard';
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -44,6 +44,7 @@ const Dashboard = () => {
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
       </UserInfo>
       <PostCard />
+      <UserCard />
     </DashboardContainer>
   );
 };
@@ -54,7 +55,7 @@ export default Dashboard;
 const DashboardContainer = styled.div`
   padding: 40px;
   text-align: center;
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
   min-height: 100vh;
   color: #333333;
   
