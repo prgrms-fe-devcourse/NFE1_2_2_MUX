@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Example from '../assets/images/DefaultProfile.png'; // 예시 이미지 경로
-import axios from "axios"; 
+import axios from "axios"; // 나중에 사용하게 될 axios
 
 // UserCard 컴포넌트
 const UserCard = ({ user }) => {
   const { image, fullName, role, comment } = user;
+    // 코멘트가 50자를 넘을 경우 자르고 '...'을 붙임
+    const truncatedComment = comment.length > 50 ? comment.slice(0, 50) + '...' : comment;
 
 
   return (
@@ -14,7 +16,7 @@ const UserCard = ({ user }) => {
       <UserInfo>
         <UserName>{fullName}</UserName> {/* 유저 이름 */}
         <UserTitle>{role}</UserTitle> {/* 유저 역할 */}
-        <UserComment>{comment}</UserComment> {/* 유저 자기소개 */}
+        <UserComment>{truncatedComment}</UserComment> {/* 유저 자기소개 */}
       </UserInfo>
     </Card>
   );
@@ -24,7 +26,7 @@ const UserCard = ({ user }) => {
 const App = () => {
   const [users, setUsers] = useState([]);
 
-      // 더미 데이터 설정
+  // 더미 데이터 설정
   useEffect(() => {
     // 나중에 이 부분을 API 호출로 대체
     /* 
@@ -36,6 +38,7 @@ const App = () => {
         console.error("Error fetching users:", error);
       });
     */
+    
     // 임시 더미 데이터
     const dummyUsers = [
       {
@@ -48,7 +51,7 @@ const App = () => {
         image: "", // 프로필 이미지 URL
         fullName: "아라이카즈키", // 이름
         role: "JazzMaster", // 칭호(역할)
-        comment: "재즈베이스 마스터? 어렵지 않습니다. 재즈베이스 마스터? 어렵지 않습니다. 재즈베이스 마스터? 어렵지 않습니다. 재즈베이스 마스터? 어렵지 않습니다. " // 자기소개
+        comment: "재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다.재즈베이스 마스터? 어렵지 않습니다." // 자기소개
       },
       {
         image: "", // 프로필 이미지 URL
