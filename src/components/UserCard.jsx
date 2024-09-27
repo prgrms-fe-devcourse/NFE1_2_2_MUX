@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Example from '../assets/images/DefaultProfile.png'; // 예시 이미지 경로
-import axios from "axios"; // 나중에 사용하게 될 axios
+import axios from "axios"; 
 
 // UserCard 컴포넌트
 const UserCard = ({ user }) => {
@@ -24,8 +24,18 @@ const UserCard = ({ user }) => {
 const App = () => {
   const [users, setUsers] = useState([]);
 
+      // 더미 데이터 설정
   useEffect(() => {
-    
+    // 나중에 이 부분을 API 호출로 대체
+    /* 
+    axios.get("/api/users")
+      .then(response => {
+        setUsers(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching users:", error);
+      });
+    */
     // 임시 더미 데이터
     const dummyUsers = [
       {
