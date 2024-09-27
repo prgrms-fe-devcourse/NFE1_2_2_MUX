@@ -100,7 +100,6 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-
 // Styled Components
 const DashboardContainer = styled.div`
   padding: 40px;
@@ -108,7 +107,6 @@ const DashboardContainer = styled.div`
   background-color: #f5f5f5;
   min-height: 100vh;
   color: #333333;
-  
 `;
 
 const UserInfo = styled.div`
@@ -142,4 +140,5 @@ const EditProfileButton = styled.button`
     background-color: #5a4bbd;
   }
 `;
+
 

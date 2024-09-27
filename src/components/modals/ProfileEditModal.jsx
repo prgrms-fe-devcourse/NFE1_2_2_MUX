@@ -57,17 +57,34 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
 
   const handleImageChange = async (e) => {
     const imageFile = e.target.files[0];
+  
+    // 파일 형식 제한 (jpg와 png만 허용)
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(imageFile.type)) {
+      alert('jpg 또는 png 형식의 파일만 업로드 가능합니다.');
+      return;
+    }
+  
+    // 파일 크기 제한 (최대 2MB)
+    const maxSizeInMB = 2;
+    if (imageFile.size > maxSizeInMB * 1024 * 1024) {
+      alert('파일 크기는 최대 2MB까지 허용됩니다.');
+      return;
+    }
+  
     const formData = new FormData();
     formData.append('image', imageFile);
     formData.append('isCover', false);
-
+  
     try {
       const updateUser = await uploadProfileImage(formData, token);
-      setProfileImage(URL.createObjectURL(imageFile));
+      setProfileImage(URL.createObjectURL(imageFile)); // 선택된 파일을 미리 보기
     } catch (error) {
       console.error('프로필 이미지를 변경할 수 없습니다.', error);
     }
   };
+  
+  
 
   const handleImageUploadClick = () => {
     fileInputRef.current.click();
@@ -96,7 +113,7 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
               ref={fileInputRef}
               type="file"
               onChange={handleImageChange}
-              accept="image/*"
+              accept="image/jpeg, image/png" // 파일 형식 제한
             />
           </ProfileImageWrapper>
         </ProfileSection>
@@ -293,14 +310,11 @@ const TextArea = styled.textarea`
   height: 80px;
   width: 100%;
   box-sizing: border-box;
-  resize: vertical;  /* 세로 방향만 조절 가능 */
-  overflow-y: auto;  /* 내용이 넘칠 경우 스크롤 표시 */
   &:focus {
     outline: none;
     border-color: #6c5dd3;
   }
 `;
-
 
 const FixedLabel = styled.span`
   position: absolute;
