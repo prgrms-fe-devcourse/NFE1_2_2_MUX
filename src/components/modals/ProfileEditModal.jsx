@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { uploadProfileImage, updateUser } from '../../utils/api'; // updateUser 추가
+import { uploadProfileImage, updateUser } from '../../utils/api';
 
-const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate }) => {
+const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -12,45 +12,49 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate }) => {
   });
 
   const [profileImage, setProfileImage] = useState(null);
-  const fileInputRef = useRef(); // 파일 선택을 트리거할 버튼에 사용
+  const fileInputRef = useRef();
 
   useEffect(() => {
     if (user) {
-      // 대시보드에서 전달받은 user 정보를 사용하여 모달의 초기값 설정
       setFormData({
         fullName: user.fullName.fullName,
         email: user.email,
         password: '****',
-        nickname: user.fullName.nickName, // 닉네임 설정
+        nickname: user.fullName.nickName,
         bio: user.bio || '',
       });
-      setProfileImage(user.profileImage); // 초기 프로필 이미지 설정
+      setProfileImage(user.profileImage);
     }
   }, [user]);
 
-  // 닉네임 변경 후 엔터키 처리
-// updateUser API 호출을 사용하여 서버에 데이터를 업데이트
-const handleKeyDown = async (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    try {
-      // 서버에 닉네임 변경 요청
-      await updateUser(user.id, token, { username: formData.nickname });
-
-      // 변경된 닉네임을 부모 컴포넌트(Dashboard)에 전달
-      if (onNicknameUpdate) {
-        onNicknameUpdate(formData.nickname); 
+  // 닉네임 엔터 처리
+  const handleNicknameKeyDown = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      try {
+        await updateUser(user.id, token, { username: formData.nickname });
+        onNicknameUpdate(formData.nickname);
+        alert('닉네임이 성공적으로 변경되었습니다.');
+      } catch (error) {
+        alert('닉네임 변경에 실패했습니다.');
       }
-
-      alert('닉네임이 성공적으로 변경되었습니다.');
-    } catch (error) {
-      alert('닉네임 변경에 실패했습니다.');
     }
-  }
-};
+  };
 
+  // 자기소개 엔터 처리
+  const handleBioKeyDown = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      try {
+        await updateUser(user.id, token, { comment: formData.bio });
+        onBioUpdate(formData.bio);
+        alert('자기소개가 성공적으로 변경되었습니다.');
+      } catch (error) {
+        alert('자기소개 변경에 실패했습니다.');
+      }
+    }
+  };
 
-  // 프로필 이미지 변경 처리
   const handleImageChange = async (e) => {
     const imageFile = e.target.files[0];
     const formData = new FormData();
@@ -59,14 +63,14 @@ const handleKeyDown = async (e) => {
 
     try {
       const updateUser = await uploadProfileImage(formData, token);
-      setProfileImage(URL.createObjectURL(imageFile)); // 선택된 파일을 미리 보기
+      setProfileImage(URL.createObjectURL(imageFile));
     } catch (error) {
       console.error('프로필 이미지를 변경할 수 없습니다.', error);
     }
   };
 
   const handleImageUploadClick = () => {
-    fileInputRef.current.click(); // 파일 선택 창 열기
+    fileInputRef.current.click();
   };
 
   const handleChange = (e) => {
@@ -143,7 +147,7 @@ const handleKeyDown = async (e) => {
               value={formData.nickname}
               name="nickname"
               onChange={handleChange}
-              onKeyDown={handleKeyDown} // 엔터키 입력 처리
+              onKeyDown={handleNicknameKeyDown} // 닉네임 엔터 처리
             />
             <FixedLabel>닉네임</FixedLabel>
           </InputWrapper>
@@ -153,6 +157,7 @@ const handleKeyDown = async (e) => {
               value={formData.bio}
               name="bio"
               onChange={handleChange}
+              onKeyDown={handleBioKeyDown} // 자기소개 엔터 처리
             />
             <FixedLabel>자기소개</FixedLabel>
           </InputWrapper>
@@ -163,6 +168,7 @@ const handleKeyDown = async (e) => {
 };
 
 export default ProfileEditModal;
+
 
 
 
@@ -287,11 +293,14 @@ const TextArea = styled.textarea`
   height: 80px;
   width: 100%;
   box-sizing: border-box;
+  resize: vertical;  /* 세로 방향만 조절 가능 */
+  overflow-y: auto;  /* 내용이 넘칠 경우 스크롤 표시 */
   &:focus {
     outline: none;
     border-color: #6c5dd3;
   }
 `;
+
 
 const FixedLabel = styled.span`
   position: absolute;
@@ -325,4 +334,6 @@ const ChangePasswordButton = styled.button`
     background-color: #5a4bc1;
   }
 `;
+
+
 

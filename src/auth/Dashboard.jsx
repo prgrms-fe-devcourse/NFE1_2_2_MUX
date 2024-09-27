@@ -6,7 +6,7 @@ import PostCard from '../components/PostCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);  
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,14 +39,28 @@ const Dashboard = () => {
   // 닉네임 업데이트 함수
   const updateUserNickname = (newNickname) => {
     if (user) {
-      const updatedUser = { 
-        ...user, 
-        fullName: { ...user.fullName, nickName: newNickname } 
+      const updatedUser = {
+        ...user,
+        fullName: { ...user.fullName, nickName: newNickname },
       };
 
       // 상태 업데이트 및 localStorage에 저장
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
+  // 자기소개 업데이트 함수
+  const updateUserBio = (newBio) => {
+    if (user) {
+      const updatedUser = {
+        ...user,
+        bio: newBio, // bio 업데이트
+      };
+
+      // 상태 업데이트 및 localStorage에 저장
+      setUser(updatedUser);  // 상태 업데이트
+      localStorage.setItem('user', JSON.stringify(updatedUser));  // localStorage에 저장
     }
   };
 
@@ -66,16 +80,18 @@ const Dashboard = () => {
         <p><strong>Email:</strong> {user.email}</p>
         <p><strong>Full Name:</strong> {user.fullName.fullName}</p>
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
+        <p><strong>Bio:</strong> {user.bio}</p> {/* 여기서 업데이트된 bio가 반영됩니다 */}
       </UserInfo>
       <PostCard />
       <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton>
 
       {isModalOpen && (
         <ProfileEditModal
-          user={user}  
+          user={user}
           token={localStorage.getItem('token')}
-          onClose={closeModalHandler}  
-          onNicknameUpdate={updateUserNickname}  // 닉네임 업데이트 함수 전달
+          onClose={closeModalHandler}
+          onNicknameUpdate={updateUserNickname}
+          onBioUpdate={updateUserBio}  // onBioUpdate 전달
         />
       )}
     </DashboardContainer>
@@ -126,3 +142,4 @@ const EditProfileButton = styled.button`
     background-color: #5a4bbd;
   }
 `;
+
