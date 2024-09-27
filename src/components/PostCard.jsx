@@ -1,19 +1,24 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import axios from "axios";
 import Example from '../assets/images/example.png'; // 예시 이미지 경로
 
 // PostCard 컴포넌트
 const PostCard = ({ post }) => {
-  const { image, title, author, comments } = post;
+  const { image, title, author, comments, _id } = post;
+  const navigate = useNavigate();
   //api에서 받아올 post 정보
 
   // 본문 내용이 없는 경우
   const content = comments.length > 0 ? comments[0].text : "";
 
   return (
-    <Card>
+    // post _id를 받아서 각 포스트의 상세 페이지로 이동
+    <Card onClick={() => navigate(`/posts/${_id}`)}> 
+    {/* {image && <PostImage src={image} alt={title} />} */}
+    {image && <PostImage src={Example} alt={title} />}{/* Example용 코드 */}
       {/* 이미지가 있는 경우에만 PostImage 렌더링 */}
-      {image && <PostImage src={Example} alt={title} />}
       <PostTitle>{title}</PostTitle> {/* 포스트 제목 */}
       <PostAuthor>{author.name}</PostAuthor> {/* 저자 이름 */}
       <PostContent>{content}</PostContent> {/* 본문 내용 */}
@@ -52,6 +57,34 @@ const App = () => {
       comments: [{ text: "이 곡을 꼭 들어보세요!" }],
     },
   ];
+  ////API를 이용해 데이터를 받아올 시 참고할 코드
+  // const [posts, setPosts] = useState([]); // posts 상태
+  // const [loading, setLoading] = useState(true); // 로딩 상태
+  // const [error, setError] = useState(null); // 에러 상태
+
+  // useEffect(() => {
+  //   // API 호출 함수
+  //   const fetchPosts = async () => {
+  //     try {
+  //       const response = await axios.get("/api/posts"); // API 호출
+  //       setPosts(response.data); // 받아온 데이터를 상태로 설정
+  //       setLoading(false);
+  //     } catch (err) {
+  //       setError("포스트 데이터를 불러오는 데 실패했습니다.");
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchPosts(); // API 호출
+  // }, []);
+
+  // if (loading) {
+  //   return <div>로딩 중...</div>;
+  // }
+
+  // if (error) {
+  //   return <div>{error}</div>;
+  // }
 
   return (
     <div>
