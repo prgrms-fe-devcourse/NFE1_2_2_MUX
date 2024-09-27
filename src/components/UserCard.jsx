@@ -87,17 +87,17 @@ const Card = styled.div`
   display: flex;
   align-items: center;
   width: 400px;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 8px;
 `;
 
 const ProfileImage = styled.img`
-  width: 65px;
-  height: 65px; /* 크기를 지정해 균일하게 표시 */
+  width: 80px;
+  height: 80px; /* 크기를 지정해 균일하게 표시 */
   padding: 5px;
   border-radius: 50%; /* 프로필 이미지를 완전한 원으로 만듦 */
   object-fit: cover;
-  margin-right: 16px;
+  margin-right: 12px;
 `;
 
 const UserInfo = styled.div`
