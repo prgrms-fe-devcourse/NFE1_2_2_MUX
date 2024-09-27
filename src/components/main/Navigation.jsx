@@ -6,73 +6,93 @@ import PostFeedIcon from '../../assets/icons/PostFeed.png';
 import BellIcon from '../../assets/icons/Bell.png';
 import DefaultProfileImage from '../../assets/images/DefaultProfile.png';
 import SearchIcon from '../../assets/icons/Search.png';
+import UploadModal from '../modals/UploadModal'; // UploadModal 컴포넌트 가져오기
 
 const Navigation = () => {
   const [searchTerm, setSearchTerm] = useState(''); // 검색어를 저장하는 상태
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
+
+  // 모달 열기/닫기 함수
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
-    <HeaderContainer>
-      {/* 로고 섹션 */}
-      <Logo>
-        <img src="/assets/images/logo.png" alt="로고" />
-      </Logo>
+    <>
+      <HeaderContainer>
+        {/* 로고 섹션 */}
+        <Logo>
+          <img src="/assets/images/logo.png" alt="로고" />
+        </Logo>
 
-      {/* 네비게이션 바 섹션 */}
-      <Navbar>
-        {/* 홈 아이콘 */}
-        <NavItem href="/main"> 
-          <img src={HomeIcon} alt="Home" />
-        </NavItem>
-        {/* 큐레이션 및 아티스트 트랙 아이콘 */}
-        <NavItem href="/curationart">
-          <img src={CurationArtistIcon} alt="큐레이션 & 아티스트 트랙" />
-        </NavItem>
-        {/* 포스트 피드 아이콘 */}
-        <NavItem href="/postfeed">
-          <img src={PostFeedIcon} alt="포스트" />
-        </NavItem>
-      </Navbar>
+        {/* 네비게이션 바 섹션 */}
+        <Navbar>
+          {/* 홈 아이콘 */}
+          <NavItem href="/main"> 
+            <img src={HomeIcon} alt="Home" />
+          </NavItem>
+          {/* 큐레이션 및 아티스트 트랙 아이콘 */}
+          <NavItem href="/curationart">
+            <img src={CurationArtistIcon} alt="큐레이션 & 아티스트 트랙" />
+          </NavItem>
+          {/* 포스트 피드 아이콘 */}
+          <NavItem href="/postfeed">
+            <img src={PostFeedIcon} alt="포스트" />
+          </NavItem>
+        </Navbar>
 
-      {/* 검색창 및 업로드 버튼 컨테이너 */}
-      <SearchUploadContainer>
-        {/* 검색 바 섹션 */}
-        <SearchBar>
-          <input 
-            type="text" 
-            placeholder="검색"
-            value={searchTerm} // 입력값을 상태로 연결
-            onChange={(e) => setSearchTerm(e.target.value)} // 입력값 변경 시 상태 업데이트
-          />
-          {/* 검색결과창으로 이동 */}
-          <a href={`/search/${searchTerm}`}>
-            <img className='search' src={SearchIcon} alt="돋보기" />
-          </a> 
-        </SearchBar>
+        {/* 검색창 및 업로드 버튼 컨테이너 */}
+        <SearchUploadContainer>
+          {/* 검색 바 섹션 */}
+          <SearchBar>
+            <input 
+              type="text" 
+              placeholder="검색"
+              value={searchTerm} // 입력값을 상태로 연결
+              onChange={(e) => setSearchTerm(e.target.value)} // 입력값 변경 시 상태 업데이트
+            />
+            {/* 검색결과창으로 이동 */}
+            <a href={`/search/${searchTerm}`}>
+              <img className='search' src={SearchIcon} alt="돋보기" />
+            </a> 
+          </SearchBar>
 
-        {/* 업로드 버튼 */}
-        <Upload>
-          <RoundButton>
-            <a href="/upload">Upload</a>
-          </RoundButton>
-        </Upload>
-      </SearchUploadContainer>
+          {/* 업로드 버튼 */}
+          <Upload>
+            <RoundButton onClick={openModal}> {/* 버튼 클릭 시 모달 열기 */}
+              <a>Upload</a>
+            </RoundButton>
+          </Upload>
+        </SearchUploadContainer>
 
-      {/* 프로필 및 알림 섹션 */}
-      <ProfileSection>
-        {/* 사용자의 칭호 */}
-        <div className="title">칭호 없음</div>
+        {/* 프로필 및 알림 섹션 */}
+        <ProfileSection>
+          {/* 사용자의 칭호 */}
+          <div className="title">칭호 없음</div>
 
-        {/* 프로필 이미지*/}
-        <a href="/usepage"> 
-          <img className='profile' src={DefaultProfileImage} alt="프로필" />
-        </a>
+          {/* 프로필 이미지*/}
+          <a href="/usepage"> 
+            <img className='profile' src={DefaultProfileImage} alt="프로필" />
+          </a>
 
-        {/* 알림 아이콘 */}
-        <a href="/notifications">
-          <img className='notification' src={BellIcon} alt="알림" />
-        </a>
-      </ProfileSection>
-    </HeaderContainer>
+          {/* 알림 아이콘 */}
+          <a href="/notifications">
+            <img className='notification' src={BellIcon} alt="알림" />
+          </a>
+        </ProfileSection>
+      </HeaderContainer>
+
+      {/* 업로드 모달 */}
+      {isModalOpen && (
+        <>
+          {/* 모달 배경 */}
+          <ModalBackground />
+          {/* 모달 컨테이너 */}
+          <ModalContainer>
+            <UploadModal onClose={closeModal} /> {/* UploadModal 컴포넌트 */}
+          </ModalContainer>
+        </>
+      )}
+    </>
   );
 };
 
@@ -156,6 +176,7 @@ const RoundButton = styled.div`
   border-radius: 32px;
   padding: 4px 24px;
   text-align: center;
+  cursor: pointer;
 
   a {
     text-decoration: none;
@@ -195,4 +216,21 @@ const ProfileSection = styled.div`
     width: 24px;
     height: 24px;
   }
+`;
+
+// 모달 배경 및 컨테이너 스타일 정의
+const ModalBackground = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+`;
+
+const ModalContainer = styled.div`
+  position: fixed;
+  z-index: 1000; 
+  padding: 20px;
 `;
