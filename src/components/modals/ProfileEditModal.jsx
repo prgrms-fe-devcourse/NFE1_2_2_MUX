@@ -1,184 +1,304 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { getUserData, uploadProfileImage } from '../../utils/api';
+import { uploadProfileImage } from '../../utils/api';
 
-const ProfileEditModal = ({ userId, token, onClose }) => {
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        password: '',
-        nickname: '',
-        bio: ''
-    });
+const ProfileEditModal = ({ user, token, onClose }) => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '****',
+    nickname: '',
+    bio: '',
+  });
 
-    const [profileImage, setProfileImage] = useState(null);
-    const modalBackground = useRef();
+  const [profileImage, setProfileImage] = useState(null);
+  const fileInputRef = useRef(); // 파일 선택을 트리거할 버튼에 사용
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const data = await getUserData(userId, token);
-                setFormData({
-                    fullName: data.fullName,
-                    email: data.email,
-                    password: '',  // 비밀번호는 공란으로 남겨둠
-                    nickname: data.username,
-                    bio: data.bio || ''
-                });
-                setProfileImage(data.profileImage); 
-            } catch (error) {
-                console.error('사용자 정보를 불러올 수 없습니다.', error);
-            } 
-        };
-        fetchUserData();
-    }, [userId, token]);
+  useEffect(() => {
+    if (user) {
+      // 대시보드에서 전달받은 user 정보를 사용하여 모달의 초기값 설정
+      setFormData({
+        fullName: user.fullName.fullName,
+        email: user.email,
+        password: '****', 
+        nickname: user.fullName.nickName,
+        bio: user.bio || '',
+      });
+      setProfileImage(user.profileImage); // 초기 프로필 이미지 설정
+    }
+  }, [user]);
 
-    const handleImageChange = async (e) => {
-        const imageFile = e.target.files[0]
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        formData.append('isCover', false);
+  // 프로필 이미지 변경 처리
+  const handleImageChange = async (e) => {
+    const imageFile = e.target.files[0];
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    formData.append('isCover', false);
 
-        try {
-            const updateUser = await uploadProfileImage(formData, token);
-            setProfileImage(updateUser.profileImage);    
-        } catch (error) {
-            console.error('프로필 이미지를 변경할 수 없습니다.', error);
-        }
-    };
+    try {
+      const updateUser = await uploadProfileImage(formData, token);
+      setProfileImage(URL.createObjectURL(imageFile)); // 선택된 파일을 미리 보기
+    } catch (error) {
+      console.error('프로필 이미지를 변경할 수 없습니다.', error);
+    }
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
-    };
+  // 파일 선택 트리거
+  const handleImageUploadClick = () => {
+    fileInputRef.current.click(); // 파일 선택 창 열기
+  };
 
-    return (
-        <ModalOverlay>
-            <ModalContent ref={modalBackground}>
-                <Header>
-                    <ProfileImage src={profileImage} alt='프로필이미지' />
-                    <input type='file' onChange={handleImageChange} />
-                    <CloseBtn onClick={onClose}>X</CloseBtn>  {/* 모달 닫기 */}
-                </Header>
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
 
-                <SectionTitle>기본 정보</SectionTitle>
-                <StyledForm>
-                    <InputLabel>이름</InputLabel>
-                    <InputField
-                        type='text'
-                        value={formData.fullName}
-                        name='fullName'
-                        disabled
-                    />
+  return (
+    <ModalOverlay>
+      <ModalContent>
+        <CloseBtn onClick={onClose}>X</CloseBtn>
 
-                    <InputLabel>이메일</InputLabel>
-                    <InputField 
-                        type='email'
-                        value={formData.email}
-                        name='email'
-                        disabled
-                    />
+        <ProfileSection>
+          <ProfileImageWrapper>
+            <ProfileImage
+              src={profileImage || '/path/to/default-image.png'}
+              alt="프로필 이미지"
+            />
+            <ProfileChangeButton onClick={handleImageUploadClick}>
+              프로필 이미지 변경
+            </ProfileChangeButton>
+            <FileInput
+              ref={fileInputRef}
+              type="file"
+              onChange={handleImageChange}
+              accept="image/*"
+            />
+          </ProfileImageWrapper>
+        </ProfileSection>
 
-                    <InputLabel>비밀번호</InputLabel>
-                    <InputField
-                        type='password'
-                        value={formData.password}
-                        name='password'
-                        placeholder="비밀번호 변경"
-                    />
-                </StyledForm>
+        <SectionTitle>기본 정보</SectionTitle>
+        <Divider />
+        <StyledForm>
+          <InputWrapper>
+            <InputField
+              type="text"
+              value={formData.fullName}
+              name="fullName"
+              onChange={handleChange}
+              disabled
+            />
+            <FixedLabel>이름</FixedLabel>
+          </InputWrapper>
 
-                <SectionTitle>추가 정보</SectionTitle>
-                <StyledForm>
-                    <InputLabel>닉네임</InputLabel>
-                    <InputField
-                        type='text'
-                        value={formData.nickname}
-                        name='nickname'
-                        onChange={handleChange}
-                    />
+          <InputWrapper>
+            <InputField
+              type="email"
+              value={formData.email}
+              name="email"
+              onChange={handleChange}
+              disabled
+            />
+            <FixedLabel>이메일</FixedLabel>
+          </InputWrapper>
 
-                    <InputLabel>자기소개</InputLabel>
-                    <TextArea
-                        value={formData.bio}
-                        name='bio'
-                        onChange={handleChange}
-                    />
-                </StyledForm>
-            </ModalContent>
-        </ModalOverlay>
-    );
+          <InputWrapper>
+            <InputField
+              type="password"
+              value={formData.password}
+              name="password"
+              onChange={handleChange}
+              disabled
+            />
+            <FixedLabel>비밀번호</FixedLabel>
+          </InputWrapper>
+        </StyledForm>
+
+        <SectionTitle>추가 정보</SectionTitle>
+        <Divider />
+        <StyledForm>
+          <InputWrapper>
+            <InputField
+              type="text"
+              value={formData.nickname}
+              name="nickname"
+              onChange={handleChange}
+            />
+            <FixedLabel>닉네임</FixedLabel>
+          </InputWrapper>
+
+          <InputWrapper>
+            <TextArea
+              value={formData.bio}
+              name="bio"
+              onChange={handleChange}
+            />
+            <FixedLabel>자기소개</FixedLabel>
+          </InputWrapper>
+        </StyledForm>
+      </ModalContent>
+    </ModalOverlay>
+  );
 };
 
 export default ProfileEditModal;
 
 // Styled Components
 const ModalOverlay = styled.div`
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ModalContent = styled.div`
-    background-color: #D5C4FF;
-    width: 500px;
-    padding: 20px;
-    border-radius: 10px;
-    position: relative;
-`;
-
-const Header = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-`;
-
-const ProfileImage = styled.img`
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
+  background-color: #d5c4ff;
+  width: 500px;
+  padding: 30px;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-height: 90vh;
+  overflow-y: auto; /* 스크롤 추가 */
 `;
 
 const CloseBtn = styled.button`
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #6c5dd3;
+`;
+
+const ProfileSection = styled.div`
+  text-align: center;
+  margin-bottom: 30px;
+`;
+
+const ProfileImageWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const ProfileImage = styled.img`
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  border: 2px solid #6c5dd3;
+  margin-bottom: 10px;
+`;
+
+const ProfileChangeButton = styled.button`
+  font-size: 14px;
+  color: #6c5dd3;
+  background: none;
+  border: none;
+  cursor: pointer;
+`;
+
+const FileInput = styled.input`
+  display: none;
 `;
 
 const SectionTitle = styled.h3`
-    margin-top: 20px;
-    color: #6C5DD3;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: left;
+`;
+
+const Divider = styled.hr`
+  border: 0;
+  height: 1px;
+  background-color: #ffffff;
+  margin-bottom: 20px;
 `;
 
 const StyledForm = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* 간격 조정 */
 `;
 
-const InputLabel = styled.label`
-    font-size: 14px;
-    color: #4A4A4A;
+const InputWrapper = styled.div`
+  position: relative;
+  margin-bottom: 12px;
 `;
 
 const InputField = styled.input`
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+  padding: 15px 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: ${({ value }) => (value ? 'right' : 'left')}; /* 값이 있으면 오른쪽 정렬, 없으면 왼쪽 정렬 */
+  &:focus {
+    outline: none;
+    border-color: #6c5dd3;
+  }
 `;
 
+
 const TextArea = styled.textarea`
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    height: 80px;
+  padding: 15px 10px 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 14px;
+  height: 80px;
+  width: 100%;
+  box-sizing: border-box;
+  &:focus {
+    outline: none;
+    border-color: #6c5dd3;
+  }
 `;
+
+const FixedLabel = styled.span`
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #000;
+  background-color: #fff;
+  padding: 0 5px;
+  pointer-events: none;
+  z-index: 1;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -10px;
+`;
+
+const ChangePasswordButton = styled.button`
+  background-color: #fff;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  &:hover {
+    background-color: #5a4bc1;
+  }
+`;
+

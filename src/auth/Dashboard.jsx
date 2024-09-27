@@ -44,7 +44,6 @@ const Dashboard = () => {
     setIsModalOpen(false);
   };
 
-  
   return (
     <DashboardContainer>
       <h2>Welcome, {user.fullName.fullName}!</h2>
@@ -53,12 +52,12 @@ const Dashboard = () => {
         <p><strong>Full Name:</strong> {user.fullName.fullName}</p>
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
       </UserInfo>
-      <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton> {/* 버튼 추가 */}
+      <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton>
 
-       {/* 모달 추가 */}
+       {/* 모달에 user 정보 전달 */}
        {isModalOpen && (
         <ProfileEditModal
-          userId={user.id}
+          user={user}  // user 데이터를 그대로 전달
           token={localStorage.getItem('token')}
           onClose={closeModalHandler}  // 모달 닫기 핸들러
         />
@@ -95,13 +94,6 @@ const UserInfo = styled.div`
   strong {
     color: #333;
   }
-`;
-
-const LoadingMessage = styled.p`
-  text-align: center;
-  font-size: 18px;
-  color: #333;
-  margin-top: 20px;
 `;
 
 const EditProfileButton = styled.button`
