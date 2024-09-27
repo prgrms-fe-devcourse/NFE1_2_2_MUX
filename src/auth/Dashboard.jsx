@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
+import PostCard from '../components/PostCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);  // 모달 상태 추가
+  const [isModalOpen, setIsModalOpen] = useState(false);  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +36,20 @@ const Dashboard = () => {
     return <p>Loading...</p>;
   }
 
+  // 닉네임 업데이트 함수
+  const updateUserNickname = (newNickname) => {
+    if (user) {
+      const updatedUser = { 
+        ...user, 
+        fullName: { ...user.fullName, nickName: newNickname } 
+      };
+
+      // 상태 업데이트 및 localStorage에 저장
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   // 모달 열기/닫기 핸들러
   const openModalHandler = () => {
     setIsModalOpen(true);
@@ -52,14 +67,15 @@ const Dashboard = () => {
         <p><strong>Full Name:</strong> {user.fullName.fullName}</p>
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
       </UserInfo>
+      <PostCard />
       <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton>
 
-       {/* 모달에 user 정보 전달 */}
-       {isModalOpen && (
+      {isModalOpen && (
         <ProfileEditModal
-          user={user}  // user 데이터를 그대로 전달
+          user={user}  
           token={localStorage.getItem('token')}
-          onClose={closeModalHandler}  // 모달 닫기 핸들러
+          onClose={closeModalHandler}  
+          onNicknameUpdate={updateUserNickname}  // 닉네임 업데이트 함수 전달
         />
       )}
     </DashboardContainer>
@@ -67,6 +83,7 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 
 // Styled Components
 const DashboardContainer = styled.div`
