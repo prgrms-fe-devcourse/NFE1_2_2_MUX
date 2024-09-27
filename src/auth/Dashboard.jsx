@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import PostCard from '../components/PostCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -42,6 +43,7 @@ const Dashboard = () => {
         <p><strong>Full Name:</strong> {user.fullName.fullName}</p>
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
       </UserInfo>
+      <PostCard />
     </DashboardContainer>
   );
 };
