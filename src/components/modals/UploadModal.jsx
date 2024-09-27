@@ -43,6 +43,7 @@ const UploadModal = ({ onClose }) => {
 
       {/* Submit Button */}
       <Footer>
+        <SubmitButton>게시하기</SubmitButton>
       </Footer>
     </ModalContainer>
   );
