@@ -54,12 +54,11 @@ export default UploadModal;
 // Styled components
 
 const ModalContainer = styled.div`
-  width: 90vw;
-  height: 100vh;
+  width: 45vw;
+  height: 75vh;
   background-color: #fff;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   position: fixed;
-  top: 0;
+  top: 13%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -128,7 +127,6 @@ const Footer = styled.div`
   justify-content: flex-end;
   padding: 10px 25px;
   background-color: #fff;
-  border-top: 1px solid #000;
 `;
 
 const SubmitButton = styled.button`
@@ -136,7 +134,7 @@ const SubmitButton = styled.button`
   background-color: #000;
   color: white;
   border: none;
-  border-radius: 15px;
+  border-radius: 13px;
   cursor: pointer;
   font-size: 14px;
 
