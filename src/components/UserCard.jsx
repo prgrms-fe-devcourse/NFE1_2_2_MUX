@@ -74,6 +74,9 @@ const Card = styled.div`
 
 const ProfileImage = styled.img`
   width: 65px;
+  height: 65px; /* 크기를 지정해 균일하게 표시 */
+  padding: 5px;
+  border-radius: 50%; /* 프로필 이미지를 완전한 원으로 만듦 */
   object-fit: cover;
   margin-right: 16px;
 `;
@@ -91,15 +94,28 @@ const UserName = styled.h2`
 `;
 
 const UserTitle = styled.p`
+  margin: 5px 0;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 10px;
+  background: #ede4db;
+  border-radius: 35px;
   font-size: 12px;
   color: #474150;
+  white-space: nowrap; /* 긴 텍스트가 줄 바꿈되지 않도록 */
 `;
 
 const UserComment = styled.p`
   margin: 5px 0;
+  text-align: left;
+  padding: 13px;
+  width: 300px;
+  height: 25px;
+  background: #bf94e4;
+  border-radius: 5px;
   font-size: 13px;
-  color: #111010;
+  color: white;
 `;
 
 const UserList = styled.div`
