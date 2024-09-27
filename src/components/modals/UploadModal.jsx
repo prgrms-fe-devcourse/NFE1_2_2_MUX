@@ -43,7 +43,7 @@ const UploadModal = ({ onClose }) => {
 
       {/* Submit Button */}
       <Footer>
-        <SubmitButton>게시하기</SubmitButton>
+        <SubmitButton src='/'>게시하기</SubmitButton>
       </Footer>
     </ModalContainer>
   );
@@ -129,4 +129,19 @@ const Footer = styled.div`
   padding: 10px 25px;
   background-color: #fff;
   border-top: 1px solid #000;
+`;
+
+const SubmitButton = styled.button`
+  padding: 5px 20px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #ccc;
+    color: black;
+  }
 `;
