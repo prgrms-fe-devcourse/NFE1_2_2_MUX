@@ -47,12 +47,14 @@ export const uploadProfileImage = async (formData, token) => {
         'Content-Type': 'multipart/form-data',  // 파일 업로드 시 필요한 헤더
       },
     });
-    return response.data;  
+    console.log("Profile image upload response:", response.data); // 서버 응답 확인
+    return response.data;  // 여기에 profileImage URL이 있어야 함.
   } catch (error) {
     console.error('프로필 이미지를 업로드할 수 없습니다.', error);
     throw error;
   }
 };
+
 
 // 사용자 정보 업데이트 API 호출
 export const updateUser = async (userId, token, updatedData) => {

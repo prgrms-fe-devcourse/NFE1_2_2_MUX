@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
 import PostCard from '../components/PostCard';
+import UserCard from '../components/UserCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -77,13 +78,20 @@ const Dashboard = () => {
     <DashboardContainer>
       <h2>Welcome, {user.fullName.fullName}!</h2>
       <UserInfo>
+        {user.profileImage && (
+          <img
+            src={user.profileImage}
+            alt="프로필 이미지"
+            style={{ width: '100px', height: '100px', borderRadius: '50%' }}
+          />
+        )}
         <p><strong>Email:</strong> {user.email}</p>
         <p><strong>Full Name:</strong> {user.fullName.fullName}</p>
         <p><strong>NickName:</strong> {user.fullName.nickName}</p>
         <p><strong>Bio:</strong> {user.bio}</p> {/* 여기서 업데이트된 bio가 반영됩니다 */}
       </UserInfo>
-      <PostCard />
       <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton>
+      <PostCard />
 
       {isModalOpen && (
         <ProfileEditModal
@@ -91,9 +99,11 @@ const Dashboard = () => {
           token={localStorage.getItem('token')}
           onClose={closeModalHandler}
           onNicknameUpdate={updateUserNickname}
-          onBioUpdate={updateUserBio}  // onBioUpdate 전달
+          onBioUpdate={updateUserBio}
+          setUser={setUser}
         />
       )}
+    <UserCard />
     </DashboardContainer>
   );
 };
@@ -104,7 +114,6 @@ export default Dashboard;
 const DashboardContainer = styled.div`
   padding: 40px;
   text-align: center;
-  background-color: #f5f5f5;
   min-height: 100vh;
   color: #333333;
 `;
@@ -116,16 +125,16 @@ const UserInfo = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   color: #333333;
-
-  p {
-    margin: 10px 0;
-    font-size: 16px;
-  }
-
-  strong {
-    color: #333;
-  }
 `;
+
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #6c5dd3;
+  margin-bottom: 10px;
+`;
+
 
 const EditProfileButton = styled.button`
   margin-top: 20px;
@@ -140,5 +149,3 @@ const EditProfileButton = styled.button`
     background-color: #5a4bbd;
   }
 `;
-
-

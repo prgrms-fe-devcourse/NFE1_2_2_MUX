@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { uploadProfileImage, updateUser } from '../../utils/api';
 
-const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate }) => {
+const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate, setUser }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -27,45 +27,16 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
     }
   }, [user]);
 
-  // 닉네임 엔터 처리
-  const handleNicknameKeyDown = async (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      try {
-        await updateUser(user.id, token, { username: formData.nickname });
-        onNicknameUpdate(formData.nickname);
-        alert('닉네임이 성공적으로 변경되었습니다.');
-      } catch (error) {
-        alert('닉네임 변경에 실패했습니다.');
-      }
-    }
-  };
-
-  // 자기소개 엔터 처리
-  const handleBioKeyDown = async (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      try {
-        await updateUser(user.id, token, { comment: formData.bio });
-        onBioUpdate(formData.bio);
-        alert('자기소개가 성공적으로 변경되었습니다.');
-      } catch (error) {
-        alert('자기소개 변경에 실패했습니다.');
-      }
-    }
-  };
-
   const handleImageChange = async (e) => {
     const imageFile = e.target.files[0];
   
-    // 파일 형식 제한 (jpg와 png만 허용)
+    // 파일 형식 및 크기 제한
     const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(imageFile.type)) {
       alert('jpg 또는 png 형식의 파일만 업로드 가능합니다.');
       return;
     }
   
-    // 파일 크기 제한 (최대 2MB)
     const maxSizeInMB = 2;
     if (imageFile.size > maxSizeInMB * 1024 * 1024) {
       alert('파일 크기는 최대 2MB까지 허용됩니다.');
@@ -77,14 +48,32 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
     formData.append('isCover', false);
   
     try {
-      const updateUser = await uploadProfileImage(formData, token);
-      setProfileImage(URL.createObjectURL(imageFile)); // 선택된 파일을 미리 보기
+      const response = await uploadProfileImage(formData, token);
+  
+      // 서버에서 반환된 이미지 URL 사용
+      const imageUrl = response.image; // response의 'image' 필드를 사용
+      if (!imageUrl) {
+        console.error('이미지 URL이 없습니다.', response);
+        alert('프로필 이미지 업로드에 실패했습니다.');
+        return;
+      }
+  
+      // 유저 상태에 프로필 이미지 업데이트
+      const updatedUser = { ...user, profileImage: imageUrl };
+  
+      // 상태 업데이트 및 localStorage에 저장
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+  
+      // 미리보기 업데이트
+      setProfileImage(imageUrl); // 서버에서 받은 이미지 URL로 미리보기 설정
+  
+      alert('프로필 이미지가 성공적으로 저장되었습니다.');
     } catch (error) {
       console.error('프로필 이미지를 변경할 수 없습니다.', error);
+      alert('프로필 이미지를 변경하는 데 실패했습니다.');
     }
   };
-  
-  
 
   const handleImageUploadClick = () => {
     fileInputRef.current.click();
@@ -95,6 +84,40 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // 회원 정보 수정 버튼 클릭 시 닉네임과 자기소개 업데이트
+  const handleSaveChanges = async () => {
+    try {
+      let nicknameUpdated = false;
+      let bioUpdated = false;
+
+      // 닉네임 업데이트
+      if (formData.nickname !== user.fullName.nickName) {
+        await updateUser(user.id, token, { username: formData.nickname });
+        nicknameUpdated = true;
+      }
+
+      // 자기소개 업데이트
+      if (formData.bio !== user.bio) {
+        await updateUser(user.id, token, { comment: formData.bio });
+        bioUpdated = true;
+      }
+
+      // 닉네임 업데이트가 성공적으로 완료된 경우
+      if (nicknameUpdated) {
+        onNicknameUpdate(formData.nickname);
+      }
+
+      // 자기소개 업데이트가 성공적으로 완료된 경우
+      if (bioUpdated) {
+        onBioUpdate(formData.bio);
+      }
+
+      alert('회원 정보가 성공적으로 변경되었습니다.');
+    } catch (error) {
+      alert('회원 정보 변경에 실패했습니다.');
+    }
+  };
+
   return (
     <ModalOverlay>
       <ModalContent>
@@ -103,7 +126,7 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
         <ProfileSection>
           <ProfileImageWrapper>
             <ProfileImage
-              src={profileImage || '/path/to/default-image.png'}
+              src={profileImage || '/path/to/default-image.png'} // 변경된 이미지 또는 기본 이미지 사용
               alt="프로필 이미지"
             />
             <ProfileChangeButton onClick={handleImageUploadClick}>
@@ -164,7 +187,6 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
               value={formData.nickname}
               name="nickname"
               onChange={handleChange}
-              onKeyDown={handleNicknameKeyDown} // 닉네임 엔터 처리
             />
             <FixedLabel>닉네임</FixedLabel>
           </InputWrapper>
@@ -174,20 +196,18 @@ const ProfileEditModal = ({ user, token, onClose, onNicknameUpdate, onBioUpdate 
               value={formData.bio}
               name="bio"
               onChange={handleChange}
-              onKeyDown={handleBioKeyDown} // 자기소개 엔터 처리
             />
             <FixedLabel>자기소개</FixedLabel>
           </InputWrapper>
         </StyledForm>
+
+        <SaveButton onClick={handleSaveChanges}>회원 정보 수정</SaveButton>
       </ModalContent>
     </ModalOverlay>
   );
 };
 
 export default ProfileEditModal;
-
-
-
 
 // Styled Components
 const ModalOverlay = styled.div`
@@ -210,7 +230,7 @@ const ModalContent = styled.div`
   position: relative;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   max-height: 90vh;
-  overflow-y: auto; /* 스크롤 추가 */
+  overflow-y: auto;
 `;
 
 const CloseBtn = styled.button`
@@ -276,7 +296,7 @@ const Divider = styled.hr`
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 12px; /* 간격 조정 */
+  gap: 12px;
 `;
 
 const InputWrapper = styled.div`
@@ -293,13 +313,12 @@ const InputField = styled.input`
   font-weight: bold;
   width: 100%;
   box-sizing: border-box;
-  text-align: ${({ value }) => (value ? 'right' : 'left')}; /* 값이 있으면 오른쪽 정렬, 없으면 왼쪽 정렬 */
+  text-align: ${({ value }) => (value ? 'right' : 'left')};
   &:focus {
     outline: none;
     border-color: #6c5dd3;
   }
 `;
-
 
 const TextArea = styled.textarea`
   padding: 15px 10px 5px;
@@ -329,25 +348,16 @@ const FixedLabel = styled.span`
   z-index: 1;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -10px;
-`;
-
-const ChangePasswordButton = styled.button`
-  background-color: #fff;
-  color: #000;
+const SaveButton = styled.button`
+  background-color: #6c5dd3;
+  color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 12px;
   font-weight: bold;
+  margin-top: 20px;
   &:hover {
     background-color: #5a4bc1;
   }
 `;
-
-
-
