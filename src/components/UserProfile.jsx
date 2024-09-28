@@ -4,7 +4,7 @@ import ExampleImage from '../assets/images/default-profile.png';
 import { useNavigate } from 'react-router-dom';
 
 // 개별 유저 프로필 카드 컴포넌트
-const UserProfileCard = ({ user, onNavigate }) => {
+const UserProfile = ({ user, onNavigate }) => {
   const { image, fullName, _id } = user;
 
   // 카드 클릭 시 사용자의 상세 페이지로 이동
@@ -54,7 +54,7 @@ const App = () => {
       <h1>유저 카드 리스트</h1>
       <StyledUserList>
         {users.map((user) => (
-          <UserProfileCard key={user._id} user={user} onNavigate={navigate} />
+          <UserProfile key={user._id} user={user} onNavigate={navigate} />
         ))}
       </StyledUserList>
     </div>
@@ -80,10 +80,14 @@ const StyledCard = styled.div`
   cursor: pointer;
   transition: box-shadow 0.3s ease;
   flex-direction: column;
+
+  &:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
 `;
 
 const StyledProfileImage = styled.img`
-  width: 80px;
+  width: 110px;
   border-radius: 50%;
 `;
 
@@ -93,7 +97,7 @@ const StyledUserInfo = styled.div`
 `;
 
 const StyledUserName = styled.h2`
-  font-size: 18px;
+  font-size: 13px;
+  font-weight: 550;
   margin: 0;
-  font-weight: normal;
 `;
