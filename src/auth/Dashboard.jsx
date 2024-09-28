@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PostCard from '../components/PostCard';
 import UserCard from '../components/UserCard';
+import UserProfile from '../components/UserProfile';
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ const Dashboard = () => {
       </UserInfo>
       <PostCard />
       <UserCard />
+      <UserProfile />
     </DashboardContainer>
   );
 };

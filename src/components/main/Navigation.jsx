@@ -4,7 +4,7 @@ import HomeIcon from '../../assets/icons/Home.png';
 import CurationArtistIcon from '../../assets/icons/CurationArtist.png';
 import PostFeedIcon from '../../assets/icons/PostFeed.png';
 import BellIcon from '../../assets/icons/Bell.png';
-import DefaultProfileImage from '../../assets/images/DefaultProfile.png';
+import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
 import UploadModal from '../modals/UploadModal'; // UploadModal 컴포넌트 가져오기
 
