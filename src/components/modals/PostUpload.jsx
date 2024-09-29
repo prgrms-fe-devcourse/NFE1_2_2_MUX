@@ -24,6 +24,7 @@ const PostUpload = () => {
 
   const intervalRef = useRef(null);
   const descriptionInputRef = useRef(null);
+
   // 앨범 검색 기능
   const searchAlbums = async () => {
     const options = {
@@ -56,14 +57,27 @@ const PostUpload = () => {
     setSelectedTrack(album);
     setSearchResults([]);
     setIsSearchMode(false);
+    resetPlayer();
 
     if (descriptionInputRef.current) {
       descriptionInputRef.current.focus();
     }
   };
 
+  // 앨범을 변경하거나 상태 초기화 시 YouTube 플레이어 리셋
+  const resetPlayer = () => {
+    if (player) {
+      player.stopVideo();
+    }
+    setCurrentTime(0);
+    setIsPlaying(false);
+    setDuration(0);
+    clearInterval(intervalRef.current);
+  };
+
   // 앨범을 변경하려면 클릭 시 원래 상태로 돌아가도록 처리
   const resetAlbumSelection = () => {
+    resetPlayer();
     setAlbumData(null);
     setIsSearchMode(true);
     setSearchTerm('');
@@ -146,7 +160,8 @@ const PostUpload = () => {
       alert('포스트 업로드에 실패하였습니다!');
     }
 
-    // 상태 초기화
+    // 상태 초기화 및 플레이어 초기화
+    resetPlayer();
     setPostTitle('');
     setAlbumData(null);
     setDescription('');
