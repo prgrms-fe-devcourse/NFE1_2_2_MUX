@@ -2,25 +2,28 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 const PostUpload = () => {
-  const [albumData, setAlbumData] = useState(null);
   const [description, setDescription] = useState('');
   const [postTitle, setPostTitle] = useState('');
   const maxCharLimit = 300;
+  const maxTitleCharLimit = 20;
 
   return (
     <PostUploadContainer>
       <ContentWrapper>
-
-          <TrackDetails>
-            {/* 포스트 제목 필드와 인풋박스 */}
-            <PostTitleWrapper>
-              <PostTitleInput
-                type="text"
-                placeholder="포스트 제목을 입력해주세요"
-                value={postTitle}
-                onChange={(e) => setPostTitle(e.target.value)} />
-            </PostTitleWrapper>
-          </TrackDetails>
+        <TrackDetails>
+          {/* 포스트 제목 필드와 인풋박스 */}
+          <PostTitleWrapper>
+            <PostTitleInput
+              type="text"
+              placeholder="포스트 제목을 입력해주세요"
+              value={postTitle}
+              onChange={(e) => setPostTitle(e.target.value)}
+              maxLength={maxTitleCharLimit} />
+            <TitleCharCount>
+              {postTitle.length}/{maxTitleCharLimit}자
+            </TitleCharCount>
+          </PostTitleWrapper>
+        </TrackDetails>
 
         {/* 설명 입력 섹션 */}
         <DescriptionSection>
@@ -29,7 +32,7 @@ const PostUpload = () => {
             placeholder="이 곡의 특별함은 무엇인가요?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            maxLength={maxCharLimit}/>
+            maxLength={maxCharLimit} />
           <CharCount>
             {description.length}/{maxCharLimit}자
           </CharCount>
@@ -73,6 +76,7 @@ const TrackDetails = styled.div`
 const PostTitleWrapper = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 15px;
 `;
 
@@ -81,7 +85,13 @@ const PostTitleInput = styled.input`
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 100%;
+  width: 90%;
+`;
+
+const TitleCharCount = styled.p`
+  font-size: 10px;
+  color: #666;
+  margin-left: 10px;
 `;
 
 const DescriptionSection = styled.div`
