@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const PostUpload = () => {
     
   const [description, setDescription] = useState('');
-
+  const maxCharLimit = 300;
   return (
     <PostUploadContainer>
       <ContentWrapper>
@@ -16,7 +16,9 @@ const PostUpload = () => {
             placeholder="이 곡의 특별함은 무엇인가요?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            maxLength={maxCharLimit}
           />
+          <CharCount>{description.length}/{maxCharLimit}자</CharCount>
         </DescriptionSection>
 
       </ContentWrapper>
