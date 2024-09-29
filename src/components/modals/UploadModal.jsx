@@ -43,10 +43,6 @@ const UploadModal = ({ onClose }) => {
         {activeTab === 'track'? <TrackUpload/> : <PostUpload/>}
       </Content>
 
-      {/* Submit Button */}
-      <Footer>
-        <SubmitButton src='/'>게시하기</SubmitButton>
-      </Footer>
     </ModalContainer>
   );
 };
@@ -122,26 +118,4 @@ const Content = styled.div`
   background-color: #fff;
   flex-grow: 1; 
   overflow-y: auto;
-`;
-
-const Footer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 10px 25px;
-  background-color: #fff;
-`;
-
-const SubmitButton = styled.button`
-  padding: 5px 20px;
-  background-color: #000;
-  color: white;
-  border: none;
-  border-radius: 13px;
-  cursor: pointer;
-  font-size: 14px;
-
-  &:hover {
-    background-color: #ccc;
-    color: black;
-  }
 `;
