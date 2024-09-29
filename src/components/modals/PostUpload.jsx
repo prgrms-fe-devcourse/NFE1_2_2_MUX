@@ -18,11 +18,12 @@ const PostUpload = () => {
   const [player, setPlayer] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
   const maxCharLimit = 300;
   const maxTitleCharLimit = 20;
 
   const intervalRef = useRef(null);
-
+  const descriptionInputRef = useRef(null);
   // 앨범 검색 기능
   const searchAlbums = async () => {
     const options = {
@@ -55,6 +56,10 @@ const PostUpload = () => {
     setSelectedTrack(album);
     setSearchResults([]);
     setIsSearchMode(false);
+
+    if (descriptionInputRef.current) {
+      descriptionInputRef.current.focus();
+    }
   };
 
   // 앨범을 변경하려면 클릭 시 원래 상태로 돌아가도록 처리
@@ -100,6 +105,53 @@ const PostUpload = () => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
+  const handlePost = () => {
+    // 포스트 제목 유효성 검사
+    if (postTitle.trim() === '') {
+      setErrorMessage('포스트 제목을 입력해 주세요.');
+      return;
+    }
+
+    // 추천 앨범 업로드 유효성 검사
+    if (!albumData) {
+      setErrorMessage('추천 포스트를 업로드 하세요.');
+      return;
+    }
+
+    // 노래 소개 유효성 검사
+    if (description.trim() === '') {
+      setErrorMessage('노래 소개를 입력하세요.');
+      return;
+    }
+
+    setErrorMessage('');
+
+    // 새로운 게시물 객체 생성
+    const newPost = {
+      postTitle: postTitle,
+      title: albumData.title,
+      artist: albumData.artist,
+      description: description,
+      coverUrl: albumData.coverUrl,
+    };
+
+    // 부모 컴포넌트에 새 게시물 전달 (포스트 게시 할때 이 부분을 참고하면 될 것 같습니다.)
+    // onPostSuccess 함수가 정의된 경우에만 호출
+    if (typeof onPostSuccess === 'function') {
+      onPostSuccess(newPost);
+      alert('포스트가 성공적으로 업로드되었습니다!');
+    } else {
+      // onPostSuccess가 정의되지 않은 경우
+      alert('포스트 업로드에 실패하였습니다!');
+    }
+
+    // 상태 초기화
+    setPostTitle('');
+    setAlbumData(null);
+    setDescription('');
+  };
+
   return (
     <PostUploadContainer>
       <ContentWrapper>
@@ -142,7 +194,10 @@ const PostUpload = () => {
             <ArtistName>{albumData ? albumData.artist : '아티스트'}</ArtistName>
             <AudioPlayer>
               <PlayPauseButton onClick={handlePlayPause} disabled={!albumData}>
-                <img src={isPlaying ? StopButtonIcon : PlayButtonIcon} alt="Play/Pause Button" />
+                <img
+                  src={isPlaying ? StopButtonIcon : PlayButtonIcon}
+                  alt="Play/Pause Button"
+                />
               </PlayPauseButton>
               <TrackTime>{formatTime(currentTime)}</TrackTime>
               <ProgressBar
@@ -160,7 +215,7 @@ const PostUpload = () => {
         {/* YouTube Player */}
         {selectedTrack && (
           <YouTube
-            videoId={selectedTrack.videoId} 
+            videoId={selectedTrack.videoId}
             opts={opts}
             onReady={onPlayerReady}
           />
@@ -202,6 +257,7 @@ const PostUpload = () => {
         <DescriptionSection>
           <DescriptionTitle>노래 소개</DescriptionTitle>
           <DescriptionInput
+            ref={descriptionInputRef}
             placeholder="이 곡의 특별함은 무엇인가요?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -211,10 +267,13 @@ const PostUpload = () => {
             {description.length}/{maxCharLimit}자
           </CharCount>
         </DescriptionSection>
-        
+
         {/* 게시하기 버튼 */}
         <PostButtonWrapper>
-          <PostButton>게시하기</PostButton>
+          {/* 에러 메시지 표시 */}
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+
+          <PostButton onClick={handlePost}>게시하기</PostButton>
         </PostButtonWrapper>
       </ContentWrapper>
     </PostUploadContainer>
@@ -249,6 +308,7 @@ const ContentWrapper = styled.div`
 const AlbumSection = styled.div`
   display: flex;
   margin-bottom: 20px;
+  align-items: flex-start;
 `;
 
 const AlbumPlaceholder = styled.div`
@@ -274,7 +334,7 @@ const YouTubeMusicLink = styled.p`
   display: flex;
   align-items: center;
   color: white;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   text-align: center;
@@ -292,11 +352,12 @@ const TrackDetails = styled.div`
   flex-direction: column;
   justify-content: center;
   width: 100%;
+  min-width: 200px;
 `;
 
 const PostTitleWrapper = styled.div`
   position: relative;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 `;
 
 const PostTitleInput = styled.input`
@@ -364,7 +425,7 @@ const TrackTime = styled.span`
 
 const SearchSection = styled.div`
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 13px;
   justify-content: center;
 `;
 
@@ -387,13 +448,13 @@ const SearchButton = styled.button`
 `;
 
 const SearchResults = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 `;
 
 const AlbumItem = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   cursor: pointer;
   &:hover {
     background-color: #f1f1f1;
@@ -424,13 +485,15 @@ const AlbumArtist = styled.span`
 const DescriptionSection = styled.div`
   background-color: #c0afe2;
   padding: 15px;
+  margin-top: 5px;
   border-radius: 10px;
   border: 1px solid #d1c4e9;
+  min-height: 150px;
 `;
 
 const DescriptionTitle = styled.p`
   font-size: 18px;
-  margin-top: 0%;
+  margin-top: 0;
   margin-bottom: 15px;
   color: white;
   border-bottom: 2px solid white;
@@ -459,11 +522,19 @@ const CharCount = styled.p`
   margin-top: 5px;
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  margin-right: 25%;
+`;
+
 const PostButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 15px;
 `;
 
 const PostButton = styled.button`
