@@ -16,7 +16,7 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
 
   useEffect(() => {
     if (user) {
-      console.log('User data in modal:', user);  // 사용자 데이터 로깅
+      console.log('User data in modal:', user); // 사용자 데이터 로깅
       setFormData({
         fullName: user.fullName?.fullName || '',
         email: user.email,
@@ -56,17 +56,17 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
         alert('프로필 이미지 업로드에 실패했습니다.');
         return;
       }
-  
-      const updatedUser = { 
-        ...user, 
-        profileImage: imageUrl 
+
+      const updatedUser = {
+        ...user,
+        profileImage: imageUrl,
       };
-  
+
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
-  
+
       setProfileImage(imageUrl);
-  
+
       alert('프로필 이미지가 성공적으로 저장되었습니다.');
     } catch (error) {
       console.error('프로필 이미지를 변경할 수 없습니다.', error);
@@ -90,21 +90,21 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
         nickName: formData.nickname,
         bio: formData.bio,
       };
-  
+
       const updatedUserData = await updateUser(user.id, token, {
         fullName: JSON.stringify(updatedFullName),
       });
-  
+
       const newUser = {
         ...user,
         ...updatedUserData,
         fullName: updatedFullName,
         profileImage: profileImage, // 이미지 URL 포함
       };
-  
+
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
-  
+
       alert('회원 정보가 성공적으로 변경되었습니다.');
       onClose();
     } catch (error) {
@@ -170,7 +170,7 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
               disabled
             />
             <FixedLabel>비밀번호</FixedLabel>
-          </InputWrapper>         
+          </InputWrapper>
         </StyledForm>
 
         <SectionTitle>추가 정보</SectionTitle>

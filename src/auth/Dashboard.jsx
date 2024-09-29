@@ -24,7 +24,7 @@ const Dashboard = () => {
     try {
       const parsedUser = JSON.parse(userData);
       console.log('Parsed user data from localStorage:', parsedUser);
-      
+
       // 사용자 ID 확인
       const userId = parsedUser.id || parsedUser._id;
       if (!userId) {
@@ -40,10 +40,11 @@ const Dashboard = () => {
         ...parsedUser,
         ...freshUserData,
         id: userId,
-        fullName: typeof freshUserData.fullName === 'string' 
-          ? JSON.parse(freshUserData.fullName) 
-          : freshUserData.fullName,
-        profileImage: freshUserData.image || parsedUser.profileImage
+        fullName:
+          typeof freshUserData.fullName === 'string'
+            ? JSON.parse(freshUserData.fullName)
+            : freshUserData.fullName,
+        profileImage: freshUserData.image || parsedUser.profileImage,
       };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -89,7 +90,10 @@ const Dashboard = () => {
 
   if (isLoading) return <LoadingMessage>Loading...</LoadingMessage>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
-  if (!user) return <ErrorMessage>User data not available. Please log in again.</ErrorMessage>;
+  if (!user)
+    return (
+      <ErrorMessage>User data not available. Please log in again.</ErrorMessage>
+    );
 
   return (
     <DashboardContainer>
@@ -105,12 +109,24 @@ const Dashboard = () => {
             }}
           />
         )}
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Full Name:</strong> {user.fullName?.fullName || 'No name provided'}</p>
-        <p><strong>NickName:</strong> {user.fullName?.nickName || 'No nickname provided'}</p>
-        <p><strong>Bio:</strong> {user.fullName?.bio || 'No bio provided'}</p>
+        <p>
+          <strong>Email:</strong> {user.email}
+        </p>
+        <p>
+          <strong>Full Name:</strong>{' '}
+          {user.fullName?.fullName || 'No name provided'}
+        </p>
+        <p>
+          <strong>NickName:</strong>{' '}
+          {user.fullName?.nickName || 'No nickname provided'}
+        </p>
+        <p>
+          <strong>Bio:</strong> {user.fullName?.bio || 'No bio provided'}
+        </p>
       </UserInfo>
-      <EditProfileButton onClick={openModalHandler}>회원 정보 수정</EditProfileButton>
+      <EditProfileButton onClick={openModalHandler}>
+        회원 정보 수정
+      </EditProfileButton>
       <PostCard />
 
       {isModalOpen && (
@@ -177,6 +193,3 @@ const ErrorMessage = styled.p`
   font-size: 18px;
   margin-top: 50px;
 `;
-
-
-
