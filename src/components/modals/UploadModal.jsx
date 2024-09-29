@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import CloseIcon from '../../assets/icons/Close.png'
 import TrackIcon from '../../assets/icons/Track.png';
 import PostIcon from '../../assets/icons/Post.png';
+import PostUpload from './PostUpload';
+import TrackUpload from './TrackUpload';
 
 const UploadModal = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('track');
@@ -38,7 +40,7 @@ const UploadModal = ({ onClose }) => {
 
       {/* Modal Content */}
       <Content>
-        
+        {activeTab === 'track'? <TrackUpload/> : <PostUpload/>}
       </Content>
 
       {/* Submit Button */}
