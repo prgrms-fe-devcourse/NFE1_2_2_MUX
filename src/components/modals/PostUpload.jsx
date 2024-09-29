@@ -128,7 +128,8 @@ const PostUpload = () => {
     }
 
     setErrorMessage('');
-
+    
+    // 새로운 게시물 객체 생성
     const newPost = {
       postTitle: postTitle,
       title: albumData.title,
@@ -137,13 +138,15 @@ const PostUpload = () => {
       coverUrl: albumData.coverUrl,
     };
 
+    // 부모 컴포넌트에 새 게시물 전달 (포스트 게시 할때 이 부분을 참고하면 될 것 같습니다.)
     if (typeof onPostSuccess === 'function') {
       onPostSuccess(newPost);
       alert('포스트가 성공적으로 업로드되었습니다!');
     } else {
       alert('포스트 업로드에 실패하였습니다!');
     }
-
+    
+    // 상태 초기화 및 플레이어 초기화
     resetPlayer();
     setPostTitle('');
     setAlbumData(null);
