@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
 import PostCard from '../components/PostCard';
 import { getUserData } from '../utils/api';
+import UserCard from '../components/UserCard';
+import UserProfile from '../components/UserProfile';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -128,7 +130,8 @@ const Dashboard = () => {
         회원 정보 수정
       </EditProfileButton>
       <PostCard />
-
+      <UserCard />
+      <UserProfile />
       {isModalOpen && (
         <ProfileEditModal
           user={user}

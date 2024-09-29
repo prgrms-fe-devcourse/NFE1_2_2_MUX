@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Example from '../assets/images/DefaultProfile.png'; // 예시 이미지 경로
+import Example from '../assets/images/default-profile.png'; // 예시 이미지 경로
 import axios from "axios"; // 나중에 사용하게 될 axios
 import { useNavigate } from "react-router-dom";
 
