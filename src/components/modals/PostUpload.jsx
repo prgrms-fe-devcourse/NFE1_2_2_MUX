@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
-import YoutubeMusicIcon from '../../assets/icons/YoutubeMusicIcon.png';
-import StopButtonIcon from '../../assets/icons/StopButton.png';
-import PlayButtonIcon from '../../assets/icons/PlayButton.png';
+import youtubeMusicIcon from '../../assets/icons/youtube-music-icon.png';
+import stopButtonIcon from '../../assets/icons/stop-button.png';
+import playButtonIcon from '../../assets/icons/play-button.png';
 import YouTube from 'react-youtube';
 
 const PostUpload = () => {
@@ -64,7 +64,7 @@ const PostUpload = () => {
     }
   };
 
-  // 앨범을 변경하거나 상태 초기화 시 YouTube 플레이어 리셋
+  // 플레이어 리셋
   const resetPlayer = () => {
     if (player) {
       player.stopVideo();
@@ -75,7 +75,7 @@ const PostUpload = () => {
     clearInterval(intervalRef.current);
   };
 
-  // 앨범을 변경하려면 클릭 시 원래 상태로 돌아가도록 처리
+  // 앨범 선택 초기화
   const resetAlbumSelection = () => {
     resetPlayer();
     setAlbumData(null);
@@ -103,15 +103,6 @@ const PostUpload = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // YouTube API 옵션 설정
-  const opts = {
-    height: '0',
-    width: '0',
-    playerVars: {
-      autoplay: 0,
-    },
-  };
-
   // 시간을 MM:SS 형식으로 변환
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -121,19 +112,16 @@ const PostUpload = () => {
 
   // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
   const handlePost = () => {
-    // 포스트 제목 유효성 검사
     if (postTitle.trim() === '') {
       setErrorMessage('포스트 제목을 입력해 주세요.');
       return;
     }
 
-    // 추천 앨범 업로드 유효성 검사
     if (!albumData) {
       setErrorMessage('추천 포스트를 업로드 하세요.');
       return;
     }
 
-    // 노래 소개 유효성 검사
     if (description.trim() === '') {
       setErrorMessage('노래 소개를 입력하세요.');
       return;
@@ -141,7 +129,6 @@ const PostUpload = () => {
 
     setErrorMessage('');
 
-    // 새로운 게시물 객체 생성
     const newPost = {
       postTitle: postTitle,
       title: albumData.title,
@@ -150,17 +137,13 @@ const PostUpload = () => {
       coverUrl: albumData.coverUrl,
     };
 
-    // 부모 컴포넌트에 새 게시물 전달 (포스트 게시 할때 이 부분을 참고하면 될 것 같습니다.)
-    // onPostSuccess 함수가 정의된 경우에만 호출
     if (typeof onPostSuccess === 'function') {
       onPostSuccess(newPost);
       alert('포스트가 성공적으로 업로드되었습니다!');
     } else {
-      // onPostSuccess가 정의되지 않은 경우
       alert('포스트 업로드에 실패하였습니다!');
     }
 
-    // 상태 초기화 및 플레이어 초기화
     resetPlayer();
     setPostTitle('');
     setAlbumData(null);
@@ -170,20 +153,13 @@ const PostUpload = () => {
   return (
     <PostUploadContainer>
       <ContentWrapper>
-        {/* 앨범 가져오기 버튼: 앨범이 선택되지 않았을 때만 표시 */}
         <AlbumSection>
-          <AlbumPlaceholder
-            onClick={
-              albumData ? resetAlbumSelection : () => setIsSearchMode(true)
-            }>
+          <AlbumPlaceholder onClick={albumData ? resetAlbumSelection : () => setIsSearchMode(true)}>
             {albumData ? (
               <AlbumCover src={albumData.coverUrl} alt="Album Cover" />
             ) : (
               <YouTubeMusicLink>
-                <YoutubeMusicIconImage
-                  src={YoutubeMusicIcon}
-                  alt="YoutubeMusicIcon"
-                />
+                <YoutubeMusicIconImage src={youtubeMusicIcon} alt="YoutubeMusicIcon" />
                 YouTube Music에서 <br />
                 앨범 가져오기
               </YouTubeMusicLink>
@@ -191,7 +167,6 @@ const PostUpload = () => {
           </AlbumPlaceholder>
 
           <TrackDetails>
-            {/* 포스트 제목 필드와 인풋박스 */}
             <PostTitleWrapper>
               <PostTitleInput
                 type="text"
@@ -209,10 +184,7 @@ const PostUpload = () => {
             <ArtistName>{albumData ? albumData.artist : '아티스트'}</ArtistName>
             <AudioPlayer>
               <PlayPauseButton onClick={handlePlayPause} disabled={!albumData}>
-                <img
-                  src={isPlaying ? StopButtonIcon : PlayButtonIcon}
-                  alt="Play/Pause Button"
-                />
+                <img src={isPlaying ? stopButtonIcon : playButtonIcon} alt="Play/Pause Button" />
               </PlayPauseButton>
               <TrackTime>{formatTime(currentTime)}</TrackTime>
               <ProgressBar
@@ -227,16 +199,10 @@ const PostUpload = () => {
           </TrackDetails>
         </AlbumSection>
 
-        {/* YouTube Player */}
         {selectedTrack && (
-          <YouTube
-            videoId={selectedTrack.videoId}
-            opts={opts}
-            onReady={onPlayerReady}
-          />
+          <YouTube videoId={selectedTrack.videoId} opts={{ height: '0', width: '0', playerVars: { autoplay: 0 }}} onReady={onPlayerReady} />
         )}
 
-        {/* 검색 모드: 앨범을 선택하지 않았을 때만 검색 UI 표시 */}
         {isSearchMode && !albumData && (
           <>
             <SearchSection>
@@ -249,13 +215,10 @@ const PostUpload = () => {
               <SearchButton onClick={searchAlbums}>검색</SearchButton>
             </SearchSection>
 
-            {/* 검색 결과 */}
             {searchResults.length > 0 && (
               <SearchResults>
                 {searchResults.map((album) => (
-                  <AlbumItem
-                    key={album.videoId}
-                    onClick={() => selectAlbum(album)}>
+                  <AlbumItem key={album.videoId} onClick={() => selectAlbum(album)}>
                     <AlbumThumbnail src={album.thumbnail} alt={album.title} />
                     <AlbumInfo>
                       <AlbumTitle>{album.title}</AlbumTitle>
@@ -268,7 +231,6 @@ const PostUpload = () => {
           </>
         )}
 
-        {/* 설명 입력 섹션 */}
         <DescriptionSection>
           <DescriptionTitle>노래 소개</DescriptionTitle>
           <DescriptionInput
@@ -283,11 +245,8 @@ const PostUpload = () => {
           </CharCount>
         </DescriptionSection>
 
-        {/* 게시하기 버튼 */}
         <PostButtonWrapper>
-          {/* 에러 메시지 표시 */}
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-
           <PostButton onClick={handlePost}>게시하기</PostButton>
         </PostButtonWrapper>
       </ContentWrapper>
