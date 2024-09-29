@@ -29,13 +29,20 @@ export const login = async (email, password) => {
 
 // 사용자 정보 가져오기 API 호출
 export const getUserData = async (userId, token) => {
-  const response = await axios.get(`/api/users/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`, // 토큰을 헤더로 전송
-    },
-  });
-
-  return response.data;
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+  try {
+    const response = await axios.get(`/api/users/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get user data:', error);
+    throw error;
+  }
 };
 
 // 프로필 이미지 업로드 API 호출
