@@ -211,6 +211,11 @@ const PostUpload = () => {
             {description.length}/{maxCharLimit}자
           </CharCount>
         </DescriptionSection>
+        
+        {/* 게시하기 버튼 */}
+        <PostButtonWrapper>
+          <PostButton>게시하기</PostButton>
+        </PostButtonWrapper>
       </ContentWrapper>
     </PostUploadContainer>
   );
@@ -223,7 +228,8 @@ export default PostUpload;
 const PostUploadContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 97%;
+  height: 100%;
   background-color: #fff;
 `;
 
@@ -232,7 +238,7 @@ const ContentWrapper = styled.div`
   padding: 10px;
   border-radius: 15px;
   width: 100%;
-  max-width: 700px;
+  max-width: 650px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -451,4 +457,21 @@ const CharCount = styled.p`
   color: white;
   text-align: right;
   margin-top: 5px;
+`;
+
+const PostButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 20px;
+`;
+
+const PostButton = styled.button`
+  padding: 3px 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
 `;
