@@ -6,11 +6,10 @@ import YoutubeMusicIcon from '../../assets/icons/YoutubeMusicIcon.png';
 const PostUpload = () => {
   const [albumData, setAlbumData] = useState(null);
   const [description, setDescription] = useState('');
-  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [postTitle, setPostTitle] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
-  const [postTitle, setPostTitle] = useState('');
   const maxCharLimit = 300;
   const maxTitleCharLimit = 20;
 
@@ -43,9 +42,15 @@ const PostUpload = () => {
       artist: album.author,
       coverUrl: album.thumbnail,
     });
-    setSelectedTrack(album);
     setSearchResults([]);
     setIsSearchMode(false);
+  };
+
+  // 앨범을 변경하려면 클릭 시 원래 상태로 돌아가도록 처리
+  const resetAlbumSelection = () => {
+    setAlbumData(null);
+    setIsSearchMode(true);
+    setSearchTerm('');
   };
 
   return (
@@ -53,11 +58,14 @@ const PostUpload = () => {
       <ContentWrapper>
         {/* 앨범 가져오기 버튼: 앨범이 선택되지 않았을 때만 표시 */}
         <AlbumSection>
-          <AlbumPlaceholder>
+          <AlbumPlaceholder
+            onClick={
+              albumData ? resetAlbumSelection : () => setIsSearchMode(true)
+            }>
             {albumData ? (
               <AlbumCover src={albumData.coverUrl} alt="Album Cover" />
             ) : (
-              <YouTubeMusicLink onClick={() => setIsSearchMode(true)}>
+              <YouTubeMusicLink>
                 <YoutubeMusicIconImage
                   src={YoutubeMusicIcon}
                   alt="YoutubeMusicIcon"
@@ -176,6 +184,7 @@ const AlbumPlaceholder = styled.div`
   justify-content: center;
   margin-right: 20px;
   border-radius: 10px;
+  cursor: pointer;
 `;
 
 const AlbumCover = styled.img`
@@ -219,12 +228,12 @@ const PostTitleInput = styled.input`
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 94%;
+  width: 90%;
 `;
 
 const TitleCharCount = styled.p`
   position: absolute;
-  bottom: 5px;
+  bottom: 10px;
   right: 10px;
   font-size: 10px;
   color: #666;
