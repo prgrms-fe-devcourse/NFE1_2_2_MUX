@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import YoutubeMusicIcon from '../../assets/icons/YoutubeMusicIcon.png';
+import StopButtonIcon from '../../assets/icons/StopButton.png';
+import PlayButtonIcon from '../../assets/icons/PlayButton.png';
+import YouTube from 'react-youtube';
 
 const PostUpload = () => {
   const [albumData, setAlbumData] = useState(null);
   const [description, setDescription] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const [postTitle, setPostTitle] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [player, setPlayer] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const maxCharLimit = 300;
   const maxTitleCharLimit = 20;
+
+  const intervalRef = useRef(null);
 
   // 앨범 검색 기능
   const searchAlbums = async () => {
@@ -42,6 +52,7 @@ const PostUpload = () => {
       artist: album.author,
       coverUrl: album.thumbnail,
     });
+    setSelectedTrack(album);
     setSearchResults([]);
     setIsSearchMode(false);
   };
@@ -51,6 +62,42 @@ const PostUpload = () => {
     setAlbumData(null);
     setIsSearchMode(true);
     setSearchTerm('');
+  };
+
+  // YouTube Player 설정
+  const onPlayerReady = (event) => {
+    setPlayer(event.target);
+    setDuration(event.target.getDuration());
+  };
+
+  // 재생/일시정지 처리
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      player.pauseVideo();
+      clearInterval(intervalRef.current);
+    } else {
+      player.playVideo();
+      intervalRef.current = setInterval(() => {
+        setCurrentTime(player.getCurrentTime());
+      }, 1000);
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  // YouTube API 옵션 설정
+  const opts = {
+    height: '0',
+    width: '0',
+    playerVars: {
+      autoplay: 0,
+    },
+  };
+
+  // 시간을 MM:SS 형식으로 변환
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
   return (
@@ -93,8 +140,31 @@ const PostUpload = () => {
 
             <TrackTitle>{albumData ? albumData.title : '제목'}</TrackTitle>
             <ArtistName>{albumData ? albumData.artist : '아티스트'}</ArtistName>
+            <AudioPlayer>
+              <PlayPauseButton onClick={handlePlayPause} disabled={!albumData}>
+                <img src={isPlaying ? StopButtonIcon : PlayButtonIcon} alt="Play/Pause Button" />
+              </PlayPauseButton>
+              <TrackTime>{formatTime(currentTime)}</TrackTime>
+              <ProgressBar
+                type="range"
+                min="0"
+                max={duration}
+                value={currentTime}
+                onChange={(e) => player.seekTo(e.target.value)}
+              />
+              <TrackTime>{formatTime(duration)}</TrackTime>
+            </AudioPlayer>
           </TrackDetails>
         </AlbumSection>
+
+        {/* YouTube Player */}
+        {selectedTrack && (
+          <YouTube
+            videoId={selectedTrack.videoId} 
+            opts={opts}
+            onReady={onPlayerReady}
+          />
+        )}
 
         {/* 검색 모드: 앨범을 선택하지 않았을 때만 검색 UI 표시 */}
         {isSearchMode && !albumData && (
@@ -228,12 +298,12 @@ const PostTitleInput = styled.input`
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 90%;
+  width: 95%;
 `;
 
 const TitleCharCount = styled.p`
   position: absolute;
-  bottom: 10px;
+  bottom: 5px;
   right: 10px;
   font-size: 10px;
   color: #666;
@@ -242,13 +312,48 @@ const TitleCharCount = styled.p`
 const TrackTitle = styled.p`
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 0;
+  margin-top: 0;
 `;
 
 const ArtistName = styled.p`
   font-size: 15px;
   color: #666;
-  margin-bottom: 50px;
+  margin-top: 0;
+`;
+
+const AudioPlayer = styled.div`
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #666;
+  padding-top: 10px;
+  margin-top: 10px;
+`;
+
+const PlayPauseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 10px;
+  img {
+    width: 40px;
+    height: 40px;
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const ProgressBar = styled.input`
+  flex-grow: 1;
+  margin: 0 10px;
+  height: 5px;
+`;
+
+const TrackTime = styled.span`
+  font-size: 14px;
+  color: #666;
 `;
 
 const SearchSection = styled.div`
