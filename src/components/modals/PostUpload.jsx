@@ -387,6 +387,7 @@ const AlbumPlaceholder = styled.div`
   align-items: center;
   justify-content: center;
   border-radius: 10px;
+  margin-right: 15px;
   cursor: pointer;
 `;
 
