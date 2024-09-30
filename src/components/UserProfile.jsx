@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ExampleImage from '../assets/images/default-profile.png';
 import { useNavigate } from 'react-router-dom';
-import { getUsers } from '../utils/api'; // 여기서 임포트
+import { getUsers } from '../utils/api'; 
 
-// 개별 유저 프로필 카드 컴포넌트
-const UserProfile = ({ user, onNavigate }) => {
+// 유저 프로필 카드 컴포넌트
+const UserProfileCard = ({ user, onNavigate }) => {
   const { image, fullName, _id } = user;
   let nickName = '닉네임이 없습니다.';
 
@@ -24,16 +24,16 @@ const UserProfile = ({ user, onNavigate }) => {
   };
 
   return (
-    <StyledCard onClick={handleCardClick}>
-      <StyledProfileImage src={image || ExampleImage} alt={nickName} />
-      <StyledUserInfo>
-        <StyledUserName>{nickName}</StyledUserName>
-      </StyledUserInfo>
-    </StyledCard>
+    <Card onClick={handleCardClick}>
+      <ProfileImage src={image || ExampleImage} alt={nickName} />
+      <UserInfo>
+        <UserName>{nickName}</UserName>
+      </UserInfo>
+    </Card>
   );
 };
 
-// 전체 유저 리스트를 렌더링하는 컴포넌트
+// 유저 리스트 컴포넌트
 const App = () => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
@@ -41,24 +41,24 @@ const App = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersData = await getUsers(); // getUsers 호출
-        setUsers(usersData); // 상태 업데이트
+        const usersData = await getUsers();
+        setUsers(usersData);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     };
 
-    fetchUsers(); // 유저 데이터 가져오기
+    fetchUsers();
   }, []);
 
   return (
     <div>
       <h1>유저 카드 리스트</h1>
-      <StyledUserList>
+      <UserList>
         {users.map((user) => (
-          <UserProfile key={user._id} user={user} onNavigate={navigate} />
+          <UserProfileCard key={user._id} user={user} onNavigate={navigate} />
         ))}
-      </StyledUserList>
+      </UserList>
     </div>
   );
 };
@@ -67,13 +67,13 @@ export default App;
 
 
 // Styled Components
-const StyledUserList = styled.div`
+const UserList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 `;
 
-const StyledCard = styled.div`
+const Card = styled.div`
   display: flex;
   align-items: center;
   padding: 10px;
@@ -88,18 +88,18 @@ const StyledCard = styled.div`
   }
 `;
 
-const StyledProfileImage = styled.img`
+const ProfileImage = styled.img`
   width: 110px;
   height: 110px;
   border-radius: 50%;
 `;
 
-const StyledUserInfo = styled.div`
+const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
-const StyledUserName = styled.h2`
+const UserName = styled.h2`
   font-size: 13px;
   font-weight: 550;
   margin-top: 10px;
