@@ -7,7 +7,6 @@ import { getUsers } from '../utils/api';
 const UserCard = ({ user, onNavigate }) => {
   const { image, fullName, role, _id } = user;
 
-  // Default values for nickName and bio
   let nickName = '...';
   let bio = '...';
 
