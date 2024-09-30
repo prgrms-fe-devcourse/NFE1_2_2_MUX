@@ -6,7 +6,7 @@ import stopButtonIcon from '../../assets/icons/stop-button.png';
 import playButtonIcon from '../../assets/icons/play-button.png';
 import YouTube from 'react-youtube';
 
-const PostUpload = () => {
+const PostUpload = ({ onPostSuccess }) => {
   const [albumData, setAlbumData] = useState(null);
   const [description, setDescription] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,13 +16,10 @@ const PostUpload = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [player, setPlayer] = useState(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const maxCharLimit = 300;
   const maxTitleCharLimit = 20;
 
-  const intervalRef = useRef(null);
   const descriptionInputRef = useRef(null);
 
   // 앨범 검색 기능
@@ -69,10 +66,7 @@ const PostUpload = () => {
     if (player) {
       player.stopVideo();
     }
-    setCurrentTime(0);
     setIsPlaying(false);
-    setDuration(0);
-    clearInterval(intervalRef.current);
   };
 
   // 앨범 선택 초기화
@@ -86,28 +80,16 @@ const PostUpload = () => {
   // YouTube Player 설정
   const onPlayerReady = (event) => {
     setPlayer(event.target);
-    setDuration(event.target.getDuration());
   };
 
   // 재생/일시정지 처리
   const handlePlayPause = () => {
     if (isPlaying) {
       player.pauseVideo();
-      clearInterval(intervalRef.current);
     } else {
       player.playVideo();
-      intervalRef.current = setInterval(() => {
-        setCurrentTime(player.getCurrentTime());
-      }, 1000);
     }
     setIsPlaying(!isPlaying);
-  };
-
-  // 시간을 MM:SS 형식으로 변환
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
   // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
@@ -128,8 +110,7 @@ const PostUpload = () => {
     }
 
     setErrorMessage('');
-    
-    // 새로운 게시물 객체 생성
+
     const newPost = {
       postTitle: postTitle,
       title: albumData.title,
@@ -138,15 +119,13 @@ const PostUpload = () => {
       coverUrl: albumData.coverUrl,
     };
 
-    // 부모 컴포넌트에 새 게시물 전달 (포스트 게시 할때 이 부분을 참고하면 될 것 같습니다.)
     if (typeof onPostSuccess === 'function') {
       onPostSuccess(newPost);
       alert('포스트가 성공적으로 업로드되었습니다!');
     } else {
       alert('포스트 업로드에 실패하였습니다!');
     }
-    
-    // 상태 초기화 및 플레이어 초기화
+
     resetPlayer();
     setPostTitle('');
     setAlbumData(null);
@@ -156,57 +135,54 @@ const PostUpload = () => {
   return (
     <PostUploadContainer>
       <ContentWrapper>
+        <PostTitleWrapper>
+          <PostTitleInput
+            type="text"
+            placeholder="포스트 제목을 입력해주세요"
+            value={postTitle}
+            onChange={(e) => setPostTitle(e.target.value)}
+            maxLength={maxTitleCharLimit}
+          />
+          <TitleCharCount>
+            {postTitle.length}/{maxTitleCharLimit}자
+          </TitleCharCount>
+        </PostTitleWrapper>
+
         <AlbumSection>
-          <AlbumPlaceholder onClick={albumData ? resetAlbumSelection : () => setIsSearchMode(true)}>
+          <AlbumPlaceholder onClick={() => setIsSearchMode(true)}>
             {albumData ? (
               <AlbumCover src={albumData.coverUrl} alt="Album Cover" />
             ) : (
               <YouTubeMusicLink>
-                <YoutubeMusicIconImage src={youtubeMusicIcon} alt="YoutubeMusicIcon" />
+                <YoutubeMusicIconImage
+                  src={youtubeMusicIcon}
+                  alt="YoutubeMusicIcon"
+                />
                 YouTube Music에서 <br />
                 앨범 가져오기
               </YouTubeMusicLink>
             )}
           </AlbumPlaceholder>
 
-          <TrackDetails>
-            <PostTitleWrapper>
-              <PostTitleInput
-                type="text"
-                placeholder="포스트 제목을 입력해주세요"
-                value={postTitle}
-                onChange={(e) => setPostTitle(e.target.value)}
-                maxLength={maxTitleCharLimit}
+          {albumData && (
+            <PlayPauseButton onClick={handlePlayPause}>
+              <img
+                src={isPlaying ? stopButtonIcon : playButtonIcon}
+                alt="Play/Pause Button"
               />
-              <TitleCharCount>
-                {postTitle.length}/{maxTitleCharLimit}자
-              </TitleCharCount>
-            </PostTitleWrapper>
-
-            <TrackTitle>{albumData ? albumData.title : '제목'}</TrackTitle>
-            <ArtistName>{albumData ? albumData.artist : '아티스트'}</ArtistName>
-            <AudioPlayer>
-              <PlayPauseButton onClick={handlePlayPause} disabled={!albumData}>
-                <img src={isPlaying ? stopButtonIcon : playButtonIcon} alt="Play/Pause Button" />
-              </PlayPauseButton>
-              <TrackTime>{formatTime(currentTime)}</TrackTime>
-              <ProgressBar
-                type="range"
-                min="0"
-                max={duration}
-                value={currentTime}
-                onChange={(e) => player.seekTo(e.target.value)}
-              />
-              <TrackTime>{formatTime(duration)}</TrackTime>
-            </AudioPlayer>
-          </TrackDetails>
+            </PlayPauseButton>
+          )}
         </AlbumSection>
 
         {selectedTrack && (
-          <YouTube videoId={selectedTrack.videoId} opts={{ height: '0', width: '0', playerVars: { autoplay: 0 }}} onReady={onPlayerReady} />
+          <YouTube
+            videoId={selectedTrack.videoId}
+            opts={{ height: '0', width: '0', playerVars: { autoplay: 0 } }}
+            onReady={onPlayerReady}
+          />
         )}
 
-        {isSearchMode && !albumData && (
+        {isSearchMode && (
           <>
             <SearchSection>
               <SearchInput
@@ -282,6 +258,27 @@ const ContentWrapper = styled.div`
   min-height: 60vh;
 `;
 
+const PostTitleWrapper = styled.div`
+  position: relative;
+  margin-bottom: 10px;
+`;
+
+const PostTitleInput = styled.input`
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 97%;
+`;
+
+const TitleCharCount = styled.p`
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-size: 10px;
+  color: #666;
+`;
+
 const AlbumSection = styled.div`
   display: flex;
   margin-bottom: 20px;
@@ -324,80 +321,15 @@ const YoutubeMusicIconImage = styled.img`
   margin-right: 7px;
 `;
 
-const TrackDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  min-width: 200px;
-`;
-
-const PostTitleWrapper = styled.div`
-  position: relative;
-  margin-bottom: 10px;
-`;
-
-const PostTitleInput = styled.input`
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 95%;
-`;
-
-const TitleCharCount = styled.p`
-  position: absolute;
-  bottom: 5px;
-  right: 10px;
-  font-size: 10px;
-  color: #666;
-`;
-
-const TrackTitle = styled.p`
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 0;
-`;
-
-const ArtistName = styled.p`
-  font-size: 15px;
-  color: #666;
-  margin-top: 0;
-`;
-
-const AudioPlayer = styled.div`
-  display: flex;
-  align-items: center;
-  border-top: 1px solid #666;
-  padding-top: 10px;
-  margin-top: 10px;
-`;
-
 const PlayPauseButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-right: 10px;
   img {
     width: 40px;
     height: 40px;
   }
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-`;
-
-const ProgressBar = styled.input`
-  flex-grow: 1;
-  margin: 0 10px;
-  height: 5px;
-`;
-
-const TrackTime = styled.span`
-  font-size: 14px;
-  color: #666;
 `;
 
 const SearchSection = styled.div`
