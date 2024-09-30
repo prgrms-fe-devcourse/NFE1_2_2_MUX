@@ -48,12 +48,15 @@ const PostUpload = ({ onPostSuccess }) => {
   // 앨범 선택 시 처리
   const selectAlbum = (album) => {
     if (albums.length < maxAlbums) {
-      setAlbums([...albums, {
-        title: album.title,
-        artist: album.author,
-        coverUrl: album.thumbnail,
-        videoId: album.videoId
-      }]);
+      setAlbums([
+        ...albums,
+        {
+          title: album.title,
+          artist: album.author,
+          coverUrl: album.thumbnail,
+          videoId: album.videoId,
+        },
+      ]);
     } else {
       alert(`최대 ${maxAlbums}개의 앨범만 추가할 수 있습니다.`);
     }
@@ -74,6 +77,15 @@ const PostUpload = ({ onPostSuccess }) => {
       }
       setSelectedTrack(album);
     }
+  };
+
+  // 새로운 곡을 재생할 때 기존 곡 멈추기
+  const playNewAlbum = (album) => {
+    if (player && selectedTrack && selectedTrack.videoId !== album.videoId) {
+      player.stopVideo();
+      setIsPlaying(false);
+    }
+    handlePlayPause(album);
   };
 
   // YouTube Player 설정
@@ -165,17 +177,21 @@ const PostUpload = ({ onPostSuccess }) => {
               <AlbumItemWrapper key={index}>
                 <AlbumCoverWrapper>
                   <AlbumCover src={album.coverUrl} alt={album.title} />
-                  <PlayPauseButton onClick={() => handlePlayPause(album)}>
+                  <PlayPauseButton onClick={() => playNewAlbum(album)}>
                     <img
                       src={
-                        selectedTrack && selectedTrack.videoId === album.videoId && isPlaying
+                        selectedTrack &&
+                        selectedTrack.videoId === album.videoId &&
+                        isPlaying
                           ? stopButtonIcon
                           : playButtonIcon
                       }
                       alt="Play/Pause Button"
                     />
                   </PlayPauseButton>
-                  <RemoveButton onClick={() => removeAlbum(index)}>×</RemoveButton>
+                  <RemoveButton onClick={() => removeAlbum(index)}>
+                    ×
+                  </RemoveButton>
                 </AlbumCoverWrapper>
                 <AlbumInfo>
                   <AlbumTitle>{album.title}</AlbumTitle>
@@ -213,8 +229,7 @@ const PostUpload = ({ onPostSuccess }) => {
                 {searchResults.map((album) => (
                   <AlbumItem
                     key={album.videoId}
-                    onClick={() => selectAlbum(album)}
-                  >
+                    onClick={() => selectAlbum(album)}>
                     <AlbumThumbnail src={album.thumbnail} alt={album.title} />
                     <AlbumInfo>
                       <AlbumTitle>{album.title}</AlbumTitle>
@@ -278,7 +293,7 @@ const ContentWrapper = styled.div`
 
 const PostTitleWrapper = styled.div`
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 `;
 
 const PostTitleInput = styled.input`
@@ -291,14 +306,15 @@ const PostTitleInput = styled.input`
 
 const TitleCharCount = styled.p`
   position: absolute;
-  bottom: 5px;
+  bottom: 1px;
   right: 10px;
-  font-size: 10px;
+  font-size: 13px;
   color: #666;
 `;
 
+/* 앨범 리스트 섹션 */
 const AlbumListSection = styled.div`
-  margin-top: 20px;
+  margin-top: 0;
 `;
 
 const AlbumListHeader = styled.div`
@@ -315,7 +331,7 @@ const AlbumCount = styled.p`
 const AlbumList = styled.div`
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: auto; 
+  overflow-x: auto;
   margin-top: 10px;
 `;
 
@@ -386,7 +402,9 @@ const AlbumPlaceholder = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   border-radius: 10px;
+  margin-bottom: 15px;
   margin-right: 15px;
   cursor: pointer;
 `;
@@ -408,6 +426,7 @@ const YoutubeMusicIconImage = styled.img`
   margin-bottom: 10px;
 `;
 
+/* 검색 및 노래 소개 */
 const SearchSection = styled.div`
   display: flex;
   margin-bottom: 13px;
