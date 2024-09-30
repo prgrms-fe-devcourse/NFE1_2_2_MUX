@@ -7,7 +7,7 @@ import playButtonIcon from '../../assets/icons/play-button.png';
 import YouTube from 'react-youtube';
 
 const PostUpload = ({ onPostSuccess }) => {
-  const [albumData, setAlbumData] = useState(null);
+  const [albums, setAlbums] = useState([]);
   const [description, setDescription] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
@@ -17,6 +17,7 @@ const PostUpload = ({ onPostSuccess }) => {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [player, setPlayer] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const maxAlbums = 5;
   const maxCharLimit = 300;
   const maxTitleCharLimit = 20;
 
@@ -46,35 +47,33 @@ const PostUpload = ({ onPostSuccess }) => {
 
   // 앨범 선택 시 처리
   const selectAlbum = (album) => {
-    setAlbumData({
-      title: album.title,
-      artist: album.author,
-      coverUrl: album.thumbnail,
-    });
-    setSelectedTrack(album);
+    if (albums.length < maxAlbums) {
+      setAlbums([...albums, {
+        title: album.title,
+        artist: album.author,
+        coverUrl: album.thumbnail,
+        videoId: album.videoId
+      }]);
+    } else {
+      alert(`최대 ${maxAlbums}개의 앨범만 추가할 수 있습니다.`);
+    }
     setSearchResults([]);
     setIsSearchMode(false);
-    resetPlayer();
-
-    if (descriptionInputRef.current) {
-      descriptionInputRef.current.focus();
-    }
   };
 
-  // 플레이어 리셋
-  const resetPlayer = () => {
-    if (player) {
-      player.stopVideo();
+  // 재생/일시정지 처리
+  const handlePlayPause = (album) => {
+    if (selectedTrack && selectedTrack.videoId === album.videoId && isPlaying) {
+      player.pauseVideo();
+      setIsPlaying(false);
+    } else {
+      if (player) {
+        player.loadVideoById(album.videoId);
+        player.playVideo();
+        setIsPlaying(true);
+      }
+      setSelectedTrack(album);
     }
-    setIsPlaying(false);
-  };
-
-  // 앨범 선택 초기화
-  const resetAlbumSelection = () => {
-    resetPlayer();
-    setAlbumData(null);
-    setIsSearchMode(true);
-    setSearchTerm('');
   };
 
   // YouTube Player 설정
@@ -82,14 +81,11 @@ const PostUpload = ({ onPostSuccess }) => {
     setPlayer(event.target);
   };
 
-  // 재생/일시정지 처리
-  const handlePlayPause = () => {
-    if (isPlaying) {
-      player.pauseVideo();
-    } else {
-      player.playVideo();
-    }
-    setIsPlaying(!isPlaying);
+  // 앨범 삭제 처리
+  const removeAlbum = (index) => {
+    const updatedAlbums = [...albums];
+    updatedAlbums.splice(index, 1);
+    setAlbums(updatedAlbums);
   };
 
   // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
@@ -99,7 +95,7 @@ const PostUpload = ({ onPostSuccess }) => {
       return;
     }
 
-    if (!albumData) {
+    if (albums.length === 0) {
       setErrorMessage('추천 포스트를 업로드 하세요.');
       return;
     }
@@ -113,10 +109,8 @@ const PostUpload = ({ onPostSuccess }) => {
 
     const newPost = {
       postTitle: postTitle,
-      title: albumData.title,
-      artist: albumData.artist,
+      albums: albums,
       description: description,
-      coverUrl: albumData.coverUrl,
     };
 
     if (typeof onPostSuccess === 'function') {
@@ -126,9 +120,8 @@ const PostUpload = ({ onPostSuccess }) => {
       alert('포스트 업로드에 실패하였습니다!');
     }
 
-    resetPlayer();
+    setAlbums([]);
     setPostTitle('');
-    setAlbumData(null);
     setDescription('');
   };
 
@@ -148,11 +141,16 @@ const PostUpload = ({ onPostSuccess }) => {
           </TitleCharCount>
         </PostTitleWrapper>
 
-        <AlbumSection>
-          <AlbumPlaceholder onClick={() => setIsSearchMode(true)}>
-            {albumData ? (
-              <AlbumCover src={albumData.coverUrl} alt="Album Cover" />
-            ) : (
+        {/* 앨범 목록 섹션 */}
+        <AlbumListSection>
+          <AlbumListHeader>
+            <h3>앨범 목록</h3>
+            <AlbumCount>
+              {albums.length}/{maxAlbums} 앨범 추가됨
+            </AlbumCount>
+          </AlbumListHeader>
+          <AlbumList>
+            <AlbumPlaceholder onClick={() => setIsSearchMode(true)}>
               <YouTubeMusicLink>
                 <YoutubeMusicIconImage
                   src={youtubeMusicIcon}
@@ -161,19 +159,34 @@ const PostUpload = ({ onPostSuccess }) => {
                 YouTube Music에서 <br />
                 앨범 가져오기
               </YouTubeMusicLink>
-            )}
-          </AlbumPlaceholder>
+            </AlbumPlaceholder>
 
-          {albumData && (
-            <PlayPauseButton onClick={handlePlayPause}>
-              <img
-                src={isPlaying ? stopButtonIcon : playButtonIcon}
-                alt="Play/Pause Button"
-              />
-            </PlayPauseButton>
-          )}
-        </AlbumSection>
+            {albums.map((album, index) => (
+              <AlbumItemWrapper key={index}>
+                <AlbumCoverWrapper>
+                  <AlbumCover src={album.coverUrl} alt={album.title} />
+                  <PlayPauseButton onClick={() => handlePlayPause(album)}>
+                    <img
+                      src={
+                        selectedTrack && selectedTrack.videoId === album.videoId && isPlaying
+                          ? stopButtonIcon
+                          : playButtonIcon
+                      }
+                      alt="Play/Pause Button"
+                    />
+                  </PlayPauseButton>
+                  <RemoveButton onClick={() => removeAlbum(index)}>×</RemoveButton>
+                </AlbumCoverWrapper>
+                <AlbumInfo>
+                  <AlbumTitle>{album.title}</AlbumTitle>
+                  <AlbumArtist>{album.artist}</AlbumArtist>
+                </AlbumInfo>
+              </AlbumItemWrapper>
+            ))}
+          </AlbumList>
+        </AlbumListSection>
 
+        {/* YouTube Player */}
         {selectedTrack && (
           <YouTube
             videoId={selectedTrack.videoId}
@@ -182,6 +195,7 @@ const PostUpload = ({ onPostSuccess }) => {
           />
         )}
 
+        {/* 앨범 검색 모드 */}
         {isSearchMode && (
           <>
             <SearchSection>
@@ -197,7 +211,10 @@ const PostUpload = ({ onPostSuccess }) => {
             {searchResults.length > 0 && (
               <SearchResults>
                 {searchResults.map((album) => (
-                  <AlbumItem key={album.videoId} onClick={() => selectAlbum(album)}>
+                  <AlbumItem
+                    key={album.videoId}
+                    onClick={() => selectAlbum(album)}
+                  >
                     <AlbumThumbnail src={album.thumbnail} alt={album.title} />
                     <AlbumInfo>
                       <AlbumTitle>{album.title}</AlbumTitle>
@@ -210,6 +227,7 @@ const PostUpload = ({ onPostSuccess }) => {
           </>
         )}
 
+        {/* 노래 소개 섹션 */}
         <DescriptionSection>
           <DescriptionTitle>노래 소개</DescriptionTitle>
           <DescriptionInput
@@ -224,6 +242,7 @@ const PostUpload = ({ onPostSuccess }) => {
           </CharCount>
         </DescriptionSection>
 
+        {/* 게시하기 버튼 */}
         <PostButtonWrapper>
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
           <PostButton onClick={handlePost}>게시하기</PostButton>
@@ -236,7 +255,6 @@ const PostUpload = ({ onPostSuccess }) => {
 export default PostUpload;
 
 // Styled components
-
 const PostUploadContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -279,57 +297,114 @@ const TitleCharCount = styled.p`
   color: #666;
 `;
 
-const AlbumSection = styled.div`
-  display: flex;
-  margin-bottom: 20px;
-  align-items: flex-start;
+const AlbumListSection = styled.div`
+  margin-top: 20px;
 `;
 
-const AlbumPlaceholder = styled.div`
-  background-color: #c0afe2;
-  height: 200px;
-  width: 300px;
+const AlbumListHeader = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  margin-right: 20px;
+`;
+
+const AlbumCount = styled.p`
+  font-size: 14px;
+  color: #666;
+`;
+
+const AlbumList = styled.div`
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto; 
+  margin-top: 10px;
+`;
+
+const AlbumItemWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-right: 15px;
+`;
+
+const AlbumCoverWrapper = styled.div`
+  position: relative;
+  width: 150px;
+  height: 150px;
   border-radius: 10px;
-  cursor: pointer;
+  overflow: hidden;
 `;
 
 const AlbumCover = styled.img`
   width: 100%;
   height: 100%;
-  border-radius: 10px;
   object-fit: cover;
+`;
+
+const PlayPauseButton = styled.button`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  img {
+    width: 40px;
+    height: 40px;
+  }
+`;
+
+const RemoveButton = styled.button`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+`;
+
+const AlbumInfo = styled.div`
+  text-align: center;
+  margin-top: 10px;
+`;
+
+const AlbumTitle = styled.p`
+  font-size: 14px;
+  font-weight: bold;
+`;
+
+const AlbumArtist = styled.p`
+  font-size: 12px;
+  color: #666;
+`;
+
+const AlbumPlaceholder = styled.div`
+  background-color: #c0afe2;
+  height: 150px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
 `;
 
 const YouTubeMusicLink = styled.p`
   display: flex;
+  flex-direction: column;
   align-items: center;
   color: white;
   font-size: 12px;
   font-weight: bold;
   cursor: pointer;
   text-align: center;
-  margin-right: 5%;
 `;
 
 const YoutubeMusicIconImage = styled.img`
   width: 30px;
   height: 30px;
-  margin-right: 7px;
-`;
-
-const PlayPauseButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  img {
-    width: 40px;
-    height: 40px;
-  }
+  margin-bottom: 10px;
 `;
 
 const SearchSection = styled.div`
@@ -374,21 +449,6 @@ const AlbumThumbnail = styled.img`
   width: 50px;
   height: 50px;
   margin-right: 10px;
-`;
-
-const AlbumInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const AlbumTitle = styled.p`
-  font-size: 16px;
-  margin: 0;
-`;
-
-const AlbumArtist = styled.span`
-  font-size: 12px;
-  color: #666;
 `;
 
 const DescriptionSection = styled.div`
