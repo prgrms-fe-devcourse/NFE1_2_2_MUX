@@ -83,7 +83,6 @@ const PostUpload = ({ onPostSuccess }) => {
   const playNewAlbum = (album) => {
     if (player && selectedTrack && selectedTrack.videoId !== album.videoId) {
       player.stopVideo();
-      setIsPlaying(false);
     }
     handlePlayPause(album);
   };
@@ -162,16 +161,19 @@ const PostUpload = ({ onPostSuccess }) => {
             </AlbumCount>
           </AlbumListHeader>
           <AlbumList>
-            <AlbumPlaceholder onClick={() => setIsSearchMode(true)}>
-              <YouTubeMusicLink>
-                <YoutubeMusicIconImage
-                  src={youtubeMusicIcon}
-                  alt="YoutubeMusicIcon"
-                />
-                YouTube Music에서 <br />
-                앨범 가져오기
-              </YouTubeMusicLink>
-            </AlbumPlaceholder>
+            {/* AlbumPlaceholder가 조건부 렌더링되도록 수정 */}
+            {albums.length < maxAlbums && (
+              <AlbumPlaceholder onClick={() => setIsSearchMode(true)}>
+                <YouTubeMusicLink>
+                  <YoutubeMusicIconImage
+                    src={youtubeMusicIcon}
+                    alt="YoutubeMusicIcon"
+                  />
+                  YouTube Music에서 <br />
+                  앨범 가져오기
+                </YouTubeMusicLink>
+              </AlbumPlaceholder>
+            )}
 
             {albums.map((album, index) => (
               <AlbumItemWrapper key={index}>
@@ -189,9 +191,7 @@ const PostUpload = ({ onPostSuccess }) => {
                       alt="Play/Pause Button"
                     />
                   </PlayPauseButton>
-                  <RemoveButton onClick={() => removeAlbum(index)}>
-                    ×
-                  </RemoveButton>
+                  <RemoveButton onClick={() => removeAlbum(index)}>×</RemoveButton>
                 </AlbumCoverWrapper>
                 <AlbumInfo>
                   <AlbumTitle>{album.title}</AlbumTitle>
@@ -206,7 +206,7 @@ const PostUpload = ({ onPostSuccess }) => {
         {selectedTrack && (
           <YouTube
             videoId={selectedTrack.videoId}
-            opts={{ height: '0', width: '0', playerVars: { autoplay: 0 } }}
+            opts={{ height: '0', width: '0', playerVars: { autoplay: 1 } }}
             onReady={onPlayerReady}
           />
         )}
@@ -229,12 +229,13 @@ const PostUpload = ({ onPostSuccess }) => {
                 {searchResults.map((album) => (
                   <AlbumItem
                     key={album.videoId}
-                    onClick={() => selectAlbum(album)}>
+                    onClick={() => selectAlbum(album)}
+                  >
                     <AlbumThumbnail src={album.thumbnail} alt={album.title} />
-                    <AlbumInfo>
-                      <AlbumTitle>{album.title}</AlbumTitle>
-                      <AlbumArtist>{album.author}</AlbumArtist>
-                    </AlbumInfo>
+                    <AlbumInfoLeftAligned>
+                      <AlbumTitleLeftAligned>{album.title}</AlbumTitleLeftAligned>
+                      <AlbumArtistLeftAligned>{album.author}</AlbumArtistLeftAligned>
+                    </AlbumInfoLeftAligned>
                   </AlbumItem>
                 ))}
               </SearchResults>
@@ -269,7 +270,9 @@ const PostUpload = ({ onPostSuccess }) => {
 
 export default PostUpload;
 
+
 // Styled components
+
 const PostUploadContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -383,6 +386,7 @@ const RemoveButton = styled.button`
 const AlbumInfo = styled.div`
   text-align: center;
   margin-top: 10px;
+  width: 150px;
 `;
 
 const AlbumTitle = styled.p`
@@ -469,6 +473,22 @@ const AlbumThumbnail = styled.img`
   width: 50px;
   height: 50px;
   margin-right: 10px;
+`;
+
+const AlbumInfoLeftAligned = styled.div`
+  text-align: left; /* 왼쪽 정렬 */
+`;
+
+const AlbumTitleLeftAligned = styled.p`
+  font-size: 14px;
+  font-weight: bold;
+  max-width: 100%;
+`;
+
+const AlbumArtistLeftAligned = styled.p`
+  font-size: 12px;
+  color: #666;
+  max-width: 100%;
 `;
 
 const DescriptionSection = styled.div`
