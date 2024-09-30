@@ -2,76 +2,78 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ExampleImage from '../assets/images/default-profile.png';
 import { useNavigate } from 'react-router-dom';
+import { getUsers } from '../utils/api'; 
 
-// 개별 유저 프로필 카드 컴포넌트
-const UserProfile = ({ user, onNavigate }) => {
+// 유저 프로필 카드 컴포넌트
+const UserProfileCard = ({ user, onNavigate }) => {
   const { image, fullName, _id } = user;
+  let nickName = '닉네임이 없습니다.';
 
-  // 카드 클릭 시 사용자의 상세 페이지로 이동
+  // fullName이 JSON 문자열로 저장되어 있으므로 파싱
+  if (fullName) {
+    try {
+      const parsedFullName = JSON.parse(fullName);
+      nickName = parsedFullName.nickName || nickName;
+    } catch (error) {
+      console.error('fullName 파싱 오류:', error);
+    }
+  }
+
   const handleCardClick = () => {
     onNavigate(`/userpage/${_id}`);
   };
 
   return (
-    <StyledCard onClick={handleCardClick}>
-      <StyledProfileImage src={image || ExampleImage} alt={fullName} />
-      <StyledUserInfo>
-        <StyledUserName>{fullName}</StyledUserName>
-      </StyledUserInfo>
-    </StyledCard>
+    <Card onClick={handleCardClick}>
+      <ProfileImage src={image || ExampleImage} alt={nickName} />
+      <UserInfo>
+        <UserName>{nickName}</UserName>
+      </UserInfo>
+    </Card>
   );
 };
 
-// 전체 유저 리스트를 렌더링하는 컴포넌트
+// 유저 리스트 컴포넌트
 const App = () => {
-  const [users, setUsers] = useState([]); // 유저 목록 상태 관리
-  const navigate = useNavigate(); // 라우팅을 위한 useNavigate 훅 사용
+  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // API 호출로 대체 예정
-    /*
-    axios.get('/api/users')
-      .then(response => {
-        setUsers(response.data);
-      })
-      .catch(error => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getUsers();
+        setUsers(usersData);
+      } catch (error) {
         console.error('Error fetching users:', error);
-      });
-    */
+      }
+    };
 
-    // 더미 유저 데이터
-    const dummyUsers = [
-      { _id: '1', image: '', fullName: '커트코베인' },
-      { _id: '2', image: '', fullName: '아라이카즈키' },
-      { _id: '3', image: '', fullName: '모차르트' }
-    ];
-
-    setUsers(dummyUsers); // 더미 데이터를 상태에 저장
+    fetchUsers();
   }, []);
 
   return (
     <div>
       <h1>유저 카드 리스트</h1>
-      <StyledUserList>
+      <UserList>
         {users.map((user) => (
-          <UserProfile key={user._id} user={user} onNavigate={navigate} />
+          <UserProfileCard key={user._id} user={user} onNavigate={navigate} />
         ))}
-      </StyledUserList>
+      </UserList>
     </div>
   );
 };
 
-export default App; 
+export default App;
 
 
 // Styled Components
-const StyledUserList = styled.div`
+const UserList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 `;
 
-const StyledCard = styled.div`
+const Card = styled.div`
   display: flex;
   align-items: center;
   padding: 10px;
@@ -86,18 +88,19 @@ const StyledCard = styled.div`
   }
 `;
 
-const StyledProfileImage = styled.img`
+const ProfileImage = styled.img`
   width: 110px;
+  height: 110px;
   border-radius: 50%;
 `;
 
-const StyledUserInfo = styled.div`
+const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
-const StyledUserName = styled.h2`
+const UserName = styled.h2`
   font-size: 13px;
   font-weight: 550;
-  margin: 0;
+  margin-top: 10px;
 `;
