@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { login } from '../utils/api'; 
+import { login } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -7,7 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -20,7 +20,6 @@ const Login = () => {
       console.error('로그인 실패:', error);
     }
   };
-
 
   return (
     <LoginContainer>
@@ -89,16 +88,16 @@ const Input = styled.input`
   font-size: 16px;
   background-color: #ffffff;
   color: #333333;
-  
+
   &:focus {
-    border-color: #BF94E4;
+    border-color: #bf94e4;
     outline: none;
   }
 `;
 
 const Button = styled.button`
   padding: 12px;
-  background-color: #BF94E4;
+  background-color: #bf94e4;
   color: white;
   border: none;
   border-radius: 5px;
@@ -108,6 +107,6 @@ const Button = styled.button`
   font-weight: bold;
 
   &:hover {
-    background-color: #D3D3D3;
+    background-color: #d3d3d3;
   }
 `;
