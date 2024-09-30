@@ -45,6 +45,19 @@ export const getUserData = async (userId, token) => {
   }
 };
 
+// 사용자 목록을 가져오는 API
+export const getUsers = async (offset = 0, limit = 10) => {
+  try {
+    const response = await axios.get(`/api/users/get-users`, {
+      params: { offset, limit },
+    });
+    return response.data; // 사용자 목록 반환
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error; // 에러 발생 시 호출한 곳으로 던짐
+  }
+};
+
 // 프로필 이미지 업로드 API 호출
 export const uploadProfileImage = async (formData, token) => {
   try {
