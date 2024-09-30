@@ -6,12 +6,14 @@ import PostCard from '../components/PostCard';
 import { getUserData } from '../utils/api';
 import UserCard from '../components/UserCard';
 import UserProfile from '../components/UserProfile';
+import PostDetailModal from '../components/modals/PostDetailModal';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchUserData = useCallback(async () => {
@@ -27,17 +29,14 @@ const Dashboard = () => {
       const parsedUser = JSON.parse(userData);
       console.log('Parsed user data from localStorage:', parsedUser);
 
-      // 사용자 ID 확인
       const userId = parsedUser.id || parsedUser._id;
       if (!userId) {
         throw new Error('User ID is missing');
       }
 
-      // 서버에서 최신 데이터 가져오기
       const freshUserData = await getUserData(userId, token);
       console.log('Fresh user data from server:', freshUserData);
 
-      // 서버 데이터로 상태와 로컬 스토리지를 업데이트
       const updatedUser = {
         ...parsedUser,
         ...freshUserData,
@@ -59,26 +58,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      try {
-        await fetchUserData();
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error in useEffect:', error);
-          setError('Failed to load user data');
-        }
-      }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
+    fetchUserData();
   }, [fetchUserData]);
 
   const updateUserDetails = useCallback((updatedUser) => {
@@ -89,6 +69,31 @@ const Dashboard = () => {
 
   const openModalHandler = () => setIsModalOpen(true);
   const closeModalHandler = () => setIsModalOpen(false);
+
+  // 테스트용 포스트 데이터
+  const testPost = {
+    userImage: 'https://example.com/user-image.jpg',
+    username: 'TestUser',
+    title: 'Test Post Title',
+    albums: [
+      {
+        coverImage: 'https://example.com/album1.jpg',
+        title: 'Album 1',
+        artist: 'Artist 1',
+      },
+      {
+        coverImage: 'https://example.com/album2.jpg',
+        title: 'Album 2',
+        artist: 'Artist 2',
+      },
+    ],
+    content: 'This is a test post content.',
+    likes: 10,
+    comments: [
+      { username: 'Commenter1', content: 'Great post!' },
+      { username: 'Commenter2', content: 'Nice music selection!' },
+    ],
+  };
 
   if (isLoading) return <LoadingMessage>Loading...</LoadingMessage>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
@@ -132,12 +137,26 @@ const Dashboard = () => {
       <PostCard />
       <UserCard />
       <UserProfile />
+
+      {/* PostDetailModal 테스트를 위한 버튼 */}
+      <button onClick={() => setIsPostModalOpen(true)}>
+        Open Post Detail Modal
+      </button>
+
       {isModalOpen && (
         <ProfileEditModal
           user={user}
           token={localStorage.getItem('token')}
           onClose={closeModalHandler}
           setUser={updateUserDetails}
+        />
+      )}
+
+      {isPostModalOpen && (
+        <PostDetailModal
+          post={testPost}
+          isOwnPost={true}
+          onClose={() => setIsPostModalOpen(false)}
         />
       )}
     </DashboardContainer>
