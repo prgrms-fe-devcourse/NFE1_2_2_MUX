@@ -47,6 +47,14 @@ const PostUpload = ({ onPostSuccess }) => {
 
   // 앨범 선택 시 처리
   const selectAlbum = (album) => {
+    // 중복 여부 확인
+    const isDuplicate = albums.some(existingAlbum => existingAlbum.videoId === album.videoId);
+
+    if (isDuplicate) {
+      alert('중복된 앨범입니다.');
+      return;
+    }
+
     if (albums.length < maxAlbums) {
       setAlbums([
         ...albums,
