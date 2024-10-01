@@ -4,6 +4,7 @@ import styled from 'styled-components';
 const TrackUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadComplete, setUploadComplete] = useState(false);
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
 
   const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024;
@@ -29,6 +30,7 @@ const TrackUpload = () => {
           const newProgress = prevProgress + 10;
           if (newProgress >= 100) {
             clearInterval(interval);
+            setUploadComplete(true);
             return 100;
           }
           return newProgress;
@@ -52,6 +54,7 @@ const TrackUpload = () => {
 
       setSelectedFile(file);
       setUploadProgress(0);
+      setUploadComplete(false);
       setAudioErrorMessage('');
     }
   };
@@ -66,33 +69,46 @@ const TrackUpload = () => {
     event.preventDefault();
   };
 
+  const handleNextStep = () => {
+
+  };
+
   return (
     <TrackUploadContent>
-      <UploadArea onDrop={handleDrop} onDragOver={handleDragOver}>
-        {selectedFile && uploadProgress > 0 ? (
-          <ProgressContainer>
-            <ProgressBar progress={uploadProgress} />
-            <ProgressText>{uploadProgress}%</ProgressText>
-          </ProgressContainer>
-        ) : (
-          <>
-            <MainText>당신의 음원을 드래그 후, 드롭하여 주세요.</MainText>
-            <UploadButton htmlFor="fileUpload">
-              또는 이 버튼을 클릭하여 음원을 선택해주세요.
-            </UploadButton>
-            <input
-              id="fileUpload"
-              type="file"
-              accept={SUPPORTED_AUDIO_FORMATS.join(',')}
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
-          </>
-        )}
-        {audioErrorMessage && (
-          <AudioErrorText>{audioErrorMessage}</AudioErrorText>
-        )}
-      </UploadArea>
+      {uploadComplete ? (
+        <CompletedSection>
+          <SuccessMessage>
+            업로드 완료!
+            <br />
+            다음 단계로 이동하여 추가 정보를 입력해주세요.
+          </SuccessMessage>
+          <NextButton onClick={handleNextStep}>다음</NextButton>
+        </CompletedSection>
+      ) : (
+        <UploadArea onDrop={handleDrop} onDragOver={handleDragOver}>
+          {selectedFile && uploadProgress > 0 ? (
+            <ProgressContainer>
+              <ProgressBar progress={uploadProgress} />
+              <ProgressText>{uploadProgress}%</ProgressText>
+            </ProgressContainer>
+          ) : (
+            <>
+              <MainText>당신의 음원을 드래그 후, 드롭하여 주세요.</MainText>
+              <UploadButton htmlFor="fileUpload">
+                또는 이 버튼을 클릭하여 음원을 선택해주세요.
+              </UploadButton>
+              <input
+                id="fileUpload"
+                type="file"
+                accept={SUPPORTED_AUDIO_FORMATS.join(',')}
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </>
+          )}
+          {audioErrorMessage && <AudioErrorText>{audioErrorMessage}</AudioErrorText>}
+        </UploadArea>
+      )}
     </TrackUploadContent>
   );
 };
@@ -109,6 +125,37 @@ const TrackUploadContent = styled.div`
   width: 100%;
   height: 100%;
   caret-color: transparent;
+`;
+
+const CompletedSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #c0afe2;
+  width: 95%;
+  height: 80%;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px dashed white;
+`;
+
+const SuccessMessage = styled.p`
+  font-size: 25px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40px;
+`;
+
+const NextButton = styled.button`
+  background-color: #bf94e4;
+  color: white;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 20px;
 `;
 
 const UploadArea = styled.div`
