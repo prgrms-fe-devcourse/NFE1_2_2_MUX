@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { updatePassword } from "../../utils/api"; // 분리된 API 파일 임포트
 
 const UpdatePasswordModal = ({ isOpen, onClose }) => {
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
@@ -13,14 +12,14 @@ const UpdatePasswordModal = ({ isOpen, onClose }) => {
       setError("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
       return;
     }
-  
+
     const token = localStorage.getItem("token"); // token 가져오기
-  
+
     if (!token) {
       setError("로그인이 필요합니다.");
       return;
     }
-  
+
     try {
       // 비밀번호 변경 API 호출
       await updatePassword(newPassword, token);
@@ -31,18 +30,18 @@ const UpdatePasswordModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // 모달이 열리지 않으면 null을 반환
   if (!isOpen) return null;
 
+  // 모달 클릭 처리 함수
+  const handleModalClick = (e) => {
+    e.stopPropagation(); // 이벤트 전파 방지
+  };
+
   return (
-    <ModalOverlay>
-      <ModalContent>
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={handleModalClick}>
         <h2>비밀번호 변경</h2>
-        {/* <Input
-          type="password"
-          placeholder="현재 비밀번호"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-        /> */}
         <Input
           type="password"
           placeholder="새 비밀번호"
