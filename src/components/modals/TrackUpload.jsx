@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import ImageChangeIcon from '../../assets/icons/image-change.png';
 
 const TrackUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [showUploadedContent, setShowUploadedContent] = useState(false);
+  const [selectedAlbumImage, setSelectedAlbumImage] = useState('https://via.placeholder.com/400x400');
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
 
   const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024;
@@ -59,6 +62,11 @@ const TrackUpload = () => {
     }
   };
 
+  const handleAlbumCoverChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedAlbumImage(URL.createObjectURL(file));
+  };
+
   const handleDrop = (event) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
@@ -70,12 +78,38 @@ const TrackUpload = () => {
   };
 
   const handleNextStep = () => {
-
+    setShowUploadedContent(true);
   };
 
   return (
     <TrackUploadContent>
-      {uploadComplete ? (
+      {showUploadedContent ? (
+        <UploadedContent>
+          <LeftSection>
+            <AlbumSection>
+              <AlbumCover>
+                <img src={selectedAlbumImage} alt="앨범 이미지" />
+              </AlbumCover>
+              <CoverChangeContainer
+                onClick={() =>
+                  document.getElementById('albumImageUpload').click()
+                }>
+                <CoverChangeText>앨범 이미지 변경</CoverChangeText>
+                <ChangeIcon src={ImageChangeIcon} alt="Change Icon" />
+              </CoverChangeContainer>
+              <input
+                id="albumImageUpload"
+                type="file"
+                accept="image/*"
+                onChange={handleAlbumCoverChange}
+                style={{ display: 'none' }}
+              />
+            </AlbumSection>
+          </LeftSection>
+
+          <RightSection></RightSection>
+        </UploadedContent>
+      ) : uploadComplete ? (
         <CompletedSection>
           <SuccessMessage>
             업로드 완료!
@@ -106,7 +140,9 @@ const TrackUpload = () => {
               />
             </>
           )}
-          {audioErrorMessage && <AudioErrorText>{audioErrorMessage}</AudioErrorText>}
+          {audioErrorMessage && (
+            <AudioErrorText>{audioErrorMessage}</AudioErrorText>
+          )}
         </UploadArea>
       )}
     </TrackUploadContent>
@@ -125,6 +161,65 @@ const TrackUploadContent = styled.div`
   width: 100%;
   height: 100%;
   caret-color: transparent;
+`;
+
+const UploadedContent = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 90%;
+  padding: 10px;
+`;
+
+const LeftSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 36%;
+`;
+
+const AlbumSection = styled.div`
+  text-align: center;
+  margin-bottom: 20px;
+`;
+
+const AlbumCover = styled.div`
+  img {
+    width: 260px;
+    height: 260px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+`;
+
+const CoverChangeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: -3px;
+  cursor: pointer;
+  justify-content: center;
+`;
+
+const CoverChangeText = styled.p`
+  color: gray;
+  font-size: 20px;
+  margin-top: 0px;
+  margin-right: 5px;
+`;
+
+const ChangeIcon = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-top: -18px;
+`;
+
+const RightSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 55%;
 `;
 
 const CompletedSection = styled.div`
