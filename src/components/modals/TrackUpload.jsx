@@ -161,6 +161,22 @@ const TrackUpload = () => {
     setShowUploadedContent(true);
   };
 
+  const handlePrevStep = () => {
+    setShowUploadedContent(false);
+    setSelectedFile(null);
+    setSelectedAlbumImage(defaultAlbumImage);
+    setSongTitle('');
+    setSongDescription('');
+    setUploadProgress(0);
+    setUploadComplete(false);
+    setIsPlaying(false);
+    setAudioProgress(0);
+    setAudioDuration(0);
+    setCurrentTime(0);
+    setAudioErrorMessage('');
+    setImageErrorMessage('');
+  };
+
   const handleMouseDown = (event) => {
     setIsDragging(true);
     handleSeek(event);
@@ -288,6 +304,10 @@ const TrackUpload = () => {
               </CharCount>
             </InputField>
           </RightSection>
+
+          <ButtonContainer>
+            <PrevButton onClick={handlePrevStep}>이전</PrevButton>
+          </ButtonContainer>
         </UploadedContent>
       ) : uploadComplete ? (
         <CompletedSection>
@@ -556,6 +576,28 @@ const CharCount = styled.p`
   text-align: right;
   margin-top: -25px;
   margin-right: 10px;
+`;
+
+const ButtonContainer = styled.div`
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+`;
+
+const PrevButton = styled.button`
+  padding: 3px 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 15px;
+  margin-bottom: 10px;
 `;
 
 const CompletedSection = styled.div`
