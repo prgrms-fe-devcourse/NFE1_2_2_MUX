@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import playButtonIcon from '../assets/icons/play-button.png';
+import pauseButtonIcon from '../assets/icons/stop-button.png'; // 일시정지 아이콘 추가
 
-const PostCard = ({ post, onPlay, isPlaying }) => {
+const PostCard = ({ post, onPlayPause, isPlaying }) => {
   const { _id, author } = post;
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
@@ -30,8 +31,8 @@ const PostCard = ({ post, onPlay, isPlaying }) => {
 
   const handleImageClick = (e) => {
     e.stopPropagation();
-    if (firstAlbum && firstAlbum.videoId && onPlay) {
-      onPlay(firstAlbum.videoId);
+    if (firstAlbum && firstAlbum.videoId && onPlayPause) {
+      onPlayPause(firstAlbum.videoId, _id); // 포스트 ID도 전달
     }
   };
 
@@ -48,9 +49,13 @@ const PostCard = ({ post, onPlay, isPlaying }) => {
         {firstAlbum && (
           <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
         )}
+        {/* Hover 상태이거나 재생 중일 때 일시정지 버튼으로 변경 */}
         {(isHovered || isPlaying) && (
           <PlayButton>
-            <PlayButtonImage src={playButtonIcon} alt="Play" />
+            <PlayButtonImage
+              src={isPlaying ? pauseButtonIcon : playButtonIcon} // 재생 상태에 따라 아이콘 변경
+              alt={isPlaying ? 'Pause' : 'Play'}
+            />
           </PlayButton>
         )}
       </ImageContainer>
@@ -104,6 +109,7 @@ const PostImage = styled.img`
   width: 100%;
   height: 300px;
   object-fit: cover;
+  border: 1px solid #e0e0e0;
 `;
 
 const CardContent = styled.div`
