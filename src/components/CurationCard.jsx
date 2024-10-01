@@ -162,10 +162,11 @@ const AlbumInfo = styled.div`
 const AlbumTitle = styled.h3`
     font-size: 14px;
     margin: 0;
+    color: #ffffff;
 `;
 
 const AlbumArtist = styled.p`
     font-size: 13px;
-    color: #666;
+    color:#ffffff;
     margin: 3px 0;
 `;
