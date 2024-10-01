@@ -4,40 +4,59 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Signup = () => {
-  const navigate = useNavigate(); // 페이지 이동을 위한 useNavigate 훅 사용
-  const [email, setEmail] = useState(''); // 이메일 상태 관리
-  const [fullName, setFullName] = useState(''); // 이름 상태 관리
-  const [password, setPassword] = useState(''); // 비밀번호 상태 관리
-  const [nickName, setNickName] = useState(''); // 닉네임 상태 관리
-  const [passwordConfirm, setPasswordConfirm] = useState(''); // 비밀번호 확인 상태 관리
-  const [errorMessage, setErrorMessage] = useState(''); // 에러 메시지 상태 관리
+  const navigate = useNavigate(); 
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickName, setNickName] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // 회원가입 처리 함수
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+      return "비밀번호는 최소 8자 이상이어야 합니다.";
+    }
+    if (!hasUpperCase) {
+      return "비밀번호에는 대문자가 최소 1자 포함되어야 합니다.";
+    }
+    if (!hasNumber) {
+      return "비밀번호에는 숫자가 최소 1자 포함되어야 합니다.";
+    }
+    if (!hasSpecialChar) {
+      return "비밀번호에는 특수문자가 최소 1자 포함되어야 합니다.";
+    }
+
+    return "비밀번호가 유효합니다.";
+  };
+
   const handleSignup = async (e) => {
-    e.preventDefault(); // 폼 제출 시 페이지 리로드 방지
-    
-    // 비밀번호와 비밀번호 확인 값이 일치하지 않으면 에러 메시지 출력
+    e.preventDefault();
+
     if (password !== passwordConfirm) {
       setErrorMessage('비밀번호가 일치하지 않습니다.');
       return;
     }
 
+    const passwordValidationMessage = validatePassword(password);
+    if (passwordValidationMessage !== "비밀번호가 유효합니다.") {
+      setErrorMessage(passwordValidationMessage);
+      return;
+    }
+
     try {
-      // signup 함수 호출로 회원가입 처리
       const { token, user } = await signup(email, password, fullName, nickName);
-      
-      // 성공 시 토큰을 로컬 스토리지에 저장하고 콘솔에 회원 정보 출력
       localStorage.setItem('token', token);
       console.log('회원가입 성공:', user);
-      
-      // 회원가입 성공 후 로그인 페이지로 이동
       navigate('/login');
     } catch (error) {
-      // 이미 사용 중인 이메일일 경우 에러 메시지 출력
       if (error.response && error.response.status === 400) {
         setErrorMessage('이미 사용 중인 이메일입니다.');
       } else {
-        // 기타 오류 발생 시 에러 메시지 출력
         setErrorMessage('회원가입 중 오류가 발생했습니다.');
       }
       console.error('회원가입 실패:', error);
@@ -48,8 +67,6 @@ const Signup = () => {
     <SignupContainer>
       <Form onSubmit={handleSignup}>
         <Title>회원가입</Title>
-        
-        {/* 이메일 입력 필드 */}
         <Label>이메일</Label>
         <Input
           type="email"
@@ -57,8 +74,6 @@ const Signup = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        
-        {/* 이름 입력 필드 */}
         <Label>이름</Label>
         <Input
           type="text"
@@ -66,8 +81,6 @@ const Signup = () => {
           onChange={(e) => setFullName(e.target.value)}
           required
         />
-        
-        {/* 닉네임 입력 필드 */}
         <Label>닉네임</Label>
         <Input
           type="text"
@@ -75,8 +88,6 @@ const Signup = () => {
           onChange={(e) => setNickName(e.target.value)}
           required
         />
-        
-        {/* 비밀번호 입력 필드 */}
         <Label>비밀번호</Label>
         <Input
           type="password"
@@ -84,8 +95,6 @@ const Signup = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        
-        {/* 비밀번호 확인 입력 필드 */}
         <Label>비밀번호 확인</Label>
         <Input
           type="password"
@@ -93,11 +102,7 @@ const Signup = () => {
           onChange={(e) => setPasswordConfirm(e.target.value)}
           required
         />
-        
-        {/* 회원가입 완료 버튼 */}
         <Button type="submit">완료</Button>
-        
-        {/* 에러 메시지 출력 */}
         {errorMessage && (
           <ErrorMessage>{errorMessage}</ErrorMessage>
         )}  

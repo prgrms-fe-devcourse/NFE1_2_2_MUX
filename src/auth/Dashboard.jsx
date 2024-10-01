@@ -5,6 +5,8 @@ import ProfileEditModal from '../components/modals/ProfileEditModal';
 import { getUserData } from '../utils/api';
 import UserCard from '../components/UserCard';
 import UserProfile from '../components/UserProfile';
+import CurationCard from '../components/CurationCard';
+import ReactionCount from '../components/ReactionCount'; // 리액션 카운트 컴포넌트
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -127,6 +129,7 @@ const Dashboard = () => {
       </EditProfileButton>
       <UserCard user={user} />
       <UserProfile user={user} />
+      <ReactionCount />
       {isModalOpen && (
         <ProfileEditModal
           user={user}
@@ -135,6 +138,7 @@ const Dashboard = () => {
           setUser={updateUserDetails}
         />
       )}
+      <CurationCard />
     </DashboardContainer>
   );
 };
