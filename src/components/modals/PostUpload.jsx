@@ -92,6 +92,8 @@ const PostUpload = ({ onPostSuccess }) => {
   const playNewAlbum = (album) => {
     if (player && selectedTrack && selectedTrack.videoId !== album.videoId) {
       player.stopVideo();
+      setPlayer(null);
+      setIsPlaying(false);
     }
     handlePlayPause(album);
   };
@@ -103,6 +105,14 @@ const PostUpload = ({ onPostSuccess }) => {
 
   // 앨범 삭제 처리
   const removeAlbum = (index) => {
+    const albumToRemove = albums[index];
+    if (selectedTrack && selectedTrack.videoId === albumToRemove.videoId) {
+      player.stopVideo();
+      setIsPlaying(false);
+      setSelectedTrack(null);
+      setPlayer(null); 
+    }
+  
     const updatedAlbums = [...albums];
     updatedAlbums.splice(index, 1);
     setAlbums(updatedAlbums);
@@ -228,7 +238,7 @@ const PostUpload = ({ onPostSuccess }) => {
         {/* YouTube Player */}
         {selectedTrack && (
           <YouTube
-            videoId={selectedTrack.videoId}
+            videoId={selectedTrack?.videoId}
             opts={{ height: '0', width: '0', playerVars: { autoplay: 1 } }}
             onReady={onPlayerReady}
           />
