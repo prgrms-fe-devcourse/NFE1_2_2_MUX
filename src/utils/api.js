@@ -37,3 +37,19 @@ export const getUserData = async (userId, token) => {
 
   return response.data; // 응답 데이터 반환
 };
+
+// 포스트 작성 API 호출
+export const createPost = async (formData, token) => {
+  try {
+    const response = await axios.post('/api/posts/create', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};

@@ -5,6 +5,7 @@ import youtubeMusicIcon from '../../assets/icons/youtube-music-icon.png';
 import stopButtonIcon from '../../assets/icons/stop-button.png';
 import playButtonIcon from '../../assets/icons/play-button.png';
 import YouTube from 'react-youtube';
+import { createPost } from '../../utils/api'; // API 함수 불러오기
 
 const PostUpload = ({ onPostSuccess }) => {
   const [albums, setAlbums] = useState([]);
@@ -108,41 +109,55 @@ const PostUpload = ({ onPostSuccess }) => {
   };
 
   // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
-  const handlePost = () => {
-    if (postTitle.trim() === '') {
-      setErrorMessage('포스트 제목을 입력해 주세요.');
+  const handlePost = async () => {
+    if (postTitle.trim() === "albums.length === 0  description.trim() === ") {
+      setErrorMessage('모든 필드를 채워주세요.');
       return;
     }
-
-    if (albums.length === 0) {
-      setErrorMessage('추천 포스트를 업로드 하세요.');
-      return;
-    }
-
-    if (description.trim() === '') {
-      setErrorMessage('노래 소개를 입력하세요.');
-      return;
-    }
-
+  
     setErrorMessage('');
-
-    const newPost = {
-      postTitle: postTitle,
+  
+    const token = localStorage.getItem('token');
+  
+    if (!token) {
+      setErrorMessage('로그인이 필요합니다.');
+      return;
+    }
+  
+    const postData = {
+      title: postTitle,
       albums: albums,
       description: description,
     };
-
-    if (typeof onPostSuccess === 'function') {
-      onPostSuccess(newPost);
-      alert('포스트가 성공적으로 업로드되었습니다!');
-    } else {
-      alert('포스트 업로드에 실패하였습니다!');
+  
+    const formData = new FormData();
+    formData.append('title', JSON.stringify(postData));
+    formData.append('channelId', "66fb541ced2d3c14a64eb9ee");
+    // 첫 번째 앨범의 커버 이미지 URL을 사용
+    if (albums[0]?.coverUrl) {
+      formData.append('image', albums[0].coverUrl);
     }
-
-    setAlbums([]);
-    setPostTitle('');
-    setDescription('');
+  
+    try {
+      const response = await createPost(formData, token);
+      console.log('Post uploaded successfully:', response);
+  
+      alert('포스트가 성공적으로 업로드되었습니다!');
+  
+      // Reset form state
+      setAlbums([]);
+      setPostTitle('');
+      setDescription('');
+  
+      if (typeof onPostSuccess === 'function') {
+        onPostSuccess(response);
+      }
+    } catch (error) {
+      console.error('포스트 업로드 실패:', error);
+      setErrorMessage(error.response?.data?.message || '포스트 업로드에 실패했습니다.');
+    }
   };
+
 
   return (
     <PostUploadContainer>
@@ -277,7 +292,6 @@ const PostUpload = ({ onPostSuccess }) => {
 };
 
 export default PostUpload;
-
 
 // Styled components
 
