@@ -2,15 +2,16 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { getChannelPosts } from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
-import UploadModal from '../../components/modals/UploadModal';
+import YouTube from 'react-youtube';
 
 const PostFeed = () => {
   const [posts, setPosts] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [currentVideoId, setCurrentVideoId] = useState(null);
+  const playerRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const channelId = '66fb541ced2d3c14a64eb9ee';
   const token = localStorage.getItem('token');
@@ -18,7 +19,7 @@ const PostFeed = () => {
 
   const lastPostElementRef = useCallback(
     (node) => {
-      if (loading) return;
+      if (isLoading) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
@@ -27,45 +28,53 @@ const PostFeed = () => {
       });
       if (node) observer.current.observe(node);
     },
-    [loading, hasMore],
+    [hasMore, isLoading],
   );
 
-  const fetchPosts = useCallback(async () => {
-    if (loading || !hasMore) return;
+  const fetchPosts = useCallback(
+    async (pageToFetch = page) => {
+      if (!hasMore || isLoading) return;
 
-    try {
-      setLoading(true);
-      const fetchedPosts = await getChannelPosts(channelId, page, 12, token);
-      if (fetchedPosts.length === 0) {
-        setHasMore(false);
-      } else {
-        setPosts((prevPosts) => {
-          const newPosts = fetchedPosts.filter(
-            (newPost) =>
-              !prevPosts.some(
-                (existingPost) => existingPost._id === newPost._id,
-              ),
-          );
-          return [...prevPosts, ...newPosts].sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-          );
-        });
+      setIsLoading(true);
+      try {
+        const fetchedPosts = await getChannelPosts(
+          channelId,
+          pageToFetch,
+          12,
+          token,
+        );
+        if (fetchedPosts.length === 0) {
+          setHasMore(false);
+        } else {
+          setPosts((prevPosts) => {
+            if (pageToFetch === 0) {
+              return fetchedPosts;
+            }
+            const newPosts = fetchedPosts.filter(
+              (newPost) => !prevPosts.some((post) => post._id === newPost._id),
+            );
+            return [...prevPosts, ...newPosts];
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch posts:', err);
+        setError('포스트를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch posts:', err);
-      setError('포스트를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  }, [channelId, token, page, loading, hasMore]);
+    },
+    [channelId, token, page, hasMore],
+  );
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts, page]);
+  }, [fetchPosts]);
 
-  const handleUploadSuccess = (newPost) => {
-    setPosts((prevPosts) => [newPost, ...prevPosts]);
-    setIsModalOpen(false);
+  const handlePlay = (videoId) => {
+    setCurrentVideoId(videoId);
+    if (playerRef.current) {
+      playerRef.current.internalPlayer.loadVideoById(videoId);
+    }
   };
 
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
@@ -78,22 +87,40 @@ const PostFeed = () => {
             <div
               key={post._id}
               ref={index === posts.length - 1 ? lastPostElementRef : null}>
-              <PostCard post={post} />
+              <PostCard
+                post={post}
+                onPlay={handlePlay}
+                isPlaying={
+                  currentVideoId ===
+                  (post.albums && post.albums[0]
+                    ? post.albums[0].videoId
+                    : null)
+                }
+              />
             </div>
           ))}
         </PostGrid>
-        {loading && <LoadingMessage>로딩 중...</LoadingMessage>}
       </MainContent>
-      <UploadButton onClick={() => setIsModalOpen(true)}>업로드</UploadButton>
-      {isModalOpen && (
-        <UploadModal
-          onClose={() => setIsModalOpen(false)}
-          onUploadSuccess={handleUploadSuccess}
+      <YouTubePlayerContainer>
+        <YouTube
+          videoId={currentVideoId}
+          opts={{
+            height: '0',
+            width: '0',
+            playerVars: {
+              autoplay: 1,
+            },
+          }}
+          onReady={(event) => {
+            playerRef.current = event;
+          }}
         />
-      )}
+      </YouTubePlayerContainer>
     </PageContainer>
   );
 };
+
+export default PostFeed;
 
 // Styled components
 const PageContainer = styled.div`
@@ -109,15 +136,9 @@ const MainContent = styled.main`
 
 const PostGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr); // 4개의 열로 변경
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   justify-content: center;
-`;
-
-const LoadingMessage = styled.div`
-  text-align: center;
-  font-size: 18px;
-  margin-top: 20px;
 `;
 
 const ErrorMessage = styled.div`
@@ -127,15 +148,9 @@ const ErrorMessage = styled.div`
   margin-top: 20px;
 `;
 
-const UploadButton = styled.button`
+const YouTubePlayerContainer = styled.div`
   position: fixed;
   bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  background-color: #0095f6;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
+  left: 20px;
+  z-index: 1000;
 `;

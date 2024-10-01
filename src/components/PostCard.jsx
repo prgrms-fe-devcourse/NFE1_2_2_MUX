@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import defaultProfileImage from '../assets/images/default-profile.png';
+import playButtonIcon from '../assets/icons/play-button.png';
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, onPlay, isPlaying }) => {
   const { _id, author } = post;
   const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
   let parsedTitle, albums, description, nickName;
   try {
@@ -26,13 +28,32 @@ const PostCard = ({ post }) => {
 
   const firstAlbum = albums && albums.length > 0 ? albums[0] : null;
 
+  const handleImageClick = (e) => {
+    e.stopPropagation();
+    if (firstAlbum && firstAlbum.videoId && onPlay) {
+      onPlay(firstAlbum.videoId);
+    }
+  };
+
   return (
     <Card onClick={() => navigate(`/posts/${_id}`)}>
       <CardHeader>
         <AuthorImage src={author.image || defaultProfileImage} alt={nickName} />
         <AuthorName>{nickName}</AuthorName>
       </CardHeader>
-      {firstAlbum && <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />}
+      <ImageContainer
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleImageClick}>
+        {firstAlbum && (
+          <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
+        )}
+        {(isHovered || isPlaying) && (
+          <PlayButton>
+            <PlayButtonImage src={playButtonIcon} alt="Play" />
+          </PlayButton>
+        )}
+      </ImageContainer>
       <CardContent>
         <PostTitle>{parsedTitle}</PostTitle>
         <PostDescription>{description}</PostDescription>
@@ -45,29 +66,28 @@ export default PostCard;
 
 // Styled Components
 const Card = styled.div`
-  width: 300px;
-  height: 400px;
+  width: 340px;
+  height: 500px;
   margin: 15px;
-  border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   overflow: hidden;
-  border: 1px solid #e0e0e0; // 얇은 회색 테두리 추가
+  border: 1px solid #e0e0e0;
 `;
 
 const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 10px;
   border-bottom: 1px solid #eee;
 `;
 
 const AuthorImage = styled.img`
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   margin-right: 10px;
 `;
@@ -82,7 +102,7 @@ const AuthorName = styled.p`
 
 const PostImage = styled.img`
   width: 100%;
-  height: 220px;
+  height: 300px;
   object-fit: cover;
 `;
 
@@ -108,10 +128,33 @@ const PostDescription = styled.p`
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2; // 최대 2줄로 제한
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   flex-grow: 1;
-  word-break: break-word; // 긴 단어가 있을 경우 줄바꿈
-  max-height: 2.7em; // 대략 2줄의 높이
-  line-height: 1.3em; // 줄 간격 설정
+  word-break: break-word;
+  max-height: 2.7em;
+  line-height: 1.3em;
+`;
+
+const ImageContainer = styled.div`
+  position: relative;
+  cursor: pointer;
+`;
+
+const PlayButton = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PlayButtonImage = styled.img`
+  width: 30px;
+  height: 30px;
 `;
