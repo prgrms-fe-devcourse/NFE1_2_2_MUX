@@ -177,6 +177,10 @@ const TrackUpload = () => {
     setImageErrorMessage('');
   };
 
+  const handlePostSubmit = () => {
+    alert('음원이 성공적으로 게시되었습니다!');
+  };
+  
   const handleMouseDown = (event) => {
     setIsDragging(true);
     handleSeek(event);
@@ -307,6 +311,7 @@ const TrackUpload = () => {
 
           <ButtonContainer>
             <PrevButton onClick={handlePrevStep}>이전</PrevButton>
+            <PostButton onClick={handlePostSubmit}>게시하기</PostButton>
           </ButtonContainer>
         </UploadedContent>
       ) : uploadComplete ? (
@@ -597,6 +602,17 @@ const PrevButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   margin-left: 15px;
+  margin-bottom: 10px;
+`;
+
+const PostButton = styled.button`
+  padding: 3px 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
   margin-bottom: 10px;
 `;
 
