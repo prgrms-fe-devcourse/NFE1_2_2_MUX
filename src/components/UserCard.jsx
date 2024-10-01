@@ -1,81 +1,71 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import Example from '../assets/images/default-profile.png'; // 예시 이미지 경로
-import axios from "axios"; // 나중에 사용하게 될 axios
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import ExampleImage from '../assets/images/default-profile.png';
+import { useNavigate } from 'react-router-dom';
+import { getUsers } from '../utils/api'; 
 
-// UserCard 컴포넌트
-const UserCard = ({ user, navigate }) => {
-  const { image, fullName, role, comment, _id } = user;
-  // 코멘트가 50자를 넘을 경우 자르고 '...'을 붙임
-  const truncatedComment = comment.length > 50 ? comment.slice(0, 50) + '...' : comment;
+const UserCard = ({ user, onNavigate }) => {
+  const { image, fullName, role, _id } = user;
+
+  let nickName = '...';
+  let bio = '...';
+
+  // fullName이 JSON 문자열로 저장되어 있으므로 파싱
+  if (fullName) {
+    try {
+      const parsedFullName = JSON.parse(fullName);
+      nickName = parsedFullName.nickName || nickName;
+      bio = parsedFullName.bio || bio;
+    } catch (error) {
+      console.error('fullName 파싱 오류:', error);
+    }
+  }
+
+  // bio가 50자를 넘으면 자르기
+  const truncatedBio = bio.length > 50 ? bio.slice(0, 50) + '...' : bio;
+
+  const handleCardClick = () => {
+    onNavigate(`/userpage/${_id}`);
+  };
 
   return (
-    <Card onClick={() => navigate(`/userpage/${_id}`)}> 
-      <ProfileImage src={image || Example} alt={fullName} /> {/* 프로필 이미지 */}
-      <UserInfo>
-        <UserName>{fullName}</UserName> {/* 유저 이름 */}
-        <UserTitle>{role}</UserTitle> {/* 유저 역할 */}
-        <UserComment>{truncatedComment}</UserComment> {/* 유저 자기소개 */}
-      </UserInfo>
-    </Card>
+    <StyledCard onClick={handleCardClick}>
+      <StyledProfileImage src={image || ExampleImage} alt={nickName} /> {/* 프로필 이미지 */}
+      <StyledUserInfo>
+        <StyledUserName>{nickName}</StyledUserName> {/* 유저 이름 */}
+        <StyledUserRole>{role}</StyledUserRole> {/* 유저 역할 */}
+        <StyledUserBio>{truncatedBio}</StyledUserBio> {/* 유저 자기소개 */}
+      </StyledUserInfo>
+    </StyledCard>
   );
 };
 
-// 테스트를 위한 App 컴포넌트
 const App = () => {
   const [users, setUsers] = useState([]);
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const navigate = useNavigate(); // useNavigate 훅
 
-  // 더미 데이터 설정
+  // API 호출을 통해 유저 데이터 가져오기
   useEffect(() => {
-    // 나중에 이 부분을 API 호출로 대체
-    /* 
-    axios.get("/api/users")
-      .then(response => {
-        setUsers(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching users:", error);
-      });
-    */
-    
-    // 임시 더미 데이터
-    const dummyUsers = [
-      {
-        _id: "1", // 더미 ID 추가
-        image: "", // 프로필 이미지 URL
-        fullName: "커트코베인", // 이름
-        role: "RockStar", // 칭호(역할)
-        comment: "아무튼 나락도 락이니까..." // 자기소개
-      },
-      {
-        _id: "2", // 더미 ID 추가
-        image: "", // 프로필 이미지 URL
-        fullName: "아라이카즈키", // 이름
-        role: "JazzMaster", // 칭호(역할)
-        comment: "재즈베이스 마스터? 어렵지 않습니다. 재즈베이스 마스터? 어렵지 않습니다." // 자기소개
-      },
-      {
-        _id: "3", // 더미 ID 추가
-        image: "", // 프로필 이미지 URL
-        fullName: "모차르트", // 이름
-        role: "Maestro", // 칭호(역할)
-        comment: "제 신곡 많이 들어주세요." // 자기소개
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getUsers(); // getUsers 호출
+        setUsers(usersData); // 상태 업데이트
+      } catch (error) {
+        console.error('Error fetching users:', error);
       }
-    ];
-    
-    setUsers(dummyUsers); // 더미 데이터로 상태 설정
+    };
+
+    fetchUsers();
   }, []);
 
   return (
     <div>
       <h1>유저 카드 리스트</h1>
-      <UserList>
+      <StyledUserList>
         {users.map((user) => (
-          <UserCard key={user._id} user={user} navigate={navigate} /> // navigate를 UserCard에 전달
+          <UserCard key={user._id} user={user} onNavigate={navigate} />
         ))}
-      </UserList>
+      </StyledUserList>
     </div>
   );
 };
@@ -83,36 +73,38 @@ const App = () => {
 export default App;
 
 // Styled Components
-const Card = styled.div`
+const StyledCard = styled.div`
   display: flex;
   align-items: center;
-  width: 400px;
+  width: 420px;
   border-radius: 16px;
   padding: 8px;
+
+  &:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
 `;
 
-const ProfileImage = styled.img`
+const StyledProfileImage = styled.img`
   width: 80px;
-  height: 80px; /* 크기를 지정해 균일하게 표시 */
-  padding: 5px;
-  border-radius: 50%; /* 프로필 이미지를 완전한 원으로 만듦 */
-  object-fit: cover;
-  margin-right: 12px;
+  height: 80px;
+  border-radius: 50%;
 `;
 
-const UserInfo = styled.div`
+const StyledUserInfo = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  margin-left: 17px;
 `;
 
-const UserName = styled.h2`
+const StyledUserName = styled.h2`
   font-size: 1em;
   margin: 0;
   color: #333;
 `;
 
-const UserTitle = styled.p`
+const StyledUserRole = styled.p`
   margin: 5px 0;
   display: flex;
   justify-content: center;
@@ -122,14 +114,14 @@ const UserTitle = styled.p`
   border-radius: 35px;
   font-size: 12px;
   color: #474150;
-  white-space: nowrap; /* 긴 텍스트가 줄 바꿈되지 않도록 */
+  white-space: nowrap;
 `;
 
-const UserComment = styled.p`
+const StyledUserBio = styled.p`
   margin: 5px 0;
   text-align: left;
   padding: 13px;
-  width: 300px;
+  width: 280px;
   height: 25px;
   background: #bf94e4;
   border-radius: 5px;
@@ -137,7 +129,7 @@ const UserComment = styled.p`
   color: white;
 `;
 
-const UserList = styled.div`
+const StyledUserList = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;

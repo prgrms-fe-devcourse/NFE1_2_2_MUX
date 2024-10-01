@@ -45,6 +45,19 @@ export const getUserData = async (userId, token) => {
   }
 };
 
+// 사용자 목록을 가져오는 API
+export const getUsers = async (offset = 0, limit = 10) => {
+  try {
+    const response = await axios.get(`/api/users/get-users`, {
+      params: { offset, limit },
+    });
+    return response.data; // 사용자 목록 반환
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error; // 에러 발생 시 호출한 곳으로 던짐
+  }
+};
+
 // 프로필 이미지 업로드 API 호출
 export const uploadProfileImage = async (formData, token) => {
   try {
@@ -73,6 +86,21 @@ export const updateUser = async (userId, token, updatedData) => {
     return response.data; // 성공적으로 업데이트한 사용자 정보 반환
   } catch (error) {
     console.error('사용자 정보를 업데이트할 수 없습니다.', error);
+    throw error;
+  }
+};
+
+// 특정 포스트 상세 정보 가져오기
+export const getPostDetails = async (postId, token) => {
+  try {
+    const response = await axios.get(`/posts/${postId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
     throw error;
   }
 };

@@ -329,4 +329,18 @@ const ModalOverlay = styled.div`
   z-index: 1000;
 `;
 
+const LoadingMessage = styled.div`
+  color: #666;
+  font-size: 18px;
+  text-align: center;
+  padding: 20px;
+`;
+
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 18px;
+  text-align: center;
+  padding: 20px;
+`;
+
 export default PostDetailModal;

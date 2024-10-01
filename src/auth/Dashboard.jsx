@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import ProfileEditModal from '../components/modals/ProfileEditModal';
-import PostCard from '../components/PostCard';
-import { getUserData } from '../utils/api';
-import UserCard from '../components/UserCard';
-import UserProfile from '../components/UserProfile';
+import ProfileEditModal from '../components/modals/ProfileEditModal'; // 프로필 수정 모달 컴포넌트
+import PostCard from '../components/PostCard'; // 게시물 카드 컴포넌트
+import { getUserData } from '../utils/api'; // 사용자 데이터 가져오는 API 함수
+import UserCard from '../components/UserCard'; // 사용자 카드 컴포넌트
+import UserProfile from '../components/UserProfile'; // 사용자 프로필 컴포넌트
 import PostDetailModal from '../components/modals/PostDetailModal';
 
 const Dashboard = () => {
