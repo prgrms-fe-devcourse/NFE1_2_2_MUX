@@ -7,8 +7,11 @@ const TrackUpload = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [showUploadedContent, setShowUploadedContent] = useState(false);
-  const [selectedAlbumImage, setSelectedAlbumImage] = useState('https://via.placeholder.com/400x400');
+  const [selectedAlbumImage, setSelectedAlbumImage] = useState(
+    'https://via.placeholder.com/400x400',
+  );
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
+  const [imageErrorMessage, setImageErrorMessage] = useState('');
 
   const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024;
   const SUPPORTED_AUDIO_FORMATS = [
@@ -64,7 +67,20 @@ const TrackUpload = () => {
 
   const handleAlbumCoverChange = (event) => {
     const file = event.target.files[0];
+    const SUPPORTED_FORMATS = ['image/jpeg', 'image/png'];
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+    if (!SUPPORTED_FORMATS.includes(file.type)) {
+      setImageErrorMessage('지원되는 이미지 형식은 JPEG 및 PNG입니다.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageErrorMessage('이미지 파일 크기는 최대 5MB까지 허용됩니다.');
+      return;
+    }
+
     setSelectedAlbumImage(URL.createObjectURL(file));
+    setImageErrorMessage('');
   };
 
   const handleDrop = (event) => {
@@ -104,6 +120,10 @@ const TrackUpload = () => {
                 onChange={handleAlbumCoverChange}
                 style={{ display: 'none' }}
               />
+              {imageErrorMessage && (
+                <ImageErrorText>{imageErrorMessage}</ImageErrorText>
+              )}
+              <ImageInfoText>지원 파일 형식: JPEG, PNG (최대 5MB)</ImageInfoText>
             </AlbumSection>
           </LeftSection>
 
@@ -138,6 +158,10 @@ const TrackUpload = () => {
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
+              <AudioInfoText>
+                지원 파일 형식: WAV, FLAC, AIFF, ALAC, OGG, MP2, MP3, AAC, AMR,
+                and WMA (최대 4GB)
+              </AudioInfoText>
             </>
           )}
           {audioErrorMessage && (
@@ -212,6 +236,18 @@ const ChangeIcon = styled.img`
   width: 20px;
   height: 20px;
   margin-top: -18px;
+`;
+
+const ImageErrorText = styled.p`
+  color: red;
+  font-size: 12px;
+  margin-top: -15px;
+`;
+
+const ImageInfoText = styled.p`
+  color: gray;
+  font-size: 12px;
+  margin-top: -10px;
 `;
 
 const RightSection = styled.div`
@@ -304,6 +340,12 @@ const UploadButton = styled.label`
   justify-content: center;
   align-items: center;
   width: 70%;
+`;
+
+const AudioInfoText = styled.p`
+  color: gray;
+  font-size: 12px;
+  margin-top: 0px;
 `;
 
 const AudioErrorText = styled.p`
