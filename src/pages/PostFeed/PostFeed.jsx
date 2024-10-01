@@ -7,22 +7,34 @@ import YouTube from 'react-youtube';
 const PostFeed = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(0); // 페이지 상태 관리
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [currentVideoId, setCurrentVideoId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingPostId, setPlayingPostId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const playerRef = useRef(null);
-  const observer = useRef(); // 스크롤 관찰을 위한 ref
+  const observer = useRef();
+  const lastPostElementRef = useCallback(
+    (node) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchPosts();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasMore],
+  );
 
   const channelId = '66fb541ced2d3c14a64eb9ee';
   const token = localStorage.getItem('token');
-  const POSTS_PER_PAGE = 12; // 한 번에 불러올 포스트 개수
+  const POSTS_PER_PAGE = 12;
 
-  // 포스트 데이터 가져오기
   const fetchPosts = useCallback(async () => {
-    if (!hasMore || isLoading) return; // 더 이상 가져올 데이터가 없거나 로딩 중이면 중단
+    if (!hasMore || isLoading) return;
 
     setIsLoading(true);
     try {
@@ -33,15 +45,15 @@ const PostFeed = () => {
         token,
       );
       if (fetchedPosts.length === 0) {
-        setHasMore(false); // 더 이상 가져올 데이터가 없음
+        setHasMore(false);
       } else {
         setPosts((prevPosts) => {
           const newPosts = fetchedPosts.filter(
             (newPost) => !prevPosts.some((post) => post._id === newPost._id),
           );
-          return [...prevPosts, ...newPosts]; // 중복되지 않은 새로운 포스트만 추가
+          return [...prevPosts, ...newPosts];
         });
-        setPage((prevPage) => prevPage + 1); // 페이지 수 증가
+        setPage((prevPage) => prevPage + 1);
       }
     } catch (err) {
       console.error('Failed to fetch posts:', err);
@@ -51,29 +63,10 @@ const PostFeed = () => {
     }
   }, [channelId, token, page, hasMore, isLoading]);
 
-  // 무한 스크롤을 위한 IntersectionObserver 설정
-  const lastPostElementRef = useCallback(
-    (node) => {
-      if (isLoading) return;
-      if (observer.current) observer.current.disconnect(); // 기존 observer 해제
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          fetchPosts(); // 페이지 끝에 도달하면 추가 포스트 로드
-        }
-      });
-
-      if (node) observer.current.observe(node); // 마지막 포스트 요소를 관찰
-    },
-    [isLoading, hasMore, fetchPosts],
-  );
-
-  // 컴포넌트 마운트 시 처음 12개 포스트 불러오기
   useEffect(() => {
     fetchPosts();
-  }, []); // 페이지가 처음 로드될 때 한 번만 실행
+  }, []);
 
-  // YouTube 플레이어 재생/일시정지 처리
   const handlePlayPause = (videoId, postId) => {
     if (
       currentVideoId === videoId &&
@@ -102,7 +95,6 @@ const PostFeed = () => {
     }
   };
 
-  // YouTube 플레이어 상태 변화를 처리하는 함수
   const handleStateChange = (event) => {
     if (event.data === 1) {
       setIsPlaying(true);
@@ -114,7 +106,7 @@ const PostFeed = () => {
   const handleCreatePost = async (newPostData) => {
     try {
       const createdPost = await createPost(newPostData, token);
-      setPosts((prevPosts) => [createdPost, ...prevPosts]); // 새로운 포스트를 배열 앞에 추가
+      setPosts((prevPosts) => [createdPost, ...prevPosts]);
     } catch (err) {
       console.error('Failed to create post:', err);
       setError('게시글 생성에 실패했습니다.');
@@ -139,6 +131,7 @@ const PostFeed = () => {
             </div>
           ))}
         </PostGrid>
+        {isLoading && <LoadingMessage>포스트를 불러오는 중...</LoadingMessage>}
       </MainContent>
       <YouTubePlayerContainer>
         <YouTube
@@ -184,6 +177,13 @@ const PostGrid = styled.div`
 const ErrorMessage = styled.div`
   text-align: center;
   color: red;
+  font-size: 18px;
+  margin-top: 20px;
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  color: #6c5ce7;
   font-size: 18px;
   margin-top: 20px;
 `;
