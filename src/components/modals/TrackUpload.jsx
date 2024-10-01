@@ -1,7 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 const TrackUpload = () => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  useEffect(() => {
+    let interval = null;
+    if (uploadProgress < 100 && selectedFile) {
+      interval = setInterval(() => {
+        setUploadProgress((prevProgress) => {
+          const newProgress = prevProgress + 10;
+          if (newProgress >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return newProgress;
+        });
+      }, 300);
+    }
+    return () => clearInterval(interval);
+  }, [uploadProgress, selectedFile]);
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadProgress(0);
+    }
+  };
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -16,6 +43,12 @@ const TrackUpload = () => {
   return (
     <TrackUploadContent>
         <UploadArea onDrop={handleDrop} onDragOver={handleDragOver}>
+          {selectedFile && uploadProgress > 0 ? (
+            <ProgressContainer>
+              <ProgressBar progress={uploadProgress} />
+              <ProgressText>{uploadProgress}%</ProgressText>
+            </ProgressContainer>
+          ) : (
             <>
               <MainText>당신의 음원을 드래그 후, 드롭하여 주세요.</MainText>
               <UploadButton htmlFor="fileUpload">
@@ -24,9 +57,11 @@ const TrackUpload = () => {
               <input
                 id="fileUpload"
                 type="file"
+                onChange={handleFileChange}
                 style={{ display: 'none' }}
               />
             </>
+          )}
         </UploadArea>
     </TrackUploadContent>
   );
@@ -46,14 +81,6 @@ const TrackUploadContent = styled.div`
   caret-color: transparent;
 `;
 
-const UploadedContent = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 90%;
-  padding: 10px;
-`;
-
 const UploadArea = styled.div`
   background-color: #c0afe2;
   width: 95%;
@@ -65,6 +92,24 @@ const UploadArea = styled.div`
   align-items: center;
   padding: 20px;
   border: 2px dashed white;
+`;
+
+const ProgressContainer = styled.div`
+  width: 100%;
+  text-align: center;
+`;
+
+const ProgressBar = styled.div`
+  background-color: #bf94e4;
+  height: 25px;
+  width: ${(props) => props.progress}%!;
+  border-radius: 5px;
+  transition: width 0.2s;
+`;
+
+const ProgressText = styled.span`
+  margin-top: 10px;
+  font-size: 16px;
 `;
 
 const MainText = styled.p`
