@@ -155,7 +155,6 @@ const PlayPauseButton = styled.div`
 `;
 
 const AlbumInfo = styled.div`
-    padding: 5px;
     margin-left: 15px;
     text-align: left;
 `;
@@ -168,4 +167,5 @@ const AlbumTitle = styled.h3`
 const AlbumArtist = styled.p`
     font-size: 13px;
     color: #666;
+    margin: 3px 0;
 `;
