@@ -55,6 +55,21 @@ const ReactionCount = ({ postId }) => {
     }
   }, [postId]);
 
+  /* 추후 API 데이터 생성 후 테스트
+  useEffect(() => {
+    /* const loadReactions = async () => {
+      try {
+        const data = await fetchPostReactions(postId); // API 함수 호출
+        setLikes(data.likes.length);
+        setComments(data.comments.length);
+      } catch (error) {
+        console.error("Error loading reactions:", error);
+      }
+    };
+
+    loadReactions(); 
+  }, [postId]);*/
+
   return (
     <MetricsContainer>
       <MetricItem>
