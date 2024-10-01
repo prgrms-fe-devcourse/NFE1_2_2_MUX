@@ -81,6 +81,14 @@ const Card = styled.div`
   cursor: pointer;
   overflow: hidden;
   border: 1px solid #e0e0e0;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease; // 트랜지션 추가
+
+  &:hover {
+    transform: translateY(-10px); // 약간 떠오르는 효과
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); // 그림자 강화
+  }
 `;
 
 const CardHeader = styled.div`
