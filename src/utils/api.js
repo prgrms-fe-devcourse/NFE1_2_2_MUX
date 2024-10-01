@@ -90,7 +90,7 @@ export const updateUser = async (userId, token, updatedData) => {
   }
 };
 
-// 포스트의 좋아요 및 댓글 수 가져오기
+// 포스트의 좋아요 및 댓글 수를 가져오는 API
 export const fetchPostReactions = async (postId) => {
   try {
     const response = await axios.get(`${API_HOST}/posts/${postId}`);
