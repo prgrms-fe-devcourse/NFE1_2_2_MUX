@@ -72,14 +72,14 @@ const AlbumCurationCard = () => {
                                 alt="Play/Pause Button"
                             />
                         </PlayPauseButton>
-                    </PlayPauseButtonContainer>
-                    {playingVideoId === album.videoId && (
+                        {playingVideoId === album.videoId && (
                         <YouTube
                             videoId={album.videoId}
                             opts={youtubeOptions}
                             onReady={onPlayerReady}
                         />
                     )}
+                    </PlayPauseButtonContainer>
                     <AlbumInfo>
                         <AlbumTitle>{album.title}</AlbumTitle>
                         <AlbumArtist>{album.artist}</AlbumArtist>
