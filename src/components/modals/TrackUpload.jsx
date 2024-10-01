@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ImageChangeIcon from '../../assets/icons/image-change.png';
+import defaultAlbumImage from '../../assets/images/default-album.png';
 
 const TrackUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [showUploadedContent, setShowUploadedContent] = useState(false);
-  const [selectedAlbumImage, setSelectedAlbumImage] = useState(
-    'https://via.placeholder.com/400x400',
-  );
+  const [selectedAlbumImage, setSelectedAlbumImage] =
+    useState(defaultAlbumImage);
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
   const [imageErrorMessage, setImageErrorMessage] = useState('');
 
@@ -123,7 +123,9 @@ const TrackUpload = () => {
               {imageErrorMessage && (
                 <ImageErrorText>{imageErrorMessage}</ImageErrorText>
               )}
-              <ImageInfoText>지원 파일 형식: JPEG, PNG (최대 5MB)</ImageInfoText>
+              <ImageInfoText>
+                지원 파일 형식: JPEG, PNG (최대 5MB)
+              </ImageInfoText>
             </AlbumSection>
           </LeftSection>
 
