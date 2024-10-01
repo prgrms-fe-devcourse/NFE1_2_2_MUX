@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import ImageChangeIcon from '../../assets/icons/image-change.png';
+import playButtonIcon from '../../assets/icons/play-button.png';
+import stopButtonIcon from '../../assets/icons/stop-button.png';
 import defaultAlbumImage from '../../assets/images/default-album.png';
 
 const TrackUpload = () => {
@@ -33,6 +35,15 @@ const TrackUpload = () => {
     'audio/wma',
   ];
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const audioRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const intervalRef = useRef(null);
+
   useEffect(() => {
     let interval = null;
     if (uploadProgress < 100 && selectedFile) {
@@ -50,6 +61,43 @@ const TrackUpload = () => {
     }
     return () => clearInterval(interval);
   }, [uploadProgress, selectedFile]);
+
+  useEffect(() => {
+    const updateProgress = () => {
+      if (audioRef.current && !isDragging) {
+        const { currentTime, duration } = audioRef.current;
+        setCurrentTime(currentTime);
+        setAudioProgress((currentTime / duration) * 100);
+        setAudioDuration(duration);
+      }
+    };
+
+    if (isPlaying) {
+      intervalRef.current = setInterval(updateProgress, 1000);
+    }
+
+    return () => {
+      clearInterval(intervalRef.current);
+    };
+  }, [isPlaying, isDragging]);
+
+  const handlePlayPause = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -113,6 +161,38 @@ const TrackUpload = () => {
     setShowUploadedContent(true);
   };
 
+  const handleMouseDown = (event) => {
+    setIsDragging(true);
+    handleSeek(event);
+  };
+
+  const handleMouseMove = (event) => {
+    if (isDragging) {
+      handleSeek(event);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleAudioEnd = () => {
+    setIsPlaying(false);
+  };
+
+  const handleSeek = (event) => {
+    const progressBar = progressBarRef.current;
+    const rect = progressBar.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const seekTime = Math.min(
+      (offsetX / rect.width) * audioDuration,
+      audioDuration,
+    );
+    audioRef.current.currentTime = seekTime;
+    setCurrentTime(seekTime);
+    setAudioProgress((seekTime / audioDuration) * 100);
+  };
+
   return (
     <TrackUploadContent>
       {showUploadedContent ? (
@@ -143,6 +223,41 @@ const TrackUpload = () => {
                 지원 파일 형식: JPEG, PNG (최대 5MB)
               </ImageInfoText>
             </AlbumSection>
+
+            <AudioControls>
+              <ProgressBarContainer
+                ref={progressBarRef}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}>
+                <ProgressBarFill style={{ width: `${audioProgress}%` }} />
+                <ProgressCircle style={{ left: `${audioProgress}%` }} />
+              </ProgressBarContainer>
+              <TimeDisplay>
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(audioDuration)}</span>
+              </TimeDisplay>
+              <PlayPauseButton onClick={handlePlayPause}>
+                <img
+                  src={isPlaying ? stopButtonIcon : playButtonIcon}
+                  alt="Play/Pause Button"
+                />
+              </PlayPauseButton>
+              <AudioPlayer
+                ref={audioRef}
+                onLoadedMetadata={() =>
+                  setAudioDuration(audioRef.current.duration)
+                }
+                onEnded={handleAudioEnd}
+                controls>
+                <source
+                  src={selectedFile ? URL.createObjectURL(selectedFile) : ''}
+                  type={selectedFile ? selectedFile.type : ''}
+                />
+                브라우저에서 오디오를 재생할 수 없습니다.
+              </AudioPlayer>
+            </AudioControls>
           </LeftSection>
 
           <RightSection>
@@ -293,6 +408,66 @@ const ImageInfoText = styled.p`
   color: gray;
   font-size: 12px;
   margin-top: -10px;
+`;
+
+const AudioControls = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+  margin-top: -10px;
+`;
+
+const ProgressBarContainer = styled.div`
+  width: 100%;
+  height: 8px;
+  background-color: #c0bfc3;
+  border-radius: 1px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+`;
+
+const ProgressBarFill = styled.div`
+  height: 100%;
+  background-color: #3f3f44;
+  border-radius: 5px;
+`;
+
+const ProgressCircle = styled.div`
+  width: 15px;
+  height: 15px;
+  background-color: #3f3f44;
+  border-radius: 50%;
+  position: absolute;
+  top: -4px;
+  transform: translateX(-50%);
+`;
+
+const TimeDisplay = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  margin-bottom: 0;
+  color: #666;
+`;
+
+const PlayPauseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: -5px;
+  img {
+    width: 40px;
+    height: 40px;
+  }
+`;
+
+const AudioPlayer = styled.audio`
+  width: 80%;
+  margin: 0;
+  display: none;
 `;
 
 const RightSection = styled.div`
