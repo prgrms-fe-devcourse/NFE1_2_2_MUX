@@ -90,6 +90,41 @@ export const updateUser = async (userId, token, updatedData) => {
   }
 };
 
+// 포스트 작성 API 호출
+export const createPost = async (formData, token) => {
+  try {
+    const response = await axios.post('/api/posts/create', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};
+
+// 비밀번호 업데이트 함수
+export const updatePassword = async (newPassword, token) => {
+  try {
+    const response = await axios.put(
+      `/api/settings/update-password`,
+      { password: newPassword },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // JWT 토큰 추가
+        },
+      },
+    );
+    return response.data; // 응답 데이터 반환
+  } catch (error) {
+    console.error('Error updating password:', error);
+    throw error; // 에러 던지기
+  }
+};
+
 // 특정 포스트 상세 정보 가져오기
 export const getPostDetails = async (postId, token) => {
   try {
