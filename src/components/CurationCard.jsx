@@ -29,7 +29,7 @@ const dummyPosts = [
     },
 ];
 
-const CurationCard = () => {
+const AlbumCurationCard = () => {
     const [playingVideoId, setPlayingVideoId] = useState(null);
     const [player, setPlayer] = useState(null);
 
@@ -52,6 +52,12 @@ const CurationCard = () => {
         }
     };
 
+    const youtubeOptions = {
+        height: '0',
+        width: '0',
+        playerVars: { autoplay: 1 },
+    };
+
     return (
         <CardContainer>
             {dummyPosts.map((album) => (
@@ -59,8 +65,6 @@ const CurationCard = () => {
                     <AlbumCover src={album.coverUrl} alt={album.title} />
                     <PlayPauseButtonContainer>
                         <PlayPauseButton
-                            onMouseEnter={() => handleMouseEnter(album._id)}
-                            onMouseLeave={() => handleMouseLeave(album._id)}
                             onClick={() => handlePlayPause(album.videoId)}
                         >
                             <img
@@ -72,7 +76,7 @@ const CurationCard = () => {
                     {playingVideoId === album.videoId && (
                         <YouTube
                             videoId={album.videoId}
-                            opts={{ height: '0', width: '0', playerVars: { autoplay: 1 } }}
+                            opts={youtubeOptions}
                             onReady={onPlayerReady}
                         />
                     )}
@@ -86,8 +90,9 @@ const CurationCard = () => {
     );
 };
 
-export default CurationCard;
+export default AlbumCurationCard;
 
+// Styled Components
 const CardContainer = styled.div`
     display: flex; /* 플렉스 박스를 사용하여 카드 배열 */
     flex-wrap: wrap; /* 여러 카드가 자동으로 줄 바꿈 */
@@ -157,7 +162,7 @@ const AlbumInfo = styled.div`
 
 const AlbumTitle = styled.h3`
     font-size: 14px;
-    margin: 0px 0;
+    margin: 0;
 `;
 
 const AlbumArtist = styled.p`
