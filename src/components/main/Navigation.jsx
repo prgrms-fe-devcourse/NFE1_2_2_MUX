@@ -4,7 +4,7 @@ import HomeIcon from '../../assets/icons/Home.png';
 import CurationArtistIcon from '../../assets/icons/CurationArtist.png';
 import PostFeedIcon from '../../assets/icons/PostFeed.png';
 import BellIcon from '../../assets/icons/Bell.png';
-import DefaultProfileImage from '../../assets/images/DefaultProfile.png';
+import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
 import UploadModal from '../modals/UploadModal'; // UploadModal 컴포넌트 가져오기
 
@@ -27,7 +27,7 @@ const Navigation = () => {
         {/* 네비게이션 바 섹션 */}
         <Navbar>
           {/* 홈 아이콘 */}
-          <NavItem href="/main"> 
+          <NavItem href="/main">
             <img src={HomeIcon} alt="Home" />
           </NavItem>
           {/* 큐레이션 및 아티스트 트랙 아이콘 */}
@@ -44,21 +44,23 @@ const Navigation = () => {
         <SearchUploadContainer>
           {/* 검색 바 섹션 */}
           <SearchBar>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="검색"
               value={searchTerm} // 입력값을 상태로 연결
               onChange={(e) => setSearchTerm(e.target.value)} // 입력값 변경 시 상태 업데이트
             />
             {/* 검색결과창으로 이동 */}
             <a href={`/search/${searchTerm}`}>
-              <img className='search' src={SearchIcon} alt="돋보기" />
-            </a> 
+              <img className="search" src={SearchIcon} alt="돋보기" />
+            </a>
           </SearchBar>
 
           {/* 업로드 버튼 */}
           <Upload>
-            <RoundButton onClick={openModal}> {/* 버튼 클릭 시 모달 열기 */}
+            <RoundButton onClick={openModal}>
+              {' '}
+              {/* 버튼 클릭 시 모달 열기 */}
               <a>Upload</a>
             </RoundButton>
           </Upload>
@@ -70,13 +72,13 @@ const Navigation = () => {
           <div className="title">칭호 없음</div>
 
           {/* 프로필 이미지*/}
-          <a href="/usepage"> 
-            <img className='profile' src={DefaultProfileImage} alt="프로필" />
+          <a href="/usepage">
+            <img className="profile" src={DefaultProfileImage} alt="프로필" />
           </a>
 
           {/* 알림 아이콘 */}
           <a href="/notifications">
-            <img className='notification' src={BellIcon} alt="알림" />
+            <img className="notification" src={BellIcon} alt="알림" />
           </a>
         </ProfileSection>
       </HeaderContainer>
@@ -141,10 +143,10 @@ const SearchUploadContainer = styled.div`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  background-color: #D9D9D9;
+  background-color: #d9d9d9;
   border-radius: 2px;
   padding: 5px;
-  
+
   img.search {
     width: 20px;
     height: 20px;
@@ -197,7 +199,7 @@ const ProfileSection = styled.div`
     align-items: center;
     padding: 10px 30px;
     width: 200px;
-    background: #EDE4DB;
+    background: #ede4db;
     border-radius: 35px;
     font-size: 14px;
     color: #474150;
@@ -231,6 +233,6 @@ const ModalBackground = styled.div`
 
 const ModalContainer = styled.div`
   position: fixed;
-  z-index: 1000; 
+  z-index: 1000;
   padding: 20px;
 `;

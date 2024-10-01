@@ -41,7 +41,8 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #f0f0f0;
+  margin-top: 50px;
+  /* background-color: #f0f0f0; */
 
   @media (max-width: 768px) {
     padding: 20px;
@@ -50,7 +51,7 @@ const Container = styled.div`
 
 const Nav = styled.nav`
   margin-bottom: 20px;
-  margin-top: 30px;
+  margin-top: 50px;
 
   @media (max-width: 768px) {
     margin-top: 10px;
