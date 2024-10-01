@@ -74,6 +74,7 @@ const Card = styled.div`
   width: 340px;
   height: 500px;
   margin: 15px;
+  border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   display: flex;
