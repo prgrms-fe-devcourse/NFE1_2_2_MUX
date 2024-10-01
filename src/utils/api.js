@@ -98,6 +98,8 @@ export const fetchPostReactions = async (postId) => {
   } catch (error) {
     console.error('Error fetching post reactions:', error);
     throw error; // 에러를 호출한 곳에서 처리할 수 있도록 throw
+  }
+};
 
 // 포스트 작성 API 호출
 export const createPost = async (formData, token) => {
