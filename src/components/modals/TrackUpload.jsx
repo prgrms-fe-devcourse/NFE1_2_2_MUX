@@ -11,10 +11,12 @@ const TrackUpload = () => {
   const [selectedAlbumImage, setSelectedAlbumImage] =
     useState(defaultAlbumImage);
   const [songTitle, setSongTitle] = useState('');
+  const [songDescription, setSongDescription] = useState('');
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
   const [imageErrorMessage, setImageErrorMessage] = useState('');
 
   const maxTitleCharLimit = 20;
+  const maxDescriptionCharLimit = 100;
 
   const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024;
   const SUPPORTED_AUDIO_FORMATS = [
@@ -157,6 +159,19 @@ const TrackUpload = () => {
                 {songTitle.length}/{maxTitleCharLimit}자
               </TitleCharCount>
             </TitleField>
+
+            <InputField>
+              <InputLabel>음원 소개</InputLabel>
+              <InputArea
+                value={songDescription}
+                placeholder="소개를 입력해주세요"
+                onChange={(e) => setSongDescription(e.target.value)}
+                maxLength={maxDescriptionCharLimit}
+              />
+              <CharCount>
+                {songDescription.length}/{maxDescriptionCharLimit}자
+              </CharCount>
+            </InputField>
           </RightSection>
         </UploadedContent>
       ) : uploadComplete ? (
@@ -320,9 +335,52 @@ const TextInput = styled.input`
 const TitleCharCount = styled.p`
   position: absolute;
   right: 30px;
-  top: 134px;
+  top: 99px;
   font-size: 12px;
   color: white;
+`;
+
+const InputField = styled.div`
+  width: 100%;
+  background-color: #c0afe2;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const InputLabel = styled.span`
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid white;
+`;
+
+const InputArea = styled.textarea`
+  padding: 10px;
+  padding-bottom: 55px;
+  font-size: 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #c0afe2;
+  color: white;
+  height: 200px;
+  resize: none;
+
+  &::placeholder {
+    color: white;
+  }
+`;
+
+const CharCount = styled.p`
+  font-size: 12px;
+  color: white;
+  text-align: right;
+  margin-top: -25px;
+  margin-right: 10px;
 `;
 
 const CompletedSection = styled.div`
