@@ -79,10 +79,10 @@ const PostUpload = ({ onPostSuccess }) => {
       player.pauseVideo();
       setIsPlaying(false);
     } else {
+      setIsPlaying(true);
       if (player) {
         player.loadVideoById(album.videoId);
         player.playVideo();
-        setIsPlaying(true);
       }
       setSelectedTrack(album);
     }
@@ -143,7 +143,7 @@ const PostUpload = ({ onPostSuccess }) => {
     const formData = new FormData();
     formData.append('title', JSON.stringify(postData));
     formData.append('channelId', "66fb541ced2d3c14a64eb9ee");
-    // 첫 번째 앨범의 커버 이미지 URL을 사용
+
     if (albums[0]?.coverUrl) {
       formData.append('image', albums[0].coverUrl);
     }
@@ -154,7 +154,6 @@ const PostUpload = ({ onPostSuccess }) => {
   
       alert('포스트가 성공적으로 업로드되었습니다!');
   
-      // Reset form state
       setAlbums([]);
       setPostTitle('');
       setDescription('');
