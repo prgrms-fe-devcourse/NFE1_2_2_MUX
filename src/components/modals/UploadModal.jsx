@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import CloseIcon from '../../assets/icons/Close.png'
 import TrackIcon from '../../assets/icons/Track.png';
 import PostIcon from '../../assets/icons/Post.png';
+import PostUpload from './PostUpload';
+import TrackUpload from './TrackUpload';
 
 const UploadModal = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('track');
@@ -38,13 +40,9 @@ const UploadModal = ({ onClose }) => {
 
       {/* Modal Content */}
       <Content>
-        
+        {activeTab === 'track'? <TrackUpload/> : <PostUpload/>}
       </Content>
 
-      {/* Submit Button */}
-      <Footer>
-        <SubmitButton src='/'>게시하기</SubmitButton>
-      </Footer>
     </ModalContainer>
   );
 };
@@ -120,26 +118,4 @@ const Content = styled.div`
   background-color: #fff;
   flex-grow: 1; 
   overflow-y: auto;
-`;
-
-const Footer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 10px 25px;
-  background-color: #fff;
-`;
-
-const SubmitButton = styled.button`
-  padding: 5px 20px;
-  background-color: #000;
-  color: white;
-  border: none;
-  border-radius: 13px;
-  cursor: pointer;
-  font-size: 14px;
-
-  &:hover {
-    background-color: #ccc;
-    color: black;
-  }
 `;

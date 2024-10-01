@@ -91,6 +91,7 @@ const Dashboard = () => {
   const openModalHandler = () => setIsModalOpen(true);
   const closeModalHandler = () => setIsModalOpen(false);
 
+
   if (isLoading) return <LoadingMessage>Loading...</LoadingMessage>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!user)

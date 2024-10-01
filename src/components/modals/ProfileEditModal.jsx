@@ -1,8 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { uploadProfileImage, updateUser } from '../../utils/api';
+import UpdatePasswordModal from '../modals/UpdatePasswordModal';
 
 const ProfileEditModal = ({ user, token, onClose, setUser }) => {
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const openPasswordModalHandler = () => {
+    console.log('비밀번호 모달 열기');
+    setIsPasswordModalOpen(true);
+  };
+  const closePasswordModalHandler = () => {
+    console.log('비밀번호 모달 닫기');
+    setIsPasswordModalOpen(false);
+  };
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -172,6 +183,9 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             <FixedLabel>비밀번호</FixedLabel>
           </InputWrapper>
         </StyledForm>
+                  <UpdatePasswordButton onClick={openPasswordModalHandler}>
+            비밀번호 수정
+          </UpdatePasswordButton>
 
         <SectionTitle>추가 정보</SectionTitle>
         <Divider />
@@ -200,6 +214,13 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
 
         <SaveButton onClick={handleSaveChanges}>회원 정보 수정</SaveButton>
       </ModalContent>
+      {isPasswordModalOpen && (
+        <UpdatePasswordModal
+          isOpen={isPasswordModalOpen}
+          token={localStorage.getItem('token')}
+          onClose={closePasswordModalHandler}
+        />
+      )}
     </ModalOverlay>
   );
 };
@@ -344,6 +365,20 @@ const FixedLabel = styled.span`
   padding: 0 5px;
   pointer-events: none;
   z-index: 1;
+`;
+
+const UpdatePasswordButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #6c5dd3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #5a4bbd;
+  }
 `;
 
 const SaveButton = styled.button`
