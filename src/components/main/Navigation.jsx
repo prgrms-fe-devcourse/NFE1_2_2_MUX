@@ -7,6 +7,7 @@ import BellIcon from '../../assets/icons/Bell.png';
 import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
 import UploadModal from '../modals/UploadModal'; // UploadModal 컴포넌트 가져오기
+import { Link } from 'react-router-dom';
 
 const Navigation = () => {
   const [searchTerm, setSearchTerm] = useState(''); // 검색어를 저장하는 상태
@@ -35,7 +36,7 @@ const Navigation = () => {
             <img src={CurationArtistIcon} alt="큐레이션 & 아티스트 트랙" />
           </NavItem>
           {/* 포스트 피드 아이콘 */}
-          <NavItem href="/postfeed">
+          <NavItem as={Link} to="/postfeed">
             <img src={PostFeedIcon} alt="포스트" />
           </NavItem>
         </Navbar>

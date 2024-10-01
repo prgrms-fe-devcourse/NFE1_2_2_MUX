@@ -124,3 +124,22 @@ export const updatePassword = async (newPassword, token) => {
     throw error; // 에러 던지기
   }
 };
+
+// 특정 채널의 포스트 목록을 가져오는 API
+export const getChannelPosts = async (
+  channelId,
+  offset = 0,
+  limit = 10,
+  token,
+) => {
+  try {
+    const response = await axios.get(`/api/posts/channel/${channelId}`, {
+      params: { offset, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching channel posts:', error);
+    throw error;
+  }
+};

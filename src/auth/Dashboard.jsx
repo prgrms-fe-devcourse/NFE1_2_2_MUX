@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import ProfileEditModal from '../components/modals/ProfileEditModal'; // 프로필 수정 모달 컴포넌트
-import PostCard from '../components/PostCard'; // 게시물 카드 컴포넌트
-import { getUserData } from '../utils/api'; // 사용자 데이터 가져오는 API 함수
-import UserCard from '../components/UserCard'; // 사용자 카드 컴포넌트
-import UserProfile from '../components/UserProfile'; // 사용자 프로필 컴포넌트
+import ProfileEditModal from '../components/modals/ProfileEditModal';
+import { getUserData } from '../utils/api';
+import UserCard from '../components/UserCard';
+import UserProfile from '../components/UserProfile';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -27,17 +26,14 @@ const Dashboard = () => {
       const parsedUser = JSON.parse(userData);
       console.log('Parsed user data from localStorage:', parsedUser);
 
-      // 사용자 ID 확인
       const userId = parsedUser.id || parsedUser._id;
       if (!userId) {
         throw new Error('User ID is missing');
       }
 
-      // 서버에서 최신 데이터 가져오기
       const freshUserData = await getUserData(userId, token);
       console.log('Fresh user data from server:', freshUserData);
 
-      // 서버 데이터로 상태와 로컬 스토리지를 업데이트
       const updatedUser = {
         ...parsedUser,
         ...freshUserData,
@@ -90,7 +86,6 @@ const Dashboard = () => {
   const openModalHandler = () => setIsModalOpen(true);
   const closeModalHandler = () => setIsModalOpen(false);
 
-
   if (isLoading) return <LoadingMessage>Loading...</LoadingMessage>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!user)
@@ -130,9 +125,8 @@ const Dashboard = () => {
       <EditProfileButton onClick={openModalHandler}>
         회원 정보 수정
       </EditProfileButton>
-      <PostCard />
-      <UserCard />
-      <UserProfile />
+      <UserCard user={user} />
+      <UserProfile user={user} />
       {isModalOpen && (
         <ProfileEditModal
           user={user}
@@ -147,7 +141,7 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-// Styled components
+// Styled components (변경 없음)
 const DashboardContainer = styled.div`
   padding: 40px;
   text-align: center;
