@@ -6,6 +6,7 @@ import PostCard from '../components/PostCard'; // 게시물 카드 컴포넌트
 import { getUserData } from '../utils/api'; // 사용자 데이터 가져오는 API 함수
 import UserCard from '../components/UserCard'; // 사용자 카드 컴포넌트
 import UserProfile from '../components/UserProfile'; // 사용자 프로필 컴포넌트
+import ReactionCount from '../components/ReactionCount'; // 리액션 카운트 컴포넌트
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -133,6 +134,7 @@ const Dashboard = () => {
       <PostCard />
       <UserCard />
       <UserProfile />
+      <ReactionCount />
       {isModalOpen && (
         <ProfileEditModal
           user={user}
