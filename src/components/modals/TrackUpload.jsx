@@ -10,8 +10,11 @@ const TrackUpload = () => {
   const [showUploadedContent, setShowUploadedContent] = useState(false);
   const [selectedAlbumImage, setSelectedAlbumImage] =
     useState(defaultAlbumImage);
+  const [songTitle, setSongTitle] = useState('');
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
   const [imageErrorMessage, setImageErrorMessage] = useState('');
+
+  const maxTitleCharLimit = 20;
 
   const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024;
   const SUPPORTED_AUDIO_FORMATS = [
@@ -140,7 +143,21 @@ const TrackUpload = () => {
             </AlbumSection>
           </LeftSection>
 
-          <RightSection></RightSection>
+          <RightSection>
+            <TitleField>
+              <TitleLabel>음원 제목</TitleLabel>
+              <TextInput
+                type="text"
+                placeholder="제목을 입력해주세요"
+                value={songTitle}
+                onChange={(e) => setSongTitle(e.target.value)}
+                maxLength={maxTitleCharLimit}
+              />
+              <TitleCharCount>
+                {songTitle.length}/{maxTitleCharLimit}자
+              </TitleCharCount>
+            </TitleField>
+          </RightSection>
         </UploadedContent>
       ) : uploadComplete ? (
         <CompletedSection>
@@ -269,6 +286,43 @@ const RightSection = styled.div`
   justify-content: flex-start;
   align-items: flex-start;
   width: 55%;
+`;
+
+const TitleField = styled.div`
+  width: 100%;
+  background-color: #c0afe2;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  flex-direction: row;
+`;
+
+const TitleLabel = styled.span`
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+`;
+
+const TextInput = styled.input`
+  padding: 5px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  margin-left: 10px;
+  background-color: #c0afe2;
+  color: white;
+
+  &::placeholder {
+    color: white;
+  }
+`;
+
+const TitleCharCount = styled.p`
+  position: absolute;
+  right: 30px;
+  top: 134px;
+  font-size: 12px;
+  color: white;
 `;
 
 const CompletedSection = styled.div`
