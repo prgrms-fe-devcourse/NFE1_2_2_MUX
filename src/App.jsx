@@ -13,14 +13,12 @@ const App = () => {
       <Navigation />
       </div>
       <Container>
-        {/* 네비게이션 버튼 */}
+
         <Nav>
           <NavLink to="/login">로그인</NavLink>
           <NavLink to="/signup">회원가입</NavLink>
           <NavLink to="/dashboard">대시보드</NavLink>
         </Nav>
-
-        {/* 페이지 라우팅 */}
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />

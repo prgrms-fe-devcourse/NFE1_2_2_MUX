@@ -6,10 +6,12 @@ import PostCard from '../components/PostCard'; // 게시물 카드 컴포넌트
 import { getUserData } from '../utils/api'; // 사용자 데이터 가져오는 API 함수
 import UserCard from '../components/UserCard'; // 사용자 카드 컴포넌트
 import UserProfile from '../components/UserProfile'; // 사용자 프로필 컴포넌트
+import UpdatePasswordModal from '../components/modals/UpdatePasswordModal';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -90,6 +92,9 @@ const Dashboard = () => {
   const openModalHandler = () => setIsModalOpen(true);
   const closeModalHandler = () => setIsModalOpen(false);
 
+  const openPasswordModalHandler = () => setIsPasswordModalOpen(true);
+  const closePasswordModalHandler = () => setIsPasswordModalOpen(false);
+
   if (isLoading) return <LoadingMessage>Loading...</LoadingMessage>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!user)
@@ -140,6 +145,16 @@ const Dashboard = () => {
           setUser={updateUserDetails}
         />
       )}
+      <UpdatePasswordButton onClick={openPasswordModalHandler}>
+        비밀번호 수정
+      </UpdatePasswordButton>
+      {isPasswordModalOpen && (
+        <UpdatePasswordModal
+          isOpen={isPasswordModalOpen} // 모달에 상태 전달
+          token={localStorage.getItem('token')}
+          onClose={closePasswordModalHandler}
+        />
+      )}
     </DashboardContainer>
   );
 };
@@ -171,6 +186,20 @@ const ProfileImage = styled.img`
 `;
 
 const EditProfileButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #6c5dd3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #5a4bbd;
+  }
+`;
+
+const UpdatePasswordButton = styled.button`
   margin-top: 20px;
   padding: 10px 20px;
   background-color: #6c5dd3;
