@@ -83,6 +83,17 @@ const TrackUpload = () => {
     setImageErrorMessage('');
   };
 
+  const handleAlbumCoverDelete = () => {
+    if (selectedAlbumImage === defaultAlbumImage) {
+      return;
+    }
+
+    const confirmDelete = window.confirm('앨범 이미지를 삭제하시겠습니까?');
+    if (confirmDelete) {
+      setSelectedAlbumImage(defaultAlbumImage);
+    }
+  };
+
   const handleDrop = (event) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
@@ -103,7 +114,7 @@ const TrackUpload = () => {
         <UploadedContent>
           <LeftSection>
             <AlbumSection>
-              <AlbumCover>
+              <AlbumCover onClick={handleAlbumCoverDelete}>
                 <img src={selectedAlbumImage} alt="앨범 이미지" />
               </AlbumCover>
               <CoverChangeContainer
