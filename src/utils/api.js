@@ -106,3 +106,21 @@ export const createPost = async (formData, token) => {
   }
 };
 
+// 비밀번호 업데이트 함수
+export const updatePassword = async (newPassword, token) => {
+  try {
+    const response = await axios.put(
+      `/api/settings/update-password`,
+      { password: newPassword },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // JWT 토큰 추가
+        },
+      },
+    );
+    return response.data; // 응답 데이터 반환
+  } catch (error) {
+    console.error('Error updating password:', error);
+    throw error; // 에러 던지기
+  }
+};
