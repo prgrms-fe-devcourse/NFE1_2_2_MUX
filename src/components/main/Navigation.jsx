@@ -124,11 +124,15 @@ const HeaderContainer = styled.header`
   justify-content: space-between;
   padding: 5px 10px;
   background-color: #f8f9fa;
+
+  @media (max-width: 768px) {
+    align-items: flex-start; /* 왼쪽 정렬 */
+  }
 `;
 
 const Logo = styled.div`
   img {
-    margin-right: 0px;
+    margin-right: 0;
     height: 40px;
   }
 `;
@@ -136,6 +140,10 @@ const Logo = styled.div`
 const Navbar = styled.nav`
   display: flex;
   gap: 20px;
+
+  @media (max-width: 768px) {
+    /* flex-wrap: wrap; 아이템이 많아지면 줄바꿈 */
+  }
 `;
 
 const NavItem = styled.a`
@@ -164,6 +172,7 @@ const SearchBar = styled.div`
   background-color: #d9d9d9;
   border-radius: 2px;
   padding: 5px;
+  width: 100%; /* 전체 폭 사용 */
 
   img.search {
     width: 20px;
@@ -182,6 +191,15 @@ const SearchBar = styled.div`
 
     &:focus {
       outline: none;
+    }
+
+    @media (max-width: 1005px) {
+      width: calc(100% - 30px); /* 1005px 이하에서 너비 줄이기 */
+      min-width: 150px; /* 최소 너비 설정 */
+    }
+
+    @media (max-width: 768px) {
+      width: 150px; /* 모바일에서는 최소 너비 */
     }
   }
 `;
@@ -211,16 +229,22 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: 15px;
 
+  /* @media (max-width: 768px) {
+    justify-content: space-between;
+    width: 100%; 
+  } */
+
   .title {
     display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 10px 30px;
-    width: 200px;
     background: #ede4db;
     border-radius: 35px;
     font-size: 14px;
     color: #474150;
+
+    @media (max-width: 790px) {
+      display: none; /* 790px 이하에서 사라짐 */
+    }
   }
 
   img {
@@ -230,9 +254,11 @@ const ProfileSection = styled.div`
   img.profile {
     width: 40px;
     height: 40px;
+    margin-left: 5px;
   }
 
   img.notification {
+    margin-left: 5px;
     width: 24px;
     height: 24px;
   }
