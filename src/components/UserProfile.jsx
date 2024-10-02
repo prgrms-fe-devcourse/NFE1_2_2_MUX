@@ -20,7 +20,7 @@ const UserProfileCard = ({ user, onNavigate }) => {
   }
 
   const handleCardClick = () => {
-    onNavigate(`/userpage/${_id}`);
+    onNavigate(`/user/${_id}`);
   };
 
   return (

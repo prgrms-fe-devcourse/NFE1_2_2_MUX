@@ -1,13 +1,23 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
 import Signup from './auth/Signup';
 import Login from './auth/Login';
 import Dashboard from './auth/Dashboard';
 import styled from 'styled-components';
 import Navigation from './components/main/Navigation';
 import PostFeed from './pages/PostFeed/PostFeed';
+import ProfilePage from '../src/profile/ProfilePage.jsx';
 
 const App = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   return (
     <Router>
       <div>
@@ -26,54 +36,47 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/postfeed" element={<PostFeed />} />
+          {/* 유저 페이지/마이페이지 */}
+          {user && (
+            <>
+              {/* 유저 카드를 클릭해서 이동할 때 /user/:userId 경로 */}
+              <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
+            </>
+          )}
         </Routes>
       </Container>
     </Router>
   );
 };
 
-export default App;
+// ProfilePageWrapper: userId와 로컬 유저 ID 비교 후 마이페이지 여부 설정
+const ProfilePageWrapper = ({ user }) => {
+  const { userId } = useParams(); // URL의 유저 ID 가져오기
+  const isMyPage = userId === user._id; // 유저 ID가 로컬 유저 ID와 같으면 true
+
+  return <ProfilePage user={user} isMyPage={isMyPage} />;
+};
+
 
 // Styled Components
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  margin-top: 50px;
-  /* background-color: #f0f0f0; */
-
-  @media (max-width: 768px) {
-    padding: 20px;
-  }
+  padding: 20px;
 `;
 
 const Nav = styled.nav`
+  display: flex;
+  justify-content: space-around;
   margin-bottom: 20px;
-  margin-top: 50px;
-
-  @media (max-width: 768px) {
-    margin-top: 10px;
-  }
 `;
 
 const NavLink = styled(Link)`
   padding: 10px 20px;
-  margin: 0 10px;
-  background-color: #bf94e4;
-  color: white;
+  color: #333;
   text-decoration: none;
-  border-radius: 5px;
-  font-size: 16px;
-  font-weight: bold;
 
   &:hover {
-    background-color: #d3d3d3;
-  }
-
-  @media (max-width: 768px) {
-    padding: 8px 16px;
-    font-size: 14px;
+    background-color: #eee;
   }
 `;
+
+export default App;
