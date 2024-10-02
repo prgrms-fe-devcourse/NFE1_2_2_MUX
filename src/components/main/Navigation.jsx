@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import HomeIcon from '../../assets/icons/Home.png';
 import CurationArtistIcon from '../../assets/icons/CurationArtist.png';
@@ -6,23 +7,41 @@ import PostFeedIcon from '../../assets/icons/PostFeed.png';
 import BellIcon from '../../assets/icons/Bell.png';
 import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
-import UploadModal from '../modals/UploadModal'; // UploadModal 컴포넌트 가져오기
+import LogoImage from '../../assets/images/Logo.png';
+import UploadModal from '../modals/UploadModal'; 
 import { Link } from 'react-router-dom';
 
 const Navigation = () => {
-  const [searchTerm, setSearchTerm] = useState(''); // 검색어를 저장하는 상태
-  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
+  const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
+  const [user, setUser] = useState(null); // 유저 상태
+  const navigate = useNavigate(); // useNavigate 훅 사용
 
   // 모달 열기/닫기 함수
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  // 로컬 스토리지에서 유저 정보 가져오기
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser)); // 로컬 스토리지에서 가져온 유저 정보 파싱
+    }
+  }, []);
+
+  // 프로필 클릭 시 해당 유저 페이지로 이동
+  const handleProfileClick = () => {
+    if (user && user._id) {
+      navigate(`/userpage/${user._id}`); // 유저의 _id를 기반으로 이동
+    }
+  };
 
   return (
     <>
       <HeaderContainer>
         {/* 로고 섹션 */}
         <Logo>
-          <img src="/assets/images/logo.png" alt="로고" />
+          <img src={LogoImage} alt="로고" />
         </Logo>
 
         {/* 네비게이션 바 섹션 */}
@@ -41,17 +60,15 @@ const Navigation = () => {
           </NavItem>
         </Navbar>
 
-        {/* 검색창 및 업로드 버튼 컨테이너 */}
+        {/* 검색창 및 업로드 버튼 섹션 */}
         <SearchUploadContainer>
-          {/* 검색 바 섹션 */}
           <SearchBar>
             <input
               type="text"
               placeholder="검색"
-              value={searchTerm} // 입력값을 상태로 연결
-              onChange={(e) => setSearchTerm(e.target.value)} // 입력값 변경 시 상태 업데이트
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            {/* 검색결과창으로 이동 */}
             <a href={`/search/${searchTerm}`}>
               <img className="search" src={SearchIcon} alt="돋보기" />
             </a>
@@ -60,8 +77,6 @@ const Navigation = () => {
           {/* 업로드 버튼 */}
           <Upload>
             <RoundButton onClick={openModal}>
-              {' '}
-              {/* 버튼 클릭 시 모달 열기 */}
               <a>Upload</a>
             </RoundButton>
           </Upload>
@@ -69,12 +84,15 @@ const Navigation = () => {
 
         {/* 프로필 및 알림 섹션 */}
         <ProfileSection>
-          {/* 사용자의 칭호 */}
           <div className="title">칭호 없음</div>
 
-          {/* 프로필 이미지*/}
-          <a href="/usepage">
-            <img className="profile" src={DefaultProfileImage} alt="프로필" />
+          {/* 프로필 클릭 시 유저 페이지로 이동 */}
+          <a onClick={handleProfileClick}>
+            <img
+              className="profile"
+              src={user?.image ? user.image : DefaultProfileImage}
+              alt="프로필"
+            />
           </a>
 
           {/* 알림 아이콘 */}
@@ -87,11 +105,9 @@ const Navigation = () => {
       {/* 업로드 모달 */}
       {isModalOpen && (
         <>
-          {/* 모달 배경 */}
           <ModalBackground />
-          {/* 모달 컨테이너 */}
           <ModalContainer>
-            <UploadModal onClose={closeModal} /> {/* UploadModal 컴포넌트 */}
+            <UploadModal onClose={closeModal} />
           </ModalContainer>
         </>
       )}
@@ -106,12 +122,13 @@ const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 20px;
+  padding: 5px 10px;
   background-color: #f8f9fa;
 `;
 
 const Logo = styled.div`
   img {
+    margin-right: 0px;
     height: 40px;
   }
 `;
