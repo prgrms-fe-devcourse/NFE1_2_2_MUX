@@ -37,12 +37,7 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/postfeed" element={<PostFeed />} />
           {/* 유저 페이지/마이페이지 */}
-          {user && (
-            <>
-              {/* 유저 카드를 클릭해서 이동할 때 /user/:userId 경로 */}
-              <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
-            </>
-          )}
+          <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
         </Routes>
       </Container>
     </Router>
@@ -53,7 +48,7 @@ const ProfilePageWrapper = ({ user }) => {
   const { userId } = useParams(); // URL에서 유저 ID 가져오기
 
   const [userData, setUserData] = useState(null);
-  const isMyPage = userId === user._id; // 로컬 유저 ID와 비교
+  const isMyPage = userId === user?._id; // 로컬 유저 ID와 비교
 
   useEffect(() => {
     const fetchUserData = async () => {

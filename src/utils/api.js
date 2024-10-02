@@ -27,6 +27,28 @@ export const login = async (email, password) => {
   return response.data;
 };
 
+// 로그아웃 API 호출 함수
+export const logout = async () => {
+  try {
+    // 로그아웃 요청 보내기
+    const response = await fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('로그아웃 실패');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('로그아웃 중 오류 발생:', error);
+    throw error;
+  }
+};
+
 // 사용자 정보 가져오기 API 호출
 export const getUserData = async (userId, token) => {
   if (!userId) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';  // useNavigate 추가
 import styled from 'styled-components';
-import { getUserData, fetchPostsByAuthor } from '../utils/api';
+import { getUserData, fetchPostsByAuthor, logout } from '../utils/api';  // 기존 API 사용
 import PostCard from '../components/PostCard';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
@@ -22,14 +22,12 @@ const ProfilePageWrapper = ({ user, token }) => {
           console.error('유저 정보 불러오기 실패:', err);
           setError('유저 정보를 불러오는 데 실패했습니다.');
         }
+      } else {
+        setUserData(user);
       }
     };
 
-    if (!isMyPage) {
-      fetchUserData();
-    } else {
-      setUserData(user); // 마이페이지인 경우 userData를 user로 설정
-    }
+    fetchUserData();
   }, [userId, isMyPage, token, user]);
 
   if (error) {
@@ -40,14 +38,14 @@ const ProfilePageWrapper = ({ user, token }) => {
     return <p>유저 정보를 불러오는 중...</p>;
   }
 
-  return <ProfilePage user={userData} isMyPage={isMyPage} />;
+  return <ProfilePage user={userData} isMyPage={isMyPage} token={token} />;
 };
 
-const ProfilePage = ({ user, isMyPage }) => {
+const ProfilePage = ({ user, isMyPage, token }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
-  const [isEditModalOpen, setEditModalOpen] = useState(false); // 모달 상태 관리
-
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const navigate = useNavigate();  // useNavigate 훅 사용
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -65,14 +63,39 @@ const ProfilePage = ({ user, isMyPage }) => {
     loadPosts();
   }, [user]);
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      // 로그아웃 요청 처리
+      await logout();
+
+      // 로컬 스토리지에서 로그인 상태 정보 삭제
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+
+      // 로그인 페이지로 리다이렉션
+      navigate('/login');
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   if (!user) {
     return <p>사용자 정보를 불러오는 중입니다...</p>;
   }
 
-  // fullName이 문자열인지 확인하고 JSON.parse 실행
-  const userFullName = typeof user.fullName === 'string' 
-    ? JSON.parse(user.fullName) 
-    : user.fullName || {};
+  let userFullName = {};
+  try {
+    userFullName = typeof user.fullName === 'string' 
+      ? JSON.parse(user.fullName) 
+      : user.fullName || {};
+  } catch (err) {
+    console.error('fullName 파싱 실패:', err);
+  }
 
   return (
     <Container>
@@ -80,11 +103,13 @@ const ProfilePage = ({ user, isMyPage }) => {
         <ProfileImage src={user?.image || defaultProfileImage} alt="프로필" />
         <ProfileInfo>
           <ProfileHeader>
-          <h2>{userFullName.nickName || '이름 없음'}</h2>
-                          {/* 마이페이지일 때만 수정 버튼 노출 */}
-                    {isMyPage && (
-            <EditButton onClick={() => setEditModalOpen(true)}>✏️ 회원정보 수정</EditButton>
-          )}
+            <h2>{userFullName.nickName || '이름 없음'}</h2>
+            {isMyPage && (
+              <>
+                <EditButton onClick={() => setEditModalOpen(true)}>✏️ 회원정보 수정</EditButton>
+                <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>🚪 로그아웃</LogoutButton>
+              </>
+            )}
           </ProfileHeader>
           <Role><div>{user.role || '역할 없음'}</div></Role>
           <Bio>
@@ -112,21 +137,19 @@ const ProfilePage = ({ user, isMyPage }) => {
         </MusicSection>
       </Content>
 
-      {/* 모달 창: isEditModalOpen이 true일 때만 보임 */}
       {isEditModalOpen && (
         <ProfileEditModal 
           user={user} 
-          closeModal={() => setEditModalOpen(false)} // 모달 닫기 함수 전달
+          closeModal={() => setEditModalOpen(false)} 
         />
       )}
     </Container>
   );
 };
 
-export default ProfilePageWrapper;
+export default ProfilePageWrapper; 
 
 // Styled Components
-
 const Container = styled.div`
   padding: 20px;
   max-width: 1200px;
@@ -153,6 +176,7 @@ const ProfileImage = styled.img`
 const ProfileInfo = styled.div`
   align-items: center;
 `;
+
 const ProfileHeader = styled.div`
   align-items: center;
   display: flex;
@@ -164,26 +188,43 @@ const ProfileHeader = styled.div`
     margin: 3px 3px;
   }
 
-  /* 닉네임과 회원정보 수정 버튼이 함께 정렬되도록 */
   position: relative;
 `;
 
 // 회원정보 수정 버튼 스타일
 const EditButton = styled.button`
   padding: 5px 10px;
-  background-color: transparent; /* 배경색 투명 */
-  color: #808080; /* 글씨색 회색 */
+  background-color: transparent;
+  color: #808080;
   border: none;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  position: absolute; /* 닉네임에서 떨어지도록 위치 조정 */
+  position: absolute;
   left: 180px;
   top: 30px;
 
   &:hover {
-    color: #a9a9a9; /* hover 시 조금 더 밝은 회색 */
+    color: #a9a9a9;
   }
 `;
+
+// 로그아웃 버튼 스타일
+const LogoutButton = styled.button`
+  padding: 5px 10px;
+  background-color: transparent;
+  color: #808080; /* 빨간색 글씨 */
+  border: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+  position: absolute;
+  left: 180px;
+  top: 10px;
+
+  &:hover {
+    color: #a9a9a9;
+  }
+`;
+
 const Role = styled.div`
   text-align: center;
   font-weight: 700;
@@ -227,7 +268,7 @@ const Content = styled.div`
 
 const PostSection = styled.div`
   flex: 2;
-  padding-right: 20px; /* 선과 포스트 사이 간격 */
+  padding-right: 20px;
   position: relative;
 
   h2 {
@@ -242,7 +283,7 @@ const PostSection = styled.div`
 const MusicSection = styled.div`
   flex: 1;
   min-width: 250px;
-  padding-left: 20px; /* 선과 음원 텍스트 사이 간격 추가 */
+  padding-left: 20px;
 
   h2 {
     font-size: 20px;
@@ -253,17 +294,17 @@ const MusicSection = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding-left: 0; /* 화면이 줄어들 때 간격 제거 */
-    border-left: none; /* 화면이 작아질 때 선 제거 */
+    padding-left: 0;
+    border-left: none;
   }
 `;
 
 const Separator = styled.div`
   width: 1px;
-  background-color: #000000; /* 선 색상 */
-  height: auto; /* 부모 높이에 맞추기 */
-  
+  background-color: #000000;
+  height: auto;
+
   @media (max-width: 768px) {
-    display: none; /* 작은 화면에서는 선 숨기기 */
+    display: none;
   }
 `;
