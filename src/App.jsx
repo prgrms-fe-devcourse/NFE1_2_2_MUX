@@ -5,25 +5,27 @@ import Login from './auth/Login';
 import Dashboard from './auth/Dashboard';
 import styled from 'styled-components';
 import Navigation from './components/main/Navigation';
+import PostFeed from './pages/PostFeed/PostFeed';
 
 const App = () => {
   return (
     <Router>
       <div>
-      <Navigation />
+        <Navigation />
       </div>
       <Container>
-
         <Nav>
           <NavLink to="/login">로그인</NavLink>
           <NavLink to="/signup">회원가입</NavLink>
           <NavLink to="/dashboard">대시보드</NavLink>
+          <NavLink to="/postfeed">포스트 피드</NavLink>
         </Nav>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/postfeed" element={<PostFeed />} />
         </Routes>
       </Container>
     </Router>

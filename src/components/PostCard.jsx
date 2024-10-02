@@ -1,145 +1,175 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import axios from "axios";
-import Example from '../assets/images/example.png'; // 예시 이미지 경로
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import defaultProfileImage from '../assets/images/default-profile.png';
+import playButtonIcon from '../assets/icons/play-button.png';
+import pauseButtonIcon from '../assets/icons/stop-button.png'; // 일시정지 아이콘 추가
 
-// PostCard 컴포넌트
-const PostCard = ({ post }) => {
-  const { image, title, author, comments, _id } = post;
+const PostCard = ({ post, onPlayPause, isPlaying, onClick }) => {
+  const { _id, author } = post;
   const navigate = useNavigate();
-  //api에서 받아올 post 정보
+  const [isHovered, setIsHovered] = useState(false);
 
-  // 본문 내용이 없는 경우
-  const content = comments.length > 0 ? comments[0].text : "";
+  let parsedTitle, albums, description, nickName;
+  try {
+    const titleObject = JSON.parse(post.title);
+    parsedTitle = titleObject.title;
+    albums = titleObject.albums;
+    description = titleObject.description;
+
+    const authorInfo = JSON.parse(author.fullName);
+    nickName = authorInfo.nickName || '익명';
+  } catch (error) {
+    console.error('JSON 파싱 에러:', error);
+    parsedTitle = '제목 없음';
+    albums = [];
+    description = '';
+    nickName = '익명';
+  }
+
+  const firstAlbum = albums && albums.length > 0 ? albums[0] : null;
+
+  const handleImageClick = (e) => {
+    e.stopPropagation();
+    if (firstAlbum && firstAlbum.videoId && onPlayPause) {
+      onPlayPause(firstAlbum.videoId, _id); // 포스트 ID도 전달
+    }
+  };
 
   return (
-    // post _id를 받아서 각 포스트의 상세 페이지로 이동
-    <Card onClick={() => navigate(`/posts/${_id}`)}> 
-    {/* {image && <PostImage src={image} alt={title} />} */}
-    {image && <PostImage src={Example} alt={title} />}{/* Example용 코드 */}
-      {/* 이미지가 있는 경우에만 PostImage 렌더링 */}
-      <PostTitle>{title}</PostTitle> {/* 포스트 제목 */}
-      <PostAuthor>{author.name}</PostAuthor> {/* 저자 이름 */}
-      <PostContent>{content}</PostContent> {/* 본문 내용 */}
+    <Card onClick={() => onClick(post._id)}>
+      <CardHeader>
+        <AuthorImage src={author.image || defaultProfileImage} alt={nickName} />
+        <AuthorName>{nickName}</AuthorName>
+      </CardHeader>
+      <ImageContainer
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleImageClick}>
+        {firstAlbum && (
+          <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
+        )}
+        {/* Hover 상태이거나 재생 중일 때 일시정지 버튼으로 변경 */}
+        {(isHovered || isPlaying) && (
+          <PlayButton>
+            <PlayButtonImage
+              src={isPlaying ? pauseButtonIcon : playButtonIcon} // 재생 상태에 따라 아이콘 변경
+              alt={isPlaying ? 'Pause' : 'Play'}
+            />
+          </PlayButton>
+        )}
+      </ImageContainer>
+      <CardContent>
+        <PostTitle>{parsedTitle}</PostTitle>
+        <PostDescription>{description}</PostDescription>
+      </CardContent>
     </Card>
   );
 };
 
-// PostList 컴포넌트
-const PostList = ({ posts }) => {
-  return (
-    <PostContainer>
-      {/* 포스트 데이터를 기반으로 PostCard 렌더링 */}
-      {posts.map((post) => (
-        <PostCard key={post._id} post={post} />
-      ))}
-    </PostContainer>
-  );
-};
-
-// 테스트를 위한 App 컴포넌트
-const App = () => {
-  // 예시 포스트 데이터
-  const posts = [
-    {
-      _id: "1",
-      image: "https://example.com/image1.jpg",
-      title: "추천 음악 1",
-      author: { name: "작성자 A" },
-      comments: [{ text: "이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요! 이 음악 정말 좋아요!" }],
-    },
-    {
-      _id: "2",
-      image: "https://example.com/image2.jpg",
-      title: "추천 음악 2",
-      author: { name: "작성자 B" },
-      comments: [{ text: "이 곡을 꼭 들어보세요!" }],
-    },
-  ];
-  ////API를 이용해 데이터를 받아올 시 참고할 코드
-  // const [posts, setPosts] = useState([]); // posts 상태
-  // const [loading, setLoading] = useState(true); // 로딩 상태
-  // const [error, setError] = useState(null); // 에러 상태
-
-  // useEffect(() => {
-  //   // API 호출 함수
-  //   const fetchPosts = async () => {
-  //     try {
-  //       const response = await axios.get("/api/posts"); // API 호출
-  //       setPosts(response.data); // 받아온 데이터를 상태로 설정
-  //       setLoading(false);
-  //     } catch (err) {
-  //       setError("포스트 데이터를 불러오는 데 실패했습니다.");
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchPosts(); // API 호출
-  // }, []);
-
-  // if (loading) {
-  //   return <div>로딩 중...</div>;
-  // }
-
-  // if (error) {
-  //   return <div>{error}</div>;
-  // }
-
-  return (
-    <div>
-      <h1>포스트 카드</h1> {/* 페이지 제목 */}
-      <PostList posts={posts} /> {/* 포스트 리스트 렌더링 */}
-    </div>
-  );
-};
-
-export default App;
+export default PostCard;
 
 // Styled Components
 const Card = styled.div`
-  width: 250px; /* 카드 너비 */
-  margin: 10px 0; /* 상하 여백 조정 */
-  border-radius: 0px; /* 카드 모서리 둥글기 */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-  background-color: #fff; /* 카드 배경색 */
-  display: flex; /* Flexbox 사용 */
-  flex-direction: column; /* 세로 방향으로 정렬 */
-  align-items: flex-start; /* 왼쪽 정렬 */
+  width: 340px;
+  height: 500px;
+  margin: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease; // 트랜지션 추가
+
+  &:hover {
+    transform: translateY(-10px); // 약간 떠오르는 효과
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); // 그림자 강화
+  }
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+`;
+
+const AuthorImage = styled.img`
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+`;
+
+const AuthorName = styled.p`
+  color: #333;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin: 0;
+  transform: translateY(-1px);
 `;
 
 const PostImage = styled.img`
-  width: 100%; /* 이미지 너비 100% */
-  height: 210px; /* 이미지 높이 */
-  object-fit: cover; /* 이미지 비율 유지 */
-  border-radius: 0px; /* 이미지 모서리 둥글기 */
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border: 1px solid #e0e0e0;
+`;
+
+const CardContent = styled.div`
+  padding: 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 `;
 
 const PostTitle = styled.h2`
-  font-size: 1.2em; /* 제목 폰트 크기 */
-  margin: 5px; /* 제목 위아래 여백 감소 */
+  font-size: 1.1em;
+  margin: 0 0 10px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-const PostAuthor = styled.p`
-  color: #555; /* 저자 이름 색상 */
-  font-size: 0.8em; /* 저자 이름 폰트 크기 */
-  margin: 5px; /* 저자 위아래 여백 감소 */
+const PostDescription = styled.p`
+  font-size: 0.9em;
+  color: #666;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex-grow: 1;
+  word-break: break-word;
+  max-height: 2.7em;
+  line-height: 1.3em;
 `;
 
-const PostContent = styled.p`
-  font-size: 0.8em; /* 본문 내용 폰트 크기 */
-  color: #333; /* 본문 내용 색상 */
-  overflow: hidden; /* 넘치는 내용 숨김 */
-  margin: 5px; /* 내용 위아래 여백 감소 */
-  text-overflow: ellipsis; /* 넘치는 내용 생략 표시 */
-  display: -webkit-box; /* Flexbox 사용 */
-  -webkit-line-clamp: 2; /* 본문을 2줄로 제한 */
-  -webkit-box-orient: vertical; /* 세로 방향 정렬 */
+const ImageContainer = styled.div`
+  position: relative;
+  cursor: pointer;
 `;
 
-const PostContainer = styled.div`
-  display: flex; /* Flexbox 사용 */
-  flex-wrap: wrap; /* 줄 바꿈 허용 */
-  justify-content: center; /* 중앙 정렬 */
-  gap: 20px; /* 카드 간 간격 */
+const PlayButton = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PlayButtonImage = styled.img`
+  width: 30px;
+  height: 30px;
 `;

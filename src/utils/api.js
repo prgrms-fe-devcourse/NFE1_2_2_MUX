@@ -90,6 +90,17 @@ export const updateUser = async (userId, token, updatedData) => {
   }
 };
 
+// 포스트의 좋아요 및 댓글 수를 가져오는 API
+export const fetchPostReactions = async (postId) => {
+  try {
+    const response = await axios.get(`${API_HOST}/posts/${postId}`);
+    return response.data; // 실제로 필요한 데이터 반환
+  } catch (error) {
+    console.error('Error fetching post reactions:', error);
+    throw error; // 에러를 호출한 곳에서 처리할 수 있도록 throw
+  }
+};
+
 // 포스트 작성 API 호출
 export const createPost = async (formData, token) => {
   try {
@@ -125,10 +136,29 @@ export const updatePassword = async (newPassword, token) => {
   }
 };
 
+// 특정 채널의 포스트 목록을 가져오는 API
+export const getChannelPosts = async (
+  channelId,
+  offset = 0,
+  limit = 10,
+  token,
+) => {
+  try {
+    const response = await axios.get(`/api/posts/channel/${channelId}`, {
+      params: { offset, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching channel posts:', error);
+    throw error;
+  }
+};
+
 // 특정 포스트 상세 정보 가져오기
 export const getPostDetails = async (postId, token) => {
   try {
-    const response = await axios.get(`/posts/${postId}`, {
+    const response = await axios.get(`api/posts/${postId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
