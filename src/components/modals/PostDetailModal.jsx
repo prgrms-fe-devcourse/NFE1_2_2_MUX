@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import PreviousBtn from '../../assets/icons/Previous-Btn.png';
 import NextBtn from '../../assets/icons/Next-Btn.png';
+import PlayBtn from '../../assets/icons/play-button-2.png';
+import StopBtn from '../../assets/icons/stop-button-2.png';
 import YouTube from 'react-youtube';
 
 const PostDetailModal = ({ post, onClose }) => {
@@ -101,7 +103,10 @@ const PostDetailModal = ({ post, onClose }) => {
               alt={albums[currentAlbumIndex]?.title}
             />
             <PlayOverlay isPlaying={isPlaying}>
-              {isPlaying ? '⏸️' : '▶️'}
+              <PlayPauseIcon
+                src={isPlaying ? StopBtn : PlayBtn}
+                alt={isPlaying ? 'Pause' : 'Play'}
+              />
             </PlayOverlay>
           </AlbumImageContainer>
           <AlbumNavButton onClick={handleNextAlbum}>
@@ -378,13 +383,21 @@ const PlayOverlay = styled.div`
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.3);
-  color: white;
-  font-size: 48px;
   opacity: ${(props) => (props.isPlaying ? 1 : 0)};
   transition: opacity 0.3s ease;
 
   ${AlbumImageContainer}:hover & {
     opacity: 1;
+  }
+`;
+
+const PlayPauseIcon = styled.img`
+  width: 50px; // 아이콘 크기 조절
+  height: 50px;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1); // 호버 시 약간 확대
   }
 `;
 
