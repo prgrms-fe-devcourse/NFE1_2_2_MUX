@@ -49,18 +49,15 @@ const App = () => {
   );
 };
 
-// ProfilePageWrapper: userId를 URL에서 가져와 해당 유저의 프로필 페이지로 이동
 const ProfilePageWrapper = ({ user }) => {
   const { userId } = useParams(); // URL에서 유저 ID 가져오기
 
-  // 여기서 실제로 해당 userId에 맞는 유저 정보를 가져옵니다.
-  // 예시로, `fetchUserData`는 서버에서 유저 데이터를 가져오는 함수입니다.
   const [userData, setUserData] = useState(null);
+  const isMyPage = userId === user._id; // 로컬 유저 ID와 비교
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // 예시: 해당 userId로 API 호출하여 유저 데이터 가져오기
         const response = await fetch(`/api/users/${userId}`);
         const data = await response.json();
         setUserData(data);
@@ -69,14 +66,16 @@ const ProfilePageWrapper = ({ user }) => {
       }
     };
 
-    fetchUserData(); // 유저 데이터 로드
-  }, [userId]); // userId가 변경될 때마다 호출
+    if (!isMyPage) {  // 마이페이지가 아니라면, 유저 데이터를 불러옵니다.
+      fetchUserData();
+    }
+  }, [userId, isMyPage]);
 
-  if (!userData) {
-    return <p>유저 정보를 불러오는 중...</p>; // 로딩 상태 처리
+  if (!userData && !isMyPage) {
+    return <p>유저 정보를 불러오는 중...</p>;
   }
 
-  return <ProfilePage user={userData} />;
+  return <ProfilePage user={isMyPage ? user : userData} isMyPage={isMyPage} />;
 };
 
 export default App;

@@ -1,81 +1,113 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { fetchPostsByAuthor } from '../utils/api';
+import { getUserData, fetchPostsByAuthor } from '../utils/api';
 import PostCard from '../components/PostCard';
 import defaultProfileImage from '../assets/images/default-profile.png';
 
-const ProfilePageWrapper = ({ user }) => {
-  const { userId } = useParams(); // URL의 유저 ID 가져오기
-  const isMyPage = userId === user._id; // 유저 ID가 로컬 유저 ID와 같으면 true
+const ProfilePageWrapper = ({ user, token }) => {
+  const { userId } = useParams();
+  const [userData, setUserData] = useState(null);
+  const [error, setError] = useState(null);
+  const isMyPage = user && userId === user._id;
 
-  return <ProfilePage user={user} isMyPage={isMyPage} />; // ProfilePage 컴포넌트에 user와 isMyPage를 전달
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!isMyPage) {
+        try {
+          const data = await getUserData(userId, token);
+          setUserData(data);
+        } catch (err) {
+          console.error('유저 정보 불러오기 실패:', err);
+          setError('유저 정보를 불러오는 데 실패했습니다.');
+        }
+      }
+    };
+
+    if (!isMyPage) {
+      fetchUserData();
+    } else {
+      setUserData(user); // 마이페이지인 경우 userData를 user로 설정
+    }
+  }, [userId, isMyPage, token, user]);
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (!userData) {
+    return <p>유저 정보를 불러오는 중...</p>;
+  }
+
+  return <ProfilePage user={userData} isMyPage={isMyPage} />;
 };
 
 const ProfilePage = ({ user, isMyPage }) => {
-  const [posts, setPosts] = useState([]); // 포스트 목록을 저장할 상태 변수
-  const [error, setError] = useState(null); // 에러 처리 변수
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState(null);
 
-  // 컴포넌트가 마운트될 때 유저의 포스트를 불러오는 useEffect
   useEffect(() => {
     const loadPosts = async () => {
       if (user) {
         try {
-          const fetchedPosts = await fetchPostsByAuthor(user._id); // 모든 포스트를 받아옴
-          setPosts(fetchedPosts); // 포스트 목록 상태에 저장
+          const fetchedPosts = await fetchPostsByAuthor(user._id);
+          setPosts(fetchedPosts);
         } catch (err) {
-          console.error('Failed to load posts:', err);
+          console.error('포스트를 불러오는 데 실패했습니다:', err);
           setError('포스트를 불러오는 데 실패했습니다.');
         }
       }
     };
-    
-    loadPosts(); // 포스트 로드 함수 호출
-  }, [user]); // user가 변경될 때마다 실행
 
-  // user가 없을 경우 로딩 메시지 표시
+    loadPosts();
+  }, [user]);
+
   if (!user) {
-    return <p>사용자 정보를 불러오는 중입니다...</p>; // 로딩 상태 표시
+    return <p>사용자 정보를 불러오는 중입니다...</p>;
   }
 
-  return (
-  <Container>
-    <Header>
-      <ProfileImage src={user?.image || defaultProfileImage} alt="프로필" />
-      <ProfileInfo>
-        <h2>{user.fullName.nickName}</h2>
-        <Role><div>{user.role}</div></Role>
-        <Bio>
-          <p>{user.fullName.bio}</p>
-        </Bio>
-      </ProfileInfo>
-    </Header>
+  // fullName이 문자열인지 확인하고 JSON.parse 실행
+  const userFullName = typeof user.fullName === 'string' 
+    ? JSON.parse(user.fullName) 
+    : user.fullName || {};
 
-    <Content>
-      <PostSection>
-        <h2>{user.fullName.nickName}의 추천 포스트</h2>
-        {error && <p>{error}</p>} {/* 에러 메시지 표시 */}
-        <div>
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <PostCard key={post._id} post={post} />
-            ))
-          ) : (
-            <p>포스트가 없습니다.</p>
-          )}
-        </div>
-      </PostSection>
-      <Separator><div></div></Separator>
-      <MusicSection>
-        <h2>{user.fullName.nickName}의 음원</h2>
-        {/* 음원 목록을 여기에 추가 */}
-      </MusicSection>
-    </Content>
-  </Container>
+  return (
+    <Container>
+      <Header>
+        <ProfileImage src={user?.image || defaultProfileImage} alt="프로필" />
+        <ProfileInfo>
+          <h2>{userFullName.nickName || '이름 없음'}</h2>
+          <Role><div>{user.role || '역할 없음'}</div></Role>
+          <Bio>
+            <p>{userFullName.bio || '자기소개 없음'}</p>
+          </Bio>
+        </ProfileInfo>
+      </Header>
+
+      <Content>
+        <PostSection>
+          <h2>{userFullName.nickName || '이름 없음'}의 추천 포스트</h2>
+          {error && <p>{error}</p>}
+          <div>
+            {posts.length > 0 ? (
+              posts.map((post) => (
+                <PostCard key={post._id} post={post} />
+              ))
+            ) : (
+              <p>포스트가 없습니다.</p>
+            )}
+          </div>
+        </PostSection>
+        <Separator><div></div></Separator>
+        <MusicSection>
+          <h2>{userFullName.nickName || '이름 없음'}의 음원</h2>
+        </MusicSection>
+      </Content>
+    </Container>
   );
 };
 
-export default ProfilePageWrapper; // ProfilePageWrapper를 내보냄
+export default ProfilePageWrapper;
 
 // Styled Components
 
