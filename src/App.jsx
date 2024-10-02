@@ -82,6 +82,7 @@ export default App;
 
 // Styled Components
 const Container = styled.div`
+/* min-width: 700px; */
   padding: 20px;
 `;
 

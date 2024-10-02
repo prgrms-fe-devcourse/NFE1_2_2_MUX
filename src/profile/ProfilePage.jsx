@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { getUserData, fetchPostsByAuthor } from '../utils/api';
 import PostCard from '../components/PostCard';
 import defaultProfileImage from '../assets/images/default-profile.png';
+import ProfileEditModal from '../components/modals/ProfileEditModal';
 
 const ProfilePageWrapper = ({ user, token }) => {
   const { userId } = useParams();
@@ -45,6 +46,8 @@ const ProfilePageWrapper = ({ user, token }) => {
 const ProfilePage = ({ user, isMyPage }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
+  const [isEditModalOpen, setEditModalOpen] = useState(false); // 모달 상태 관리
+
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -76,14 +79,19 @@ const ProfilePage = ({ user, isMyPage }) => {
       <Header>
         <ProfileImage src={user?.image || defaultProfileImage} alt="프로필" />
         <ProfileInfo>
+          <ProfileHeader>
           <h2>{userFullName.nickName || '이름 없음'}</h2>
+                          {/* 마이페이지일 때만 수정 버튼 노출 */}
+                    {isMyPage && (
+            <EditButton onClick={() => setEditModalOpen(true)}>✏️ 회원정보 수정</EditButton>
+          )}
+          </ProfileHeader>
           <Role><div>{user.role || '역할 없음'}</div></Role>
           <Bio>
             <p>{userFullName.bio || '자기소개 없음'}</p>
           </Bio>
         </ProfileInfo>
       </Header>
-
       <Content>
         <PostSection>
           <h2>{userFullName.nickName || '이름 없음'}의 추천 포스트</h2>
@@ -103,6 +111,14 @@ const ProfilePage = ({ user, isMyPage }) => {
           <h2>{userFullName.nickName || '이름 없음'}의 음원</h2>
         </MusicSection>
       </Content>
+
+      {/* 모달 창: isEditModalOpen이 true일 때만 보임 */}
+      {isEditModalOpen && (
+        <ProfileEditModal 
+          user={user} 
+          closeModal={() => setEditModalOpen(false)} // 모달 닫기 함수 전달
+        />
+      )}
     </Container>
   );
 };
@@ -136,13 +152,38 @@ const ProfileImage = styled.img`
 
 const ProfileInfo = styled.div`
   align-items: center;
+`;
+const ProfileHeader = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
   h2 {
     font-size: 1.3rem;
     font-weight: 600;
     margin: 3px 3px;
   }
+
+  /* 닉네임과 회원정보 수정 버튼이 함께 정렬되도록 */
+  position: relative;
 `;
 
+// 회원정보 수정 버튼 스타일
+const EditButton = styled.button`
+  padding: 5px 10px;
+  background-color: transparent; /* 배경색 투명 */
+  color: #808080; /* 글씨색 회색 */
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  position: absolute; /* 닉네임에서 떨어지도록 위치 조정 */
+  left: 180px;
+  top: 30px;
+
+  &:hover {
+    color: #a9a9a9; /* hover 시 조금 더 밝은 회색 */
+  }
+`;
 const Role = styled.div`
   text-align: center;
   font-weight: 700;
