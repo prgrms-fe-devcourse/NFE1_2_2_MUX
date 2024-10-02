@@ -4,8 +4,10 @@ import ImageChangeIcon from '../../assets/icons/image-change.png';
 import playButtonIcon from '../../assets/icons/play-button.png';
 import stopButtonIcon from '../../assets/icons/stop-button.png';
 import defaultAlbumImage from '../../assets/images/default-album.png';
+import { createTrack, getUserData } from '../../utils/api';
+import { v4 as uuidv4 } from 'uuid';
 
-const TrackUpload = () => {
+const TrackUpload = ({ onTrackSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -16,6 +18,8 @@ const TrackUpload = () => {
   const [songDescription, setSongDescription] = useState('');
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
   const [imageErrorMessage, setImageErrorMessage] = useState('');
+  const [ErrorMessage, setErrorMessage] = useState('');
+  const [artistName, setArtistName] = useState('');
 
   const maxTitleCharLimit = 20;
   const maxDescriptionCharLimit = 100;
@@ -177,10 +181,109 @@ const TrackUpload = () => {
     setImageErrorMessage('');
   };
 
-  const handlePostSubmit = () => {
-    alert('음원이 성공적으로 게시되었습니다!');
-  };
+  useEffect(() => {
+    const fetchUserNickname = async () => {
+      const token = localStorage.getItem('token');
+      const userData = JSON.parse(localStorage.getItem('user'));
+      
+      if (userData && token) {
+        try {
+          const user = await getUserData(userData.id || userData._id, token);
+          
+          // Parse the fullName JSON string
+          const fullNameData = JSON.parse(user.fullName);
+          
+          // Extract the nickName
+          const nickName = fullNameData.nickName;
+          
+          // Set the artist name to the nickName
+          setArtistName(nickName);
+        } catch (error) {
+          console.error('Failed to fetch user nickname:', error);
+          setErrorMessage('User data could not be loaded.');
+        }
+      }
+    };
   
+    fetchUserNickname();
+  }, []);
+
+  const handlePostSubmit = async () => {
+    setErrorMessage('');
+
+    if (selectedAlbumImage === defaultAlbumImage) {
+      setErrorMessage('앨범 이미지를 선택해 주세요.');
+      return;
+    }
+
+    if (!songTitle.trim()) {
+      setErrorMessage('앨범 제목을 입력해 주세요.');
+      return;
+    }
+
+    if (!songDescription.trim()) {
+      setErrorMessage('음원을 소개해 주세요.');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setErrorMessage('로그인이 필요합니다.');
+      return;
+    }
+
+    const generatedVideoId = uuidv4();
+    
+    try {
+      const trackData = {
+        title: songTitle,
+        albums: [
+          {
+            title: songTitle,
+            artist: artistName,
+            coverUrl: selectedAlbumImage,
+            videoId: generatedVideoId,
+          },
+        ],
+        description: songDescription,
+      };
+
+      const formData = new FormData();
+      formData.append('title', JSON.stringify(trackData));
+      formData.append('channelId', '66fb53f9ed2d3c14a64eb9ea');
+      formData.append('image', selectedAlbumImage);
+
+      const response = await createTrack(formData, token);
+      console.log('Track uploaded successfully:', response);
+
+      alert('음원이 성공적으로 업로드되었습니다!');
+
+      // 업로드 후 상태 초기화
+      setShowUploadedContent(false);
+      setSelectedFile(null);
+      setSelectedAlbumImage(defaultAlbumImage);
+      setSongTitle('');
+      setSongDescription('');
+      setUploadProgress(0);
+      setUploadComplete(false);
+      setIsPlaying(false);
+      setAudioProgress(0);
+      setAudioDuration(0);
+      setCurrentTime(0);
+      setAudioErrorMessage('');
+      setImageErrorMessage('');
+
+      if (typeof onTrackSuccess === 'function') {
+        onTrackSuccess(response);
+      }
+    } catch (error) {
+      console.error('음원 업로드 실패:', error);
+      setErrorMessage(
+        error.response?.data?.message || '음원 업로드에 실패했습니다.',
+      );
+    }
+  };
+
   const handleMouseDown = (event) => {
     setIsDragging(true);
     handleSeek(event);
@@ -311,6 +414,7 @@ const TrackUpload = () => {
 
           <ButtonContainer>
             <PrevButton onClick={handlePrevStep}>이전</PrevButton>
+            {ErrorMessage && <ErrorText>{ErrorMessage}</ErrorText>}
             <PostButton onClick={handlePostSubmit}>게시하기</PostButton>
           </ButtonContainer>
         </UploadedContent>
@@ -603,6 +707,13 @@ const PrevButton = styled.button`
   font-size: 16px;
   margin-left: 15px;
   margin-bottom: 10px;
+`;
+
+const ErrorText = styled.p`
+  color: red;
+  font-size: 15px;
+  margin-top: 4px;
+  margin-left: 15px;
 `;
 
 const PostButton = styled.button`

@@ -135,3 +135,19 @@ export const updatePassword = async (newPassword, token) => {
     throw error; // 에러 던지기
   }
 };
+
+// 음원 업로드 API 호출
+export const createTrack = async (formData, token) => {
+  try {
+    const response = await axios.post('/api/posts/create', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};
