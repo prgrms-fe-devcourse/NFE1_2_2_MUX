@@ -49,14 +49,37 @@ const App = () => {
   );
 };
 
-// ProfilePageWrapper: userId와 로컬 유저 ID 비교 후 마이페이지 여부 설정
+// ProfilePageWrapper: userId를 URL에서 가져와 해당 유저의 프로필 페이지로 이동
 const ProfilePageWrapper = ({ user }) => {
-  const { userId } = useParams(); // URL의 유저 ID 가져오기
-  const isMyPage = userId === user._id; // 유저 ID가 로컬 유저 ID와 같으면 true
+  const { userId } = useParams(); // URL에서 유저 ID 가져오기
 
-  return <ProfilePage user={user} isMyPage={isMyPage} />;
+  // 여기서 실제로 해당 userId에 맞는 유저 정보를 가져옵니다.
+  // 예시로, `fetchUserData`는 서버에서 유저 데이터를 가져오는 함수입니다.
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // 예시: 해당 userId로 API 호출하여 유저 데이터 가져오기
+        const response = await fetch(`/api/users/${userId}`);
+        const data = await response.json();
+        setUserData(data);
+      } catch (error) {
+        console.error('유저 데이터 불러오기 실패:', error);
+      }
+    };
+
+    fetchUserData(); // 유저 데이터 로드
+  }, [userId]); // userId가 변경될 때마다 호출
+
+  if (!userData) {
+    return <p>유저 정보를 불러오는 중...</p>; // 로딩 상태 처리
+  }
+
+  return <ProfilePage user={userData} />;
 };
 
+export default App;
 
 // Styled Components
 const Container = styled.div`
@@ -78,5 +101,3 @@ const NavLink = styled(Link)`
     background-color: #eee;
   }
 `;
-
-export default App;
