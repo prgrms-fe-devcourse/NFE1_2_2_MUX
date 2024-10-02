@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { getChannelPosts, getPostDetails } from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
-import PostDetailModal from '../../components/modals/PostDetailModal.jsx'; // 추가
+import PostDetailModal from '../../components/modals/PostDetailModal.jsx';
 import YouTube from 'react-youtube';
 
 const PostFeed = () => {
@@ -107,16 +107,6 @@ const PostFeed = () => {
     }
   };
 
-  const handleCreatePost = async (newPostData) => {
-    try {
-      const createdPost = await createPost(newPostData, token);
-      setPosts((prevPosts) => [createdPost, ...prevPosts]);
-    } catch (err) {
-      console.error('Failed to create post:', err);
-      setError('게시글 생성에 실패했습니다.');
-    }
-  };
-
   const handlePostClick = async (postId) => {
     try {
       const token = localStorage.getItem('token');
@@ -137,7 +127,32 @@ const PostFeed = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    // 모달을 닫을 때 선택된 포스트 정보를 업데이트합니다.
+    if (selectedPost) {
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === selectedPost._id ? selectedPost : post,
+        ),
+      );
+    }
     setSelectedPost(null);
+  };
+
+  const handleLikeUpdate = (postId, isLiked) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? {
+              ...post,
+              likes: isLiked
+                ? [...post.likes, { user: localStorage.getItem('userId') }]
+                : post.likes.filter(
+                    (like) => like.user !== localStorage.getItem('userId'),
+                  ),
+            }
+          : post,
+      ),
+    );
   };
 
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
@@ -178,7 +193,11 @@ const PostFeed = () => {
         />
       </YouTubePlayerContainer>
       {isModalOpen && selectedPost && (
-        <PostDetailModal post={selectedPost} onClose={handleCloseModal} />
+        <PostDetailModal
+          post={selectedPost}
+          onClose={handleCloseModal}
+          onLikeUpdate={handleLikeUpdate}
+        />
       )}
     </PageContainer>
   );

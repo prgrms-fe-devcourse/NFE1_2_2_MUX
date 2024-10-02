@@ -169,3 +169,59 @@ export const getPostDetails = async (postId, token) => {
     throw error;
   }
 };
+
+// api.js에 추가
+
+// 좋아요 추가
+export const addLike = async (postId, token) => {
+  try {
+    const response = await axios.post(
+      '/api/likes/create',
+      { postId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error adding like:', error);
+    throw error;
+  }
+};
+
+// 좋아요 취소 API 호출
+export const removeLike = async (likeId, token) => {
+  try {
+    const response = await axios.delete('/api/likes/delete', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { id: likeId }, // body로 likeId 전달
+    });
+    return response.data;
+  } catch (error) {
+    console.error('좋아요 취소 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+// 댓글 추가 API 호출
+export const addComment = async (postId, comment, token) => {
+  try {
+    const response = await axios.post(
+      '/api/comments/create',
+      { postId, comment },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data; // 서버에서 반환하는 댓글 데이터
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+};
