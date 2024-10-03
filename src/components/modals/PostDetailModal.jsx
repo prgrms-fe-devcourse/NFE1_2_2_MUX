@@ -6,7 +6,9 @@ import PlayBtn from '../../assets/icons/play-button-2.png';
 import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import TrashBtn from '../../assets/icons/trash-button.png';
+import CommentIcon from '../../assets/icons/Comment.png';
 import YouTube from 'react-youtube';
+
 import {
   addLike,
   removeLike,
@@ -14,7 +16,6 @@ import {
   deleteComment,
   getAuthUserData,
   getPostDetails,
-  deletePost,
 } from '../../utils/api.js';
 
 const PostDetailModal = ({
@@ -33,6 +34,7 @@ const PostDetailModal = ({
   const [currentUser, setCurrentUser] = useState(null);
   const [post, setPost] = useState(initialPost);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [commentCount, setCommentCount] = useState(initialPost.comments.length);
   const token = localStorage.getItem('token');
   const playerRef = useRef(null);
 
@@ -168,6 +170,7 @@ const PostDetailModal = ({
       console.log('New comment:', newComment);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
+      setCommentCount((prevCount) => prevCount + 1); // 댓글 수 증가
     } catch (error) {
       console.error('댓글 작성 중 오류 발생:', error);
       alert('댓글 작성 중 오류가 발생했습니다.');
@@ -180,6 +183,7 @@ const PostDetailModal = ({
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== commentId),
       );
+      setCommentCount((prevCount) => prevCount - 1); // 댓글 수 감소
     } catch (error) {
       console.error('댓글 삭제 중 오류 발생:', error);
       alert('댓글을 삭제할 수 없습니다. 다시 시도해 주세요.');
@@ -292,10 +296,16 @@ const PostDetailModal = ({
         <Divider />
 
         <LikeSection>
-          <LikeButton onClick={handleLike}>
-            <LikeIconImg src={LikeIcon} alt="Like" $isLiked={isLiked} />
-            <LikeCount>{likeCount}</LikeCount>
-          </LikeButton>
+          <InteractionGroup>
+            <LikeButton onClick={handleLike}>
+              <LikeIconImg src={LikeIcon} alt="Like" $isLiked={isLiked} />
+              <Count>{likeCount}</Count>
+            </LikeButton>
+            <CommentDisplay>
+              <CommentIconImg src={CommentIcon} alt="Comment" />
+              <Count>{commentCount}</Count>
+            </CommentDisplay>
+          </InteractionGroup>
           {currentUser && currentUser._id === post.author._id && (
             <DeleteButton onClick={handleDeletePost}>
               <img src={TrashBtn} alt="Delete" />
@@ -461,29 +471,31 @@ const Divider = styled.hr`
 const AlbumSection = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 40px;
-  margin-bottom: 20px;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
 `;
 
 const AlbumNavButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
-  margin-top: 40px;
-  margin-left: 30px;
-  margin-right: 30px;
+  width: 24px;
+  height: 24px;
+  margin: 0 40px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 
   img {
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 80%;
+    max-height: 80%;
     object-fit: contain;
+  }
+
+  &:hover {
+    opacity: 0.7;
   }
 `;
 
@@ -585,10 +597,12 @@ const LikeSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  margin-left: 20px;
-  margin-right: 20px;
-  margin-top: 20px;
+  margin: 20px;
+`;
+
+const InteractionGroup = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const LikeButton = styled.button`
@@ -599,6 +613,15 @@ const LikeButton = styled.button`
   cursor: pointer;
   color: #333;
   font-size: 14px;
+  margin-right: 10px;
+`;
+
+const CommentDisplay = styled.div`
+  display: flex;
+  align-items: center;
+  color: #333;
+  font-size: 14px;
+  pointer-events: none;
 `;
 
 const LikeIconImg = styled.img`
@@ -610,10 +633,6 @@ const LikeIconImg = styled.img`
       ? 'invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)'
       : 'none'};
   transition: filter 0.3s ease;
-`;
-
-const LikeCount = styled.span`
-  font-weight: bold;
 `;
 
 const CommentSection = styled.div`
@@ -694,4 +713,14 @@ const DeleteButton = styled.button`
   &:hover img {
     transform: scale(1.1);
   }
+`;
+
+const CommentIconImg = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+`;
+
+const Count = styled.span`
+  font-weight: bold;
 `;
