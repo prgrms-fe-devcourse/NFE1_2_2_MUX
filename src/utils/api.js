@@ -170,8 +170,6 @@ export const getPostDetails = async (postId, token) => {
   }
 };
 
-// api.js에 추가
-
 // 좋아요 추가
 export const addLike = async (postId, token) => {
   try {
@@ -222,6 +220,36 @@ export const addComment = async (postId, comment, token) => {
     return response.data; // 서버에서 반환하는 댓글 데이터
   } catch (error) {
     console.error('Error adding comment:', error);
+    throw error;
+  }
+};
+
+// 댓글 삭제 API 호출
+export const deleteComment = async (commentId, token) => {
+  try {
+    const response = await axios.delete('/api/comments/delete', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { id: commentId }, // body에 commentId 전송
+    });
+    return response.data;
+  } catch (error) {
+    console.error('댓글 삭제 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+export const getAuthUserData = async (token) => {
+  try {
+    const response = await axios.get('/api/auth-user', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
     throw error;
   }
 };

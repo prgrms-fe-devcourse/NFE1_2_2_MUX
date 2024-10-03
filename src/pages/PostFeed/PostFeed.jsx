@@ -35,6 +35,7 @@ const PostFeed = () => {
 
   const channelId = '66fb541ced2d3c14a64eb9ee';
   const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
   const POSTS_PER_PAGE = 12;
 
   const fetchPosts = useCallback(async () => {
@@ -107,53 +108,49 @@ const PostFeed = () => {
     }
   };
 
-  const handlePostClick = async (postId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const postDetails = await getPostDetails(postId, token);
-      if (postDetails) {
-        setSelectedPost(postDetails);
-        setIsModalOpen(true);
-      } else {
-        throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+  const handlePostClick = useCallback(
+    async (postId) => {
+      try {
+        const postDetails = await getPostDetails(postId, token);
+        if (postDetails) {
+          setSelectedPost(postDetails);
+          setIsModalOpen(true);
+        } else {
+          throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+        alert(
+          '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+        );
       }
-    } catch (error) {
-      console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
-      alert(
-        '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
-      );
-    }
-  };
+    },
+    [token],
+  );
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
-    // 모달을 닫을 때 선택된 포스트 정보를 업데이트합니다.
-    if (selectedPost) {
+    setSelectedPost(null);
+  }, []);
+
+  const handleLikeUpdate = useCallback(
+    (postId, isLiked, newLikeCount) => {
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
-          post._id === selectedPost._id ? selectedPost : post,
+          post._id === postId
+            ? {
+                ...post,
+                likes: isLiked
+                  ? [...post.likes, { user: userId }]
+                  : post.likes.filter((like) => like.user !== userId),
+                likeCount: newLikeCount,
+              }
+            : post,
         ),
       );
-    }
-    setSelectedPost(null);
-  };
-
-  const handleLikeUpdate = (postId, isLiked) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === postId
-          ? {
-              ...post,
-              likes: isLiked
-                ? [...post.likes, { user: localStorage.getItem('userId') }]
-                : post.likes.filter(
-                    (like) => like.user !== localStorage.getItem('userId'),
-                  ),
-            }
-          : post,
-      ),
-    );
-  };
+    },
+    [userId],
+  );
 
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 

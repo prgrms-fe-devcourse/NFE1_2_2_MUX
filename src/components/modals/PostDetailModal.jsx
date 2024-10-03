@@ -6,7 +6,13 @@ import PlayBtn from '../../assets/icons/play-button-2.png';
 import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import YouTube from 'react-youtube';
-import { addLike, removeLike, addComment } from '../../utils/api.js'; // 댓글 관련 함수 추가
+import {
+  addLike,
+  removeLike,
+  addComment,
+  deleteComment,
+  getAuthUserData,
+} from '../../utils/api.js';
 
 const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
@@ -16,10 +22,33 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [currentLikeId, setCurrentLikeId] = useState(null);
-  const [comments, setComments] = useState([]); // 댓글 상태 추가
+  const [comments, setComments] = useState([]);
   const token = localStorage.getItem('token');
-  const userId = localStorage.getItem('userId');
+  const [userId, setUserId] = useState(null);
   const playerRef = useRef(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (token) {
+          const userData = await getAuthUserData(token);
+          setCurrentUser(userData);
+          console.log('Current user:', userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [token]);
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    setUserId(storedUserId);
+    console.log('Current userId:', storedUserId);
+  }, []);
 
   if (!post) return null;
 
@@ -40,43 +69,47 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
   useEffect(() => {
     if (post) {
       const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+      const isPostLiked = likedPosts[post._id] !== undefined;
       setIsLiked(likedPosts[post._id] || false);
       setLikeCount(post.likes.length);
+      setCurrentLikeId(isPostLiked ? likedPosts[post._id] : null);
 
       // 댓글을 최신 순으로 정렬
       const sortedComments = [...post.comments].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
       setComments(sortedComments);
+
+      console.log('Sorted comments:', sortedComments);
     }
   }, [post]);
 
   const handleLike = async () => {
     try {
-      let newLikedState;
+      const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+
       if (isLiked) {
         await removeLike(currentLikeId, token);
         setLikeCount((prev) => prev - 1);
-        newLikedState = false;
+        setIsLiked(false);
+        setCurrentLikeId(null);
+        delete likedPosts[post._id];
       } else {
         const likeResponse = await addLike(post._id, token);
         setLikeCount((prev) => prev + 1);
-        newLikedState = true;
+        setIsLiked(true);
         setCurrentLikeId(likeResponse._id);
+        likedPosts[post._id] = likeResponse._id;
       }
 
-      setIsLiked(newLikedState);
-
-      const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
-      if (newLikedState) {
-        likedPosts[post._id] = currentLikeId;
-      } else {
-        delete likedPosts[post._id];
-      }
       localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
 
       if (onLikeUpdate) {
-        onLikeUpdate(post._id, newLikedState);
+        onLikeUpdate(
+          post._id,
+          !isLiked,
+          isLiked ? likeCount - 1 : likeCount + 1,
+        );
       }
     } catch (error) {
       console.error('좋아요 처리 중 오류 발생:', error);
@@ -101,13 +134,26 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!comment) return;
-      const newComment = await addComment(post._id, comment, token); // 댓글 추가 API 호출
-      setComment(''); // 입력 필드 초기화
-      setComments((prevComments) => [newComment, ...prevComments]); // 새로운 댓글을 배열의 맨 앞에 추가
+      if (!comment.trim() || !currentUser) return;
+      const newComment = await addComment(post._id, comment, token);
+      console.log('New comment:', newComment);
+      setComments((prevComments) => [newComment, ...prevComments]);
+      setComment('');
     } catch (error) {
       console.error('댓글 작성 중 오류 발생:', error);
       alert('댓글 작성 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await deleteComment(commentId, token);
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment._id !== commentId),
+      );
+    } catch (error) {
+      console.error('댓글 삭제 중 오류 발생:', error);
+      alert('댓글을 삭제할 수 없습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -208,7 +254,6 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
           </LikeButton>
         </LikeSection>
 
-        {/* 댓글 리스트 섹션 */}
         <CommentSection>
           <CommentForm onSubmit={handleCommentSubmit}>
             <CommentInput
@@ -219,20 +264,39 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
             <CommentSubmitButton type="submit">댓글 작성</CommentSubmitButton>
           </CommentForm>
 
-          {comments.map((commentItem) => (
-            <CommentItem key={commentItem._id}>
-              <AuthorImage
-                src={commentItem.author.image || '/default-profile.png'}
-                alt={commentItem.author.nickName}
-              />
-              <CommentContent>
-                <CommentAuthor>
-                  {JSON.parse(commentItem.author.fullName)?.nickName || '익명'}
-                </CommentAuthor>
-                <CommentText>{commentItem.comment}</CommentText>
-              </CommentContent>
-            </CommentItem>
-          ))}
+          {comments.map((commentItem) => {
+            console.log('Comment item:', commentItem);
+            console.log('Comment author ID:', commentItem.author._id);
+            console.log('Current user ID:', currentUser?._id);
+            console.log(
+              'Is author:',
+              currentUser?._id === commentItem.author._id,
+            );
+
+            return (
+              <CommentItem key={commentItem._id}>
+                <AuthorImage
+                  src={commentItem.author.image || '/default-profile.png'}
+                  alt={
+                    JSON.parse(commentItem.author.fullName)?.nickName || '익명'
+                  }
+                />
+                <CommentContent>
+                  <CommentAuthor>
+                    {JSON.parse(commentItem.author.fullName)?.nickName ||
+                      '익명'}
+                  </CommentAuthor>
+                  <CommentText>{commentItem.comment}</CommentText>
+                </CommentContent>
+                {currentUser?._id === commentItem.author._id && (
+                  <DeleteButton
+                    onClick={() => handleDeleteComment(commentItem._id)}>
+                    🗑️
+                  </DeleteButton>
+                )}
+              </CommentItem>
+            );
+          })}
         </CommentSection>
 
         <YouTube
@@ -274,12 +338,12 @@ const ModalContainer = styled.div`
   border-radius: 15px;
   width: 95%;
   max-width: 800px;
-  height: 90vh; /* 모달창 크기를 고정 */
-  overflow-y: scroll; /* 내부에서 스크롤되게 설정 */
-  scrollbar-width: none; /* Firefox에서 스크롤바 숨김 */
-  -ms-overflow-style: none; /* IE 및 Edge에서 스크롤바 숨김 */
+  height: 90vh;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera에서 스크롤바 숨김 */
+    display: none;
   }
 
   position: relative;
@@ -312,13 +376,12 @@ const Header = styled.div`
   margin-bottom: 10px;
 `;
 
-// 프로필 이미지에 얇은 회색 테두리 추가
 const AuthorImage = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 50%;
   margin-right: 10px;
-  border: 1px solid lightgray; /* 얇은 회색 테두리 */
+  border: 1px solid lightgray;
 `;
 
 const HeaderText = styled.div`
@@ -446,7 +509,7 @@ const AlbumArtist = styled.p`
 `;
 
 const DescriptionBox = styled.div`
-  background-color: #f5f5f5;
+  background-color: #c0afe2;
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 20px;
@@ -462,6 +525,8 @@ const Description = styled.p`
   line-height: 1.5;
   margin: 0;
   text-align: center;
+  color: #fff;
+  font-weight: bold;
 `;
 
 const LikeSection = styled.div`
@@ -517,7 +582,7 @@ const CommentInput = styled.input`
 
 const CommentSubmitButton = styled.button`
   padding: 8px 15px;
-  background-color: #007bff;
+  background-color: #c0afe2;
   color: white;
   border: none;
   border-radius: 5px;
@@ -526,7 +591,7 @@ const CommentSubmitButton = styled.button`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #c86edf;
   }
 `;
 
@@ -540,22 +605,35 @@ const CommentContent = styled.div`
   margin-left: 10px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 `;
 
-// 닉네임 스타일: 굵은 회색 글씨, 작은 크기
 const CommentAuthor = styled.span`
   font-weight: bold;
-  font-size: 12px; /* 글자 크기를 줄임 */
-  color: grey; /* 굵은 회색 글씨 */
+  font-size: 12px;
+  color: grey;
   margin-bottom: 5px;
 `;
 
-// 댓글 내용 스타일: 굵은 검정색 글씨
 const CommentText = styled.p`
   margin: 0;
   font-size: 14px;
-  font-weight: bold; /* 굵은 글씨 */
-  color: black; /* 검정색 */
+  font-weight: bold;
+  color: black;
+`;
+
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 10px;
+  color: #888;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #ff6b6b;
+  }
 `;
 
 export default PostDetailModal;
