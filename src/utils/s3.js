@@ -3,8 +3,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 // AWS 자격 증명 및 설정
 const REGION = 'us-east-1'; // 자신의 리전으로 변경하세요.
-const ACCESS_KEY = 'AKIAS252V35UDT2H7PG6';
-const SECRET_KEY = 'rNqvzt0P5qJ1mcyn6c33kfZq1OugkNO+FmRio1mX';
+AWS_ACCESS_KEY_ID = your_access_key;
+AWS_SECRET_ACCESS_KEY = your_secret_key;
 const BUCKET_NAME = 'mux-track';
 
 // AWS S3 클라이언트 생성
