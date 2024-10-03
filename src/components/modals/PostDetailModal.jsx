@@ -5,6 +5,7 @@ import NextBtn from '../../assets/icons/Next-Btn.png';
 import PlayBtn from '../../assets/icons/play-button-2.png';
 import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
+import TrashBtn from '../../assets/icons/trash-button.png';
 import YouTube from 'react-youtube';
 import {
   addLike,
@@ -13,9 +14,15 @@ import {
   deleteComment,
   getAuthUserData,
   getPostDetails,
+  deletePost,
 } from '../../utils/api.js';
 
-const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
+const PostDetailModal = ({
+  post: initialPost,
+  onClose,
+  onLikeUpdate,
+  onPostDelete,
+}) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,20 +32,29 @@ const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
   const [comments, setComments] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [post, setPost] = useState(initialPost);
+  const [isDeleted, setIsDeleted] = useState(false);
   const token = localStorage.getItem('token');
   const playerRef = useRef(null);
 
   const fetchPostDetails = useCallback(async () => {
+    if (isDeleted) return; // 게시글이 삭제되었다면 데이터를 가져오지 않음
+
     try {
       if (post && token) {
         const updatedPost = await getPostDetails(post._id, token);
-        setPost(updatedPost);
-        updateLikeStatus(updatedPost);
+        if (updatedPost) {
+          setPost(updatedPost);
+          updateLikeStatus(updatedPost);
+        } else {
+          setIsDeleted(true);
+          onClose();
+        }
       }
     } catch (error) {
-      console.error('Failed to fetch post details:', error);
+      console.warn('Failed to fetch post details:', error);
+      // 오류 발생 시 무시하고 계속 진행
     }
-  }, [post, token]);
+  }, [post, token, isDeleted, onClose]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -200,6 +216,21 @@ const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
     setCurrentVideoId(albums[currentAlbumIndex]?.videoId);
   }, [currentAlbumIndex, albums]);
 
+  const handleDeletePost = async () => {
+    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+      try {
+        if (onPostDelete) {
+          await onPostDelete(post._id);
+        }
+        onClose();
+      } catch (error) {
+        console.error('게시글 삭제 중 오류 발생:', error);
+      }
+    }
+  };
+
+  if (isDeleted) return null;
+
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
@@ -265,6 +296,11 @@ const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
             <LikeIconImg src={LikeIcon} alt="Like" $isLiked={isLiked} />
             <LikeCount>{likeCount}</LikeCount>
           </LikeButton>
+          {currentUser && currentUser._id === post.author._id && (
+            <DeleteButton onClick={handleDeletePost}>
+              <img src={TrashBtn} alt="Delete" />
+            </DeleteButton>
+          )}
         </LikeSection>
 
         <CommentSection>
@@ -332,6 +368,8 @@ const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
     </ModalOverlay>
   );
 };
+
+export default PostDetailModal;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -545,9 +583,11 @@ const Description = styled.p`
 
 const LikeSection = styled.div`
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
   margin-left: 20px;
+  margin-right: 20px;
   margin-top: 20px;
 `;
 
@@ -640,14 +680,18 @@ const DeleteButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  margin-left: 10px;
-  color: #888;
-  transition: color 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &:hover {
-    color: #ff6b6b;
+  img {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.1);
   }
 `;
-
-export default PostDetailModal;

@@ -253,3 +253,19 @@ export const getAuthUserData = async (token) => {
     throw error;
   }
 };
+
+export const deletePost = async (postId, token) => {
+  try {
+    const response = await axios.delete('/api/posts/delete', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { id: postId },
+    });
+    return response.data;
+  } catch (error) {
+    console.warn('게시글 삭제 중 서버 오류 발생:', error);
+    // 오류가 발생해도 상위로 전파하여 PostFeed에서 처리하도록 함
+    throw error;
+  }
+};

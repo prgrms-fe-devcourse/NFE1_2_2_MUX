@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import { getChannelPosts, getPostDetails } from '../../utils/api.js';
+import {
+  getChannelPosts,
+  getPostDetails,
+  deletePost,
+} from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
 import PostDetailModal from '../../components/modals/PostDetailModal.jsx';
 import YouTube from 'react-youtube';
@@ -67,6 +71,13 @@ const PostFeed = () => {
       setIsLoading(false);
     }
   }, [channelId, token, page, hasMore, isLoading]);
+
+  const refreshPosts = useCallback(async () => {
+    setPage(0);
+    setPosts([]);
+    setHasMore(true);
+    await fetchPosts();
+  }, [fetchPosts]);
 
   useEffect(() => {
     fetchPosts();
@@ -152,6 +163,31 @@ const PostFeed = () => {
     [userId],
   );
 
+  const handlePostDelete = useCallback(async (postId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await deletePost(postId, token);
+
+      // UI 업데이트
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      setIsModalOpen(false);
+      setSelectedPost(null);
+
+      // 성공 메시지 표시
+      alert('게시글이 삭제되었습니다.');
+    } catch (error) {
+      console.error('게시글 삭제 중 오류 발생:', error);
+      // 오류 발생 시에도 UI 업데이트
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      setIsModalOpen(false);
+      setSelectedPost(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
@@ -194,6 +230,7 @@ const PostFeed = () => {
           post={selectedPost}
           onClose={handleCloseModal}
           onLikeUpdate={handleLikeUpdate}
+          onPostDelete={handlePostDelete}
         />
       )}
     </PageContainer>
