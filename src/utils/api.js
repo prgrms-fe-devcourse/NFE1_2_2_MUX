@@ -157,3 +157,54 @@ export const updatePassword = async (newPassword, token) => {
     throw error; // 에러 던지기
   }
 };
+
+// 음원 업로드 API 호출
+export const createTrack = async (formData, token) => {
+  try {
+    const response = await axios.post('/api/posts/create', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};
+
+// 특정 채널의 포스트 목록을 가져오는 API
+export const getChannelPosts = async (
+  channelId,
+  offset = 0,
+  limit = 10,
+  token,
+) => {
+  try {
+    const response = await axios.get(`/api/posts/channel/${channelId}`, {
+      params: { offset, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching channel posts:', error);
+    throw error;
+  }
+};
+
+// 유저의 포스트 목록을 가져오는 함수
+export const fetchPostsByAuthor = async (authorId, offset = 0, limit = 10) => {
+  try {
+    const response = await axios.get(`/api/posts/author/${authorId}`, {
+      params: {
+        offset, // 페이징을 위한 offset 파라미터
+        limit, // 페이징을 위한 limit 파라미터
+      },
+    });
+    return response.data; // 포스트 목록 리턴
+  } catch (error) {
+    console.error('Error fetching posts by author:', error);
+    throw error; // 에러가 발생하면 throw
+  }
+};
