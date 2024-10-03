@@ -1,81 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';  // useNavigate 추가
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getUserData, fetchPostsByAuthor, logout } from '../utils/api';  // 기존 API 사용
+import { fetchPostsByAuthor, logout } from '../utils/api'; 
 import PostCard from '../components/PostCard';
-import defaultProfileImage from '../assets/images/default-profile.png';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
+import defaultProfileImage from '../assets/images/default-profile.png';
 
-const ProfilePageWrapper = ({ user, token }) => {
-  const { userId } = useParams();
-  const [userData, setUserData] = useState(null);
-  const [error, setError] = useState(null);
-  const isMyPage = user && userId === user._id;
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!isMyPage) {
-        try {
-          const data = await getUserData(userId, token);
-          setUserData(data);
-        } catch (err) {
-          console.error('유저 정보 불러오기 실패:', err);
-          setError('유저 정보를 불러오는 데 실패했습니다.');
-        }
-      } else {
-        setUserData(user);
-      }
-    };
-
-    fetchUserData();
-  }, [userId, isMyPage, token, user]);
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
-  if (!userData) {
-    return <p>유저 정보를 불러오는 중...</p>;
-  }
-
-  return <ProfilePage user={userData} isMyPage={isMyPage} token={token} />;
-};
-
-const ProfilePage = ({ user, isMyPage, token }) => {
+const ProfilePage = ({ user, isMyPage }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const navigate = useNavigate();  // useNavigate 훅 사용
+  const navigate = useNavigate();
 
+  // 유저가 작성한 포스트를 불러옴
   useEffect(() => {
-    const loadPosts = async () => {
-      if (user) {
+    const loadUserPosts = async () => {
+      if (user?._id) {
         try {
           const fetchedPosts = await fetchPostsByAuthor(user._id);
           setPosts(fetchedPosts);
         } catch (err) {
-          console.error('포스트를 불러오는 데 실패했습니다:', err);
           setError('포스트를 불러오는 데 실패했습니다.');
         }
       }
     };
-
-    loadPosts();
-  }, [user]);
+    loadUserPosts();
+  }, [user?._id]);
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // 로그아웃 처리 함수
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      // 로그아웃 요청 처리
       await logout();
-
-      // 로컬 스토리지에서 로그인 상태 정보 삭제
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-
-      // 로그인 페이지로 리다이렉션
       navigate('/login');
     } catch (error) {
       console.error('로그아웃 실패:', error);
@@ -84,14 +44,16 @@ const ProfilePage = ({ user, isMyPage, token }) => {
     }
   };
 
+  // 유저 데이터가 없을 경우 로딩 메시지 출력
   if (!user) {
     return <p>사용자 정보를 불러오는 중입니다...</p>;
   }
 
+  // 유저의 fullName을 JSON 파싱
   let userFullName = {};
   try {
     userFullName = typeof user.fullName === 'string' 
-      ? JSON.parse(user.fullName) 
+      ? JSON.parse(user.fullName)
       : user.fullName || {};
   } catch (err) {
     console.error('fullName 파싱 실패:', err);
@@ -136,18 +98,17 @@ const ProfilePage = ({ user, isMyPage, token }) => {
           <h2>{userFullName.nickName || '이름 없음'}의 음원</h2>
         </MusicSection>
       </Content>
-
       {isEditModalOpen && (
         <ProfileEditModal 
           user={user} 
-          closeModal={() => setEditModalOpen(false)} 
+          closeModal={() => setEditModalOpen(false)}  
         />
       )}
     </Container>
   );
 };
 
-export default ProfilePageWrapper; 
+export default ProfilePage;
 
 // Styled Components
 const Container = styled.div`
@@ -178,20 +139,16 @@ const ProfileInfo = styled.div`
 `;
 
 const ProfileHeader = styled.div`
-  align-items: center;
   display: flex;
   justify-content: space-between;
-
   h2 {
     font-size: 1.3rem;
     font-weight: 600;
     margin: 3px 3px;
   }
-
   position: relative;
 `;
 
-// 회원정보 수정 버튼 스타일
 const EditButton = styled.button`
   padding: 5px 10px;
   background-color: transparent;
@@ -202,24 +159,21 @@ const EditButton = styled.button`
   position: absolute;
   left: 180px;
   top: 30px;
-
   &:hover {
     color: #a9a9a9;
   }
 `;
 
-// 로그아웃 버튼 스타일
 const LogoutButton = styled.button`
   padding: 5px 10px;
   background-color: transparent;
-  color: #808080; /* 빨간색 글씨 */
+  color: #808080;
   border: none;
   font-size: 0.8rem;
   cursor: pointer;
   position: absolute;
   left: 180px;
   top: 10px;
-
   &:hover {
     color: #a9a9a9;
   }
@@ -228,7 +182,6 @@ const LogoutButton = styled.button`
 const Role = styled.div`
   text-align: center;
   font-weight: 700;
-
   div {
     width: 120px;
     display: flex;
@@ -248,7 +201,6 @@ const Bio = styled.div`
   width: 300px;
   height: 80px;
   border-radius: 10px;
-
   p {
     font-size: 0.9rem;
     padding: 10px;
@@ -260,7 +212,6 @@ const Bio = styled.div`
 const Content = styled.div`
   display: flex;
   justify-content: space-between;
-
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -270,7 +221,6 @@ const PostSection = styled.div`
   flex: 2;
   padding-right: 20px;
   position: relative;
-
   h2 {
     font-size: 20px;
     font-weight: 400;
@@ -284,7 +234,6 @@ const MusicSection = styled.div`
   flex: 1;
   min-width: 250px;
   padding-left: 20px;
-
   h2 {
     font-size: 20px;
     font-weight: 400;
@@ -292,7 +241,6 @@ const MusicSection = styled.div`
     padding-bottom: 10px;
     margin-bottom: 20px;
   }
-
   @media (max-width: 768px) {
     padding-left: 0;
     border-left: none;
@@ -303,7 +251,6 @@ const Separator = styled.div`
   width: 1px;
   background-color: #000000;
   height: auto;
-
   @media (max-width: 768px) {
     display: none;
   }
