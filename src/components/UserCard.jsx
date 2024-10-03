@@ -4,8 +4,9 @@ import ExampleImage from '../assets/images/default-profile.png';
 import { useNavigate } from 'react-router-dom';
 import { getUsers } from '../utils/api'; 
 
-const UserCard = ({ user, onNavigate }) => {
+const UserCard = ({ user, navigate }) => {
   const { image, fullName, role, _id } = user;
+  // 코멘트가 50자를 넘을 경우 자르고 '...'을 붙임
 
   let nickName = '...';
   let bio = '...';
@@ -15,36 +16,35 @@ const UserCard = ({ user, onNavigate }) => {
     try {
       const parsedFullName = JSON.parse(fullName);
       nickName = parsedFullName.nickName || nickName;
-      bio = parsedFullName.bio || bio;
+      bio = parsedFullName.bio || bio; // bio도 파싱
     } catch (error) {
       console.error('fullName 파싱 오류:', error);
     }
   }
 
   // bio가 50자를 넘으면 자르기
-  const truncatedBio = bio.length > 50 ? bio.slice(0, 50) + '...' : bio;
+  const Introduce = bio.length > 50 ? bio.slice(0, 50) + '...' : bio;
 
   const handleCardClick = () => {
-    onNavigate(`/userpage/${_id}`);
+    navigate(`/user/${_id}`);
   };
 
   return (
-    <StyledCard onClick={handleCardClick}>
-      <StyledProfileImage src={image || ExampleImage} alt={nickName} /> {/* 프로필 이미지 */}
-      <StyledUserInfo>
-        <StyledUserName>{nickName}</StyledUserName> {/* 유저 이름 */}
-        <StyledUserRole>{role}</StyledUserRole> {/* 유저 역할 */}
-        <StyledUserBio>{truncatedBio}</StyledUserBio> {/* 유저 자기소개 */}
-      </StyledUserInfo>
-    </StyledCard>
+    <Card onClick={handleCardClick}>
+      <ProfileImage src={image || ExampleImage} alt={nickName} /> {/* 프로필 이미지 */}
+      <UserInfo>
+        <UserName>{nickName}</UserName> {/* 유저 이름 */}
+        <UserTitle>{role}</UserTitle> {/* 유저 역할 */}
+        <UserBio>{Introduce}</UserBio> {/* 유저 자기소개 */}
+      </UserInfo>
+    </Card>
   );
 };
 
 const App = () => {
   const [users, setUsers] = useState([]);
-  const navigate = useNavigate(); // useNavigate 훅
+  const navigate = useNavigate();
 
-  // API 호출을 통해 유저 데이터 가져오기
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -55,17 +55,17 @@ const App = () => {
       }
     };
 
-    fetchUsers();
+    fetchUsers(); // 유저 데이터 가져오기
   }, []);
 
   return (
     <div>
       <h1>유저 카드 리스트</h1>
-      <StyledUserList>
+      <UserList>
         {users.map((user) => (
-          <UserCard key={user._id} user={user} onNavigate={navigate} />
+          <UserCard key={user._id} user={user} navigate={navigate} /> // navigate 전달
         ))}
-      </StyledUserList>
+      </UserList>
     </div>
   );
 };
@@ -73,38 +73,34 @@ const App = () => {
 export default App;
 
 // Styled Components
-const StyledCard = styled.div`
+const Card = styled.div`
   display: flex;
   align-items: center;
   width: 420px;
   border-radius: 16px;
   padding: 8px;
-
-  &:hover {
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
 `;
 
-const StyledProfileImage = styled.img`
+const ProfileImage = styled.img`
   width: 80px;
   height: 80px;
   border-radius: 50%;
 `;
 
-const StyledUserInfo = styled.div`
+const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   margin-left: 17px;
 `;
 
-const StyledUserName = styled.h2`
+const UserName = styled.h2`
   font-size: 1em;
   margin: 0;
   color: #333;
 `;
 
-const StyledUserRole = styled.p`
+const UserTitle = styled.p`
   margin: 5px 0;
   display: flex;
   justify-content: center;
@@ -114,10 +110,10 @@ const StyledUserRole = styled.p`
   border-radius: 35px;
   font-size: 12px;
   color: #474150;
-  white-space: nowrap;
+  white-space: nowrap; /* 긴 텍스트가 줄 바꿈되지 않도록 */
 `;
 
-const StyledUserBio = styled.p`
+const UserBio = styled.p`
   margin: 5px 0;
   text-align: left;
   padding: 13px;
@@ -129,7 +125,7 @@ const StyledUserBio = styled.p`
   color: white;
 `;
 
-const StyledUserList = styled.div`
+const UserList = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;

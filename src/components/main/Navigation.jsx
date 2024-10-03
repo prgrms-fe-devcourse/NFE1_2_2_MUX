@@ -32,7 +32,7 @@ const Navigation = () => {
   // 프로필 클릭 시 해당 유저 페이지로 이동
   const handleProfileClick = () => {
     if (user && user._id) {
-      navigate(`/userpage/${user._id}`); // 유저의 _id를 기반으로 이동
+      navigate(`/user/${user._id}`); // 유저의 _id를 기반으로 이동
     }
   };
 
@@ -124,10 +124,6 @@ const HeaderContainer = styled.header`
   justify-content: space-between;
   padding: 5px 10px;
   background-color: #f8f9fa;
-
-  @media (max-width: 768px) {
-    align-items: flex-start; /* 왼쪽 정렬 */
-  }
 `;
 
 const Logo = styled.div`
@@ -141,9 +137,6 @@ const Navbar = styled.nav`
   display: flex;
   gap: 20px;
 
-  @media (max-width: 768px) {
-    /* flex-wrap: wrap; 아이템이 많아지면 줄바꿈 */
-  }
 `;
 
 const NavItem = styled.a`
@@ -236,7 +229,7 @@ const ProfileSection = styled.div`
 
   .title {
     display: flex;
-    padding: 10px 30px;
+    padding: 5px 30px;
     background: #ede4db;
     border-radius: 35px;
     font-size: 14px;
@@ -255,10 +248,10 @@ const ProfileSection = styled.div`
     width: 40px;
     height: 40px;
     margin-left: 5px;
+    margin-top: 5px;
   }
 
   img.notification {
-    margin-left: 5px;
     width: 24px;
     height: 24px;
   }

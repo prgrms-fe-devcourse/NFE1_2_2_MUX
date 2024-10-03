@@ -27,6 +27,28 @@ export const login = async (email, password) => {
   return response.data;
 };
 
+// 로그아웃 API 호출 함수
+export const logout = async () => {
+  try {
+    // 로그아웃 요청 보내기
+    const response = await fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('로그아웃 실패');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('로그아웃 중 오류 발생:', error);
+    throw error;
+  }
+};
+
 // 사용자 정보 가져오기 API 호출
 export const getUserData = async (userId, token) => {
   if (!userId) {
@@ -152,5 +174,21 @@ export const getChannelPosts = async (
   } catch (error) {
     console.error('Error fetching channel posts:', error);
     throw error;
+  }
+};
+
+// 유저의 포스트 목록을 가져오는 함수
+export const fetchPostsByAuthor = async (authorId, offset = 0, limit = 10) => {
+  try {
+    const response = await axios.get(`/api/posts/author/${authorId}`, {
+      params: {
+        offset, // 페이징을 위한 offset 파라미터
+        limit, // 페이징을 위한 limit 파라미터
+      },
+    });
+    return response.data; // 포스트 목록 리턴
+  } catch (error) {
+    console.error('Error fetching posts by author:', error);
+    throw error; // 에러가 발생하면 throw
   }
 };
