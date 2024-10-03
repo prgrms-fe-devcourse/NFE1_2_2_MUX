@@ -5,6 +5,7 @@ import playButtonIcon from '../../assets/icons/play-button.png';
 import stopButtonIcon from '../../assets/icons/stop-button.png';
 import defaultAlbumImage from '../../assets/images/default-album.png';
 import { createTrack, getUserData } from '../../utils/api';
+import { uploadToS3 } from '../../utils/s3';
 import { v4 as uuidv4 } from 'uuid';
 
 const TrackUpload = ({ onTrackSuccess }) => {
@@ -14,6 +15,7 @@ const TrackUpload = ({ onTrackSuccess }) => {
   const [showUploadedContent, setShowUploadedContent] = useState(false);
   const [selectedAlbumImage, setSelectedAlbumImage] =
     useState(defaultAlbumImage);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(defaultAlbumImage);
   const [songTitle, setSongTitle] = useState('');
   const [songDescription, setSongDescription] = useState('');
   const [audioErrorMessage, setAudioErrorMessage] = useState('');
@@ -136,7 +138,9 @@ const TrackUpload = ({ onTrackSuccess }) => {
       return;
     }
 
-    setSelectedAlbumImage(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+    setSelectedAlbumImage(file);
+    setImagePreviewUrl(previewUrl);
     setImageErrorMessage('');
   };
 
@@ -168,6 +172,7 @@ const TrackUpload = ({ onTrackSuccess }) => {
   const handlePrevStep = () => {
     setShowUploadedContent(false);
     setSelectedFile(null);
+    setImagePreviewUrl(defaultAlbumImage);
     setSelectedAlbumImage(defaultAlbumImage);
     setSongTitle('');
     setSongDescription('');
@@ -185,18 +190,13 @@ const TrackUpload = ({ onTrackSuccess }) => {
     const fetchUserNickname = async () => {
       const token = localStorage.getItem('token');
       const userData = JSON.parse(localStorage.getItem('user'));
-      
+
       if (userData && token) {
         try {
           const user = await getUserData(userData.id || userData._id, token);
-          
-          // Parse the fullName JSON string
           const fullNameData = JSON.parse(user.fullName);
-          
-          // Extract the nickName
           const nickName = fullNameData.nickName;
-          
-          // Set the artist name to the nickName
+
           setArtistName(nickName);
         } catch (error) {
           console.error('Failed to fetch user nickname:', error);
@@ -204,7 +204,7 @@ const TrackUpload = ({ onTrackSuccess }) => {
         }
       }
     };
-  
+
     fetchUserNickname();
   }, []);
 
@@ -231,18 +231,20 @@ const TrackUpload = ({ onTrackSuccess }) => {
       setErrorMessage('로그인이 필요합니다.');
       return;
     }
-
-    const generatedVideoId = uuidv4();
-    
     try {
+      const imageUrl = await uploadToS3(selectedAlbumImage);
+      const audioUrl = await uploadToS3(selectedFile); // 음원 파일 업로드
+
+      const generatedVideoId = uuidv4();
       const trackData = {
         title: songTitle,
         albums: [
           {
             title: songTitle,
             artist: artistName,
-            coverUrl: selectedAlbumImage,
+            coverUrl: imageUrl,
             videoId: generatedVideoId,
+            videoUrl: audioUrl,
           },
         ],
         description: songDescription,
@@ -251,7 +253,6 @@ const TrackUpload = ({ onTrackSuccess }) => {
       const formData = new FormData();
       formData.append('title', JSON.stringify(trackData));
       formData.append('channelId', '66fb53f9ed2d3c14a64eb9ea');
-      formData.append('image', selectedAlbumImage);
 
       const response = await createTrack(formData, token);
       console.log('Track uploaded successfully:', response);
@@ -261,6 +262,7 @@ const TrackUpload = ({ onTrackSuccess }) => {
       // 업로드 후 상태 초기화
       setShowUploadedContent(false);
       setSelectedFile(null);
+      setImagePreviewUrl(defaultAlbumImage);
       setSelectedAlbumImage(defaultAlbumImage);
       setSongTitle('');
       setSongDescription('');
@@ -323,7 +325,10 @@ const TrackUpload = ({ onTrackSuccess }) => {
           <LeftSection>
             <AlbumSection>
               <AlbumCover onClick={handleAlbumCoverDelete}>
-                <img src={selectedAlbumImage} alt="앨범 이미지" />
+                <img
+                  src={imagePreviewUrl || defaultAlbumImage}
+                  alt="앨범 이미지"
+                />
               </AlbumCover>
               <CoverChangeContainer
                 onClick={() =>
