@@ -91,7 +91,7 @@ const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
       setComments(sortedComments);
-      console.log('Sorted comments:', sortedComments);
+      // console.log('Sorted comments:', sortedComments);
     }
   }, [post]);
 
@@ -278,13 +278,14 @@ const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
           </CommentForm>
 
           {comments.map((commentItem) => {
+            /*
             console.log('Comment item:', commentItem);
             console.log('Comment author ID:', commentItem.author._id);
             console.log('Current user ID:', currentUser?._id);
             console.log(
               'Is author:',
               currentUser?._id === commentItem.author._id,
-            );
+            );*/
 
             return (
               <CommentItem key={commentItem._id}>
