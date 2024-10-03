@@ -27,6 +27,28 @@ export const login = async (email, password) => {
   return response.data;
 };
 
+// 로그아웃 API 호출 함수
+export const logout = async () => {
+  try {
+    // 로그아웃 요청 보내기
+    const response = await fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('로그아웃 실패');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('로그아웃 중 오류 발생:', error);
+    throw error;
+  }
+};
+
 // 사용자 정보 가져오기 API 호출
 export const getUserData = async (userId, token) => {
   if (!userId) {
@@ -90,7 +112,7 @@ export const updateUser = async (userId, token, updatedData) => {
   }
 };
 
-// 포스트의 좋아요 및 댓글 수 가져오기
+// 포스트의 좋아요 및 댓글 수를 가져오는 API
 export const fetchPostReactions = async (postId) => {
   try {
     const response = await axios.get(`${API_HOST}/posts/${postId}`);
@@ -133,21 +155,5 @@ export const updatePassword = async (newPassword, token) => {
   } catch (error) {
     console.error('Error updating password:', error);
     throw error; // 에러 던지기
-  }
-};
-
-// 음원 업로드 API 호출
-export const createTrack = async (formData, token) => {
-  try {
-    const response = await axios.post('/api/posts/create', formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error creating post:', error);
-    throw error;
   }
 };
