@@ -7,12 +7,14 @@ import UserCard from '../components/UserCard';
 import UserProfile from '../components/UserProfile';
 import CurationCard from '../components/CurationCard';
 import ReactionCount from '../components/ReactionCount'; // 리액션 카운트 컴포넌트
+import ArtistCard from '../components/ArtistCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchUserData = useCallback(async () => {
@@ -57,26 +59,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      try {
-        await fetchUserData();
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error in useEffect:', error);
-          setError('Failed to load user data');
-        }
-      }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
+    fetchUserData();
   }, [fetchUserData]);
 
   const updateUserDetails = useCallback((updatedUser) => {
@@ -139,6 +122,7 @@ const Dashboard = () => {
         />
       )}
       <CurationCard />
+      <ArtistCard />
     </DashboardContainer>
   );
 };
