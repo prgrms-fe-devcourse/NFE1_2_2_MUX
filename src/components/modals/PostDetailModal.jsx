@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import PreviousBtn from '../../assets/icons/Previous-Btn.png';
 import NextBtn from '../../assets/icons/Next-Btn.png';
@@ -12,21 +12,33 @@ import {
   addComment,
   deleteComment,
   getAuthUserData,
+  getPostDetails,
 } from '../../utils/api.js';
 
-const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
+const PostDetailModal = ({ post: initialPost, onClose, onLikeUpdate }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [currentLikeId, setCurrentLikeId] = useState(null);
   const [comments, setComments] = useState([]);
-  const token = localStorage.getItem('token');
-  const [userId, setUserId] = useState(null);
-  const playerRef = useRef(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [post, setPost] = useState(initialPost);
+  const token = localStorage.getItem('token');
+  const playerRef = useRef(null);
+
+  const fetchPostDetails = useCallback(async () => {
+    try {
+      if (post && token) {
+        const updatedPost = await getPostDetails(post._id, token);
+        setPost(updatedPost);
+        updateLikeStatus(updatedPost);
+      }
+    } catch (error) {
+      console.error('Failed to fetch post details:', error);
+    }
+  }, [post, token]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,7 +46,6 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
         if (token) {
           const userData = await getAuthUserData(token);
           setCurrentUser(userData);
-          console.log('Current user:', userData);
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
@@ -42,13 +53,21 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
     };
 
     fetchUserData();
-  }, [token]);
+    fetchPostDetails();
+  }, [token, fetchPostDetails]);
 
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    setUserId(storedUserId);
-    console.log('Current userId:', storedUserId);
-  }, []);
+  const updateLikeStatus = useCallback(
+    (updatedPost) => {
+      if (currentUser) {
+        const userLike = updatedPost.likes.find(
+          (like) => like.user === currentUser._id,
+        );
+        setIsLiked(!!userLike);
+        setLikeCount(updatedPost.likes.length);
+      }
+    },
+    [currentUser],
+  );
 
   if (!post) return null;
 
@@ -68,52 +87,46 @@ const PostDetailModal = ({ post, onClose, onLikeUpdate }) => {
 
   useEffect(() => {
     if (post) {
-      const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
-      const isPostLiked = likedPosts[post._id] !== undefined;
-      setIsLiked(likedPosts[post._id] || false);
-      setLikeCount(post.likes.length);
-      setCurrentLikeId(isPostLiked ? likedPosts[post._id] : null);
-
-      // 댓글을 최신 순으로 정렬
       const sortedComments = [...post.comments].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
       setComments(sortedComments);
-
       console.log('Sorted comments:', sortedComments);
     }
   }, [post]);
 
   const handleLike = async () => {
     try {
-      const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
+      // 즉시 UI 업데이트
+      setIsLiked(!isLiked);
+      setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
 
       if (isLiked) {
-        await removeLike(currentLikeId, token);
-        setLikeCount((prev) => prev - 1);
-        setIsLiked(false);
-        setCurrentLikeId(null);
-        delete likedPosts[post._id];
+        const likeToRemove = post.likes.find(
+          (like) => like.user === currentUser._id,
+        );
+        if (likeToRemove) {
+          await removeLike(likeToRemove._id, token);
+        }
       } else {
-        const likeResponse = await addLike(post._id, token);
-        setLikeCount((prev) => prev + 1);
-        setIsLiked(true);
-        setCurrentLikeId(likeResponse._id);
-        likedPosts[post._id] = likeResponse._id;
+        await addLike(post._id, token);
       }
 
-      localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+      // 서버에서 최신 데이터 가져오기
+      const updatedPost = await getPostDetails(post._id, token);
+      setPost(updatedPost);
+      updateLikeStatus(updatedPost);
 
+      // 부모 컴포넌트에 좋아요 상태 변경을 알림
       if (onLikeUpdate) {
-        onLikeUpdate(
-          post._id,
-          !isLiked,
-          isLiked ? likeCount - 1 : likeCount + 1,
-        );
+        onLikeUpdate(post._id, !isLiked, updatedPost.likes.length);
       }
     } catch (error) {
       console.error('좋아요 처리 중 오류 발생:', error);
       alert('좋아요 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      // 오류 발생 시 원래 상태로 되돌리기
+      setIsLiked(!isLiked);
+      setLikeCount((prevCount) => (isLiked ? prevCount + 1 : prevCount - 1));
     }
   };
 

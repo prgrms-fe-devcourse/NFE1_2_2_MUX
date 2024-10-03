@@ -158,7 +158,7 @@ export const getChannelPosts = async (
 // 특정 포스트 상세 정보 가져오기
 export const getPostDetails = async (postId, token) => {
   try {
-    const response = await axios.get(`api/posts/${postId}`, {
+    const response = await axios.get(`/api/posts/${postId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
