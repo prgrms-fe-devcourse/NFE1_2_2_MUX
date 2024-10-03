@@ -5,7 +5,7 @@ import defaultProfileImage from '../assets/images/default-profile.png';
 import playButtonIcon from '../assets/icons/play-button.png';
 import pauseButtonIcon from '../assets/icons/stop-button.png'; // 일시정지 아이콘 추가
 
-const PostCard = ({ post, onPlayPause, isPlaying }) => {
+const PostCard = ({ post, onPlayPause, isPlaying, onClick }) => {
   const { _id, author } = post;
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
@@ -37,7 +37,7 @@ const PostCard = ({ post, onPlayPause, isPlaying }) => {
   };
 
   return (
-    <Card onClick={() => navigate(`/posts/${_id}`)}>
+    <Card onClick={() => onClick(post._id)}>
       <CardHeader>
         <AuthorImage src={author.image || defaultProfileImage} alt={nickName} />
         <AuthorName>{nickName}</AuthorName>

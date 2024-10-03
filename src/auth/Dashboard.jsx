@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchUserData = useCallback(async () => {
@@ -57,26 +58,7 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const loadData = async () => {
-      try {
-        await fetchUserData();
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error in useEffect:', error);
-          setError('Failed to load user data');
-        }
-      }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
+    fetchUserData();
   }, [fetchUserData]);
 
   const updateUserDetails = useCallback((updatedUser) => {

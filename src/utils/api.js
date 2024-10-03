@@ -193,6 +193,121 @@ export const getChannelPosts = async (
   }
 };
 
+// 특정 포스트 상세 정보 가져오기
+export const getPostDetails = async (postId, token) => {
+  try {
+    const response = await axios.get(`/api/posts/${postId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+    throw error;
+  }
+};
+
+// 좋아요 추가
+export const addLike = async (postId, token) => {
+  try {
+    const response = await axios.post(
+      '/api/likes/create',
+      { postId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error adding like:', error);
+    throw error;
+  }
+};
+
+// 좋아요 취소 API 호출
+export const removeLike = async (likeId, token) => {
+  try {
+    const response = await axios.delete('/api/likes/delete', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { id: likeId }, // body로 likeId 전달
+    });
+    return response.data;
+  } catch (error) {
+    console.error('좋아요 취소 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+// 댓글 추가 API 호출
+export const addComment = async (postId, comment, token) => {
+  try {
+    const response = await axios.post(
+      '/api/comments/create',
+      { postId, comment },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data; // 서버에서 반환하는 댓글 데이터
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+};
+
+// 댓글 삭제 API 호출
+export const deleteComment = async (commentId, token) => {
+  try {
+    const response = await axios.delete('/api/comments/delete', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { id: commentId }, // body에 commentId 전송
+    });
+    return response.data;
+  } catch (error) {
+    console.error('댓글 삭제 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+export const getAuthUserData = async (token) => {
+  try {
+    const response = await axios.get('/api/auth-user', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    throw error;
+  }
+};
+
+export const deletePost = async (postId, token) => {
+  try {
+    const response = await axios.delete('/api/posts/delete', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: { id: postId },
+    });
+    return response.data;
+  } catch (error) {
+    console.warn('게시글 삭제 중 서버 오류 발생:', error);
+    // 오류가 발생해도 상위로 전파하여 PostFeed에서 처리하도록 함
+    throw error;
+  }
+};
+
 // 유저의 포스트 목록을 가져오는 함수
 export const fetchPostsByAuthor = async (authorId, offset = 0, limit = 10) => {
   try {

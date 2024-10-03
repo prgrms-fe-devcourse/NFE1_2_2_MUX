@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import { getChannelPosts, createPost } from '../../utils/api.js';
+import {
+  getChannelPosts,
+  getPostDetails,
+  deletePost,
+} from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
+import PostDetailModal from '../../components/modals/PostDetailModal.jsx';
 import YouTube from 'react-youtube';
 
 const PostFeed = () => {
@@ -13,8 +18,11 @@ const PostFeed = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingPostId, setPlayingPostId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const playerRef = useRef(null);
   const observer = useRef();
+
   const lastPostElementRef = useCallback(
     (node) => {
       if (isLoading) return;
@@ -31,6 +39,7 @@ const PostFeed = () => {
 
   const channelId = '66fb541ced2d3c14a64eb9ee';
   const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
   const POSTS_PER_PAGE = 12;
 
   const fetchPosts = useCallback(async () => {
@@ -62,6 +71,13 @@ const PostFeed = () => {
       setIsLoading(false);
     }
   }, [channelId, token, page, hasMore, isLoading]);
+
+  const refreshPosts = useCallback(async () => {
+    setPage(0);
+    setPosts([]);
+    setHasMore(true);
+    await fetchPosts();
+  }, [fetchPosts]);
 
   useEffect(() => {
     fetchPosts();
@@ -103,15 +119,74 @@ const PostFeed = () => {
     }
   };
 
-  const handleCreatePost = async (newPostData) => {
+  const handlePostClick = useCallback(
+    async (postId) => {
+      try {
+        const postDetails = await getPostDetails(postId, token);
+        if (postDetails) {
+          setSelectedPost(postDetails);
+          setIsModalOpen(true);
+        } else {
+          throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+        alert(
+          '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+        );
+      }
+    },
+    [token],
+  );
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  }, []);
+
+  const handleLikeUpdate = useCallback(
+    (postId, isLiked, newLikeCount) => {
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? {
+                ...post,
+                likes: isLiked
+                  ? [...post.likes, { user: userId }]
+                  : post.likes.filter((like) => like.user !== userId),
+                likeCount: newLikeCount,
+              }
+            : post,
+        ),
+      );
+    },
+    [userId],
+  );
+
+  const handlePostDelete = useCallback(async (postId) => {
     try {
-      const createdPost = await createPost(newPostData, token);
-      setPosts((prevPosts) => [createdPost, ...prevPosts]);
-    } catch (err) {
-      console.error('Failed to create post:', err);
-      setError('게시글 생성에 실패했습니다.');
+      const token = localStorage.getItem('token');
+      await deletePost(postId, token);
+
+      // UI 업데이트
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      setIsModalOpen(false);
+      setSelectedPost(null);
+
+      // 성공 메시지 표시
+      alert('게시글이 삭제되었습니다.');
+    } catch (error) {
+      console.error('게시글 삭제 중 오류 발생:', error);
+      // 오류 발생 시에도 UI 업데이트
+      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+      setIsModalOpen(false);
+      setSelectedPost(null);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
@@ -127,6 +202,7 @@ const PostFeed = () => {
                 post={post}
                 onPlayPause={handlePlayPause}
                 isPlaying={playingPostId === post._id && isPlaying}
+                onClick={() => handlePostClick(post._id)}
               />
             </div>
           ))}
@@ -149,6 +225,14 @@ const PostFeed = () => {
           onStateChange={handleStateChange}
         />
       </YouTubePlayerContainer>
+      {isModalOpen && selectedPost && (
+        <PostDetailModal
+          post={selectedPost}
+          onClose={handleCloseModal}
+          onLikeUpdate={handleLikeUpdate}
+          onPostDelete={handlePostDelete}
+        />
+      )}
     </PageContainer>
   );
 };
