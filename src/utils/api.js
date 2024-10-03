@@ -158,6 +158,22 @@ export const updatePassword = async (newPassword, token) => {
   }
 };
 
+// 음원 업로드 API 호출
+export const createTrack = async (formData, token) => {
+  try {
+    const response = await axios.post('/api/posts/create', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating post:', error);
+    throw error;
+  }
+};
+
 // 특정 채널의 포스트 목록을 가져오는 API
 export const getChannelPosts = async (
   channelId,
