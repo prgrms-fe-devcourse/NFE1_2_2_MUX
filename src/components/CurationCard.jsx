@@ -1,84 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import YouTube from 'react-youtube';
+import axios from 'axios';
 import playButtonIcon from '../assets/icons/play-button.png';
 import stopButtonIcon from '../assets/icons/stop-button.png';
 
-// 더미 데이터
-const dummyPosts = [
-    {
-        _id: "1",
-        title: "Album 1",
-        artist: "Artist 1",
-        coverUrl: "https://via.placeholder.com/200",
-        videoId: "dQw4w9WgXcQ", // 예시 비디오 ID
-    },
-    {
-        _id: "2",
-        title: "Album 2",
-        artist: "Artist 2",
-        coverUrl: "https://via.placeholder.com/200",
-        videoId: "eYq7WapuZJ8", // 예시 비디오 ID
-    },
-    {
-        _id: "3",
-        title: "Album 3",
-        artist: "Artist 3",
-        coverUrl: "https://via.placeholder.com/200",
-        videoId: "2Vv-BfVoq4g", // 예시 비디오 ID
-    },
-];
-
 const AlbumCurationCard = () => {
+    const [albums, setAlbums] = useState([]);
     const [playingVideoId, setPlayingVideoId] = useState(null);
-    const [player, setPlayer] = useState(null);
+    const playerRef = useRef(null);
 
-    // YouTube Player 설정
+    useEffect(() => {
+        const fetchTopAlbums = async () => {
+            const options = {
+                method: 'GET',
+                url: 'https://youtube-music6.p.rapidapi.com/ytmusic/',
+                params: { query: '2024 k-pop song, 2024 j-pop' },
+                headers: {
+                    'x-rapidapi-key': '053f682234msh54d68575184242bp177e08jsn83138cb78fd6',
+                    'x-rapidapi-host': 'youtube-music6.p.rapidapi.com',
+                },
+            };
+
+            try {
+                const response = await axios.request(options);
+                const results = response.data || [];
+                setAlbums(results
+                    .filter(album => album.videoId && album.category !== 'Episodes')
+                    .map((album) => ({
+                        videoId: album.videoId,
+                        title: album.title,
+                        artist: album.artists && album.artists.length > 0 ? album.artists[0].name : 'Unknown Artist',
+                        coverUrl: album.thumbnails && album.thumbnails[0] ? album.thumbnails[0].url : '',
+                        duration: album.duration,
+                    })));
+            } catch (error) {
+                console.error('데이터 불러오는 중 오류 발생:', error);
+            }
+        };
+
+        fetchTopAlbums();
+    }, []);
+
     const onPlayerReady = (event) => {
-        setPlayer(event.target);
+        playerRef.current = event.target;
     };
 
-    // 재생/일시정지 처리
     const handlePlayPause = (videoId) => {
         if (playingVideoId === videoId) {
-            player.pauseVideo();
+            playerRef.current.pauseVideo();
             setPlayingVideoId(null);
         } else {
             setPlayingVideoId(videoId);
-            if (player) {
-                player.loadVideoById(videoId);
-                player.playVideo();
-            }
+            playerRef.current.loadVideoById(videoId);
+            playerRef.current.playVideo();
         }
     };
 
     const youtubeOptions = {
         height: '0',
         width: '0',
-        playerVars: { autoplay: 1 },
+        playerVars: {
+            autoplay: 1,
+            origin: window.location.origin,
+        },
     };
 
     return (
         <CardContainer>
-            {dummyPosts.map((album) => (
-                <AlbumContainer key={album._id}>
+            {albums.map((album) => (
+                <AlbumContainer key={album.videoId}>
                     <AlbumCover src={album.coverUrl} alt={album.title} />
                     <PlayPauseButtonContainer>
-                        <PlayPauseButton
-                            onClick={() => handlePlayPause(album.videoId)}
-                        >
+                        <PlayPauseButton onClick={() => handlePlayPause(album.videoId)}>
                             <img
                                 src={playingVideoId === album.videoId ? stopButtonIcon : playButtonIcon}
                                 alt="Play/Pause Button"
                             />
                         </PlayPauseButton>
                         {playingVideoId === album.videoId && (
-                        <YouTube
-                            videoId={album.videoId}
-                            opts={youtubeOptions}
-                            onReady={onPlayerReady}
-                        />
-                    )}
+                            <YouTube
+                                videoId={album.videoId}
+                                opts={youtubeOptions}
+                                onReady={onPlayerReady}
+                            />
+                        )}
                     </PlayPauseButtonContainer>
                     <AlbumInfo>
                         <AlbumTitle>{album.title}</AlbumTitle>
@@ -93,32 +99,38 @@ const AlbumCurationCard = () => {
 export default AlbumCurationCard;
 
 // Styled Components
+
 const CardContainer = styled.div`
-    display: flex; /* 플렉스 박스를 사용하여 카드 배열 */
-    flex-wrap: wrap; /* 여러 카드가 자동으로 줄 바꿈 */
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 20px;
+    caret-color: transparent;
+    margin-bottom: 30px;
+    -webkit-overflow-scrolling: touch;
 `;
 
 const AlbumContainer = styled.div`
-    position: relative;
+    flex: none;
     width: 200px;
-    height: 240px; /* 높이 조정 */
+    height: 240px;
     margin: 10px;
     cursor: pointer;
-    border-radius: 10px; /* 모서리 둥글게 */
-    overflow: hidden; /* 자식 요소가 컨테이너를 넘칠 경우 숨김 */
-    background-color: #c0afe3; /* 배경색 */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-    transition: transform 0.2s; /* 애니메이션 효과 */
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #c0afe3;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
     
     &:hover {
-        transform: scale(1.04); /* 마우스 오버 시 확대 효과 */
+        transform: scale(1.04);
     }
 `;
 
 const AlbumCover = styled.img`
     width: 90%;
     margin-top: 10px;
-    height: 170px; /* 앨범 커버 높이 설정 */
+    height: 170px;
     object-fit: cover;
 `;
 
@@ -132,10 +144,10 @@ const PlayPauseButtonContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    visibility: hidden; /* 기본적으로 버튼 숨기기 */
+    visibility: hidden;
 
     ${AlbumContainer}:hover & {
-        visibility: visible; /* 카드 호버 시 버튼 보이기 */
+        visibility: visible;
     }
 `;
 
@@ -167,6 +179,6 @@ const AlbumTitle = styled.h3`
 
 const AlbumArtist = styled.p`
     font-size: 13px;
-    color:#ffffff;
+    color: #ffffff;
     margin: 3px 0;
 `;
