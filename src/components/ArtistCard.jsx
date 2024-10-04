@@ -9,24 +9,23 @@ const ArtistCard = ({ artist, albumId, artistId, postId }) => {
   const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // 아티스트 상세페이지 이동 영역
+  // 유저 페이지 이동 부분
   const handleArtistClick = (e) => {
     e.stopPropagation();
     navigate(`/artist/${artistId}`);
   }; 
 
-  // 재생 목록에 음원 추가 영역 (안되면 자체적으로 음원 재생)
+  //가운데 앨범 클릭했을때 부분
   const handleAlbumClick = (e) => {
     e.stopPropagation();
     console.log(`앨범 ${albumId}를 재생목록에 추가`);
   };
 
-  // 음원 포스트 상세페이지 이동 영역
+  // 포스트 클릭했을
   const handlePostClick = () => {
     navigate(`/post/${postId}`);
   };
 
-  
   const togglePlayPause = (e) => {
     e.stopPropagation();
     setIsPlaying((prev) => !prev);
@@ -58,6 +57,7 @@ const ArtistCard = ({ artist, albumId, artistId, postId }) => {
           <SongInformation>이별 후 듣기 좋은 노래. 이별 후 듣기 좋은 노래. 이별 후 듣기 좋은 노래 ...더보기</SongInformation>
         </PostContent>
       </CardContent>
+      <ExtraSpace />
     </CardContainer>
   );
 };
@@ -67,6 +67,7 @@ export default ArtistCard;
 // 스타일드 컴포넌트
 const CardContainer = styled.div`
   width: 300px;
+  height: 480px; // 높이를 늘렸습니다
   background-color: #f3e8fb;
   border-radius: 15px;
   overflow: hidden;
@@ -74,6 +75,8 @@ const CardContainer = styled.div`
   cursor: pointer;
   font-family: 'Arial', sans-serif;
   transition: transform 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     transform: scale(1.02);
@@ -172,4 +175,9 @@ const SongInformation = styled.p`
   color: #666666;
   font-size: 12px;
   margin-bottom: 10px;
+`;
+
+const ExtraSpace = styled.div`
+  flex: 1;
+  // 필요에 따라 여기에 추가 스타일을 적용할 수 있습니다.
 `;
