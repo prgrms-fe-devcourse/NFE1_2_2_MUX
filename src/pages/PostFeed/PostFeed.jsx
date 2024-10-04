@@ -7,20 +7,15 @@ import {
 } from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
 import PostDetailModal from '../../components/modals/PostDetailModal.jsx';
-import YouTube from 'react-youtube';
 
 const PostFeed = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [currentVideoId, setCurrentVideoId] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playingPostId, setPlayingPostId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const playerRef = useRef(null);
   const observer = useRef();
 
   const lastPostElementRef = useCallback(
@@ -72,53 +67,6 @@ const PostFeed = () => {
     }
   }, [channelId, token, page, hasMore, isLoading]);
 
-  const refreshPosts = useCallback(async () => {
-    setPage(0);
-    setPosts([]);
-    setHasMore(true);
-    await fetchPosts();
-  }, [fetchPosts]);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const handlePlayPause = (videoId, postId) => {
-    if (
-      currentVideoId === videoId &&
-      playerRef.current &&
-      playerRef.current.internalPlayer
-    ) {
-      const playerState = playerRef.current.internalPlayer.getPlayerState();
-
-      if (playerState === 1) {
-        playerRef.current.internalPlayer.pauseVideo();
-        setIsPlaying(false);
-        setPlayingPostId(null);
-      } else {
-        playerRef.current.internalPlayer.playVideo();
-        setIsPlaying(true);
-        setPlayingPostId(postId);
-      }
-    } else {
-      setCurrentVideoId(videoId);
-      setPlayingPostId(postId);
-      if (playerRef.current && playerRef.current.internalPlayer) {
-        playerRef.current.internalPlayer.loadVideoById(videoId);
-        playerRef.current.internalPlayer.playVideo();
-        setIsPlaying(true);
-      }
-    }
-  };
-
-  const handleStateChange = (event) => {
-    if (event.data === 1) {
-      setIsPlaying(true);
-    } else if (event.data === 2 || event.data === 0) {
-      setIsPlaying(false);
-    }
-  };
-
   const handlePostClick = useCallback(
     async (postId) => {
       try {
@@ -168,16 +116,13 @@ const PostFeed = () => {
       const token = localStorage.getItem('token');
       await deletePost(postId, token);
 
-      // UI 업데이트
       setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
       setIsModalOpen(false);
       setSelectedPost(null);
 
-      // 성공 메시지 표시
       alert('게시글이 삭제되었습니다.');
     } catch (error) {
       console.error('게시글 삭제 중 오류 발생:', error);
-      // 오류 발생 시에도 UI 업데이트
       setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
       setIsModalOpen(false);
       setSelectedPost(null);
@@ -198,33 +143,12 @@ const PostFeed = () => {
             <div
               key={post._id}
               ref={index === posts.length - 1 ? lastPostElementRef : null}>
-              <PostCard
-                post={post}
-                onPlayPause={handlePlayPause}
-                isPlaying={playingPostId === post._id && isPlaying}
-                onClick={() => handlePostClick(post._id)}
-              />
+              <PostCard post={post} onClick={() => handlePostClick(post._id)} />
             </div>
           ))}
         </PostGrid>
         {isLoading && <LoadingMessage>포스트를 불러오는 중...</LoadingMessage>}
       </MainContent>
-      <YouTubePlayerContainer>
-        <YouTube
-          videoId={currentVideoId}
-          opts={{
-            height: '0',
-            width: '0',
-            playerVars: {
-              autoplay: 1,
-            },
-          }}
-          onReady={(event) => {
-            playerRef.current = event;
-          }}
-          onStateChange={handleStateChange}
-        />
-      </YouTubePlayerContainer>
       {isModalOpen && selectedPost && (
         <PostDetailModal
           post={selectedPost}
@@ -270,11 +194,4 @@ const LoadingMessage = styled.div`
   color: #6c5ce7;
   font-size: 18px;
   margin-top: 20px;
-`;
-
-const YouTubePlayerContainer = styled.div`
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
 `;
