@@ -9,8 +9,8 @@ const UserProfileCard = ({ user, onNavigate }) => {
   const { image, fullName, _id } = user;
   let nickName = '닉네임이 없습니다.';
 
-  // fullName이 JSON 문자열로 저장되어 있으므로 파싱
-  if (fullName) {
+  // fullName이 유효한 JSON 문자열인지 확인 후 파싱
+  if (fullName && typeof fullName === 'string') {
     try {
       const parsedFullName = JSON.parse(fullName);
       nickName = parsedFullName.nickName || nickName;
