@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
+import YouTube from 'react-youtube';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import playButtonIcon from '../assets/icons/play-button.png';
-import pauseButtonIcon from '../assets/icons/stop-button.png'; // 일시정지 아이콘 추가
+import pauseButtonIcon from '../assets/icons/stop-button.png';
 
-const PostCard = ({ post, onPlayPause, isPlaying, onClick }) => {
-  const { _id, author } = post;
-  const navigate = useNavigate();
+// 정적 변수로 현재 재생 중인 플레이어 관리
+let currentPlayingPlayer = null;
+
+const PostCard = ({ post, onClick }) => {
+  const { author } = post;
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const playerRef = useRef(null);
 
   let parsedTitle, albums, description, nickName;
   try {
@@ -29,12 +34,67 @@ const PostCard = ({ post, onPlayPause, isPlaying, onClick }) => {
 
   const firstAlbum = albums && albums.length > 0 ? albums[0] : null;
 
-  const handleImageClick = (e) => {
+  const handlePlayPause = (e) => {
     e.stopPropagation();
-    if (firstAlbum && firstAlbum.videoId && onPlayPause) {
-      onPlayPause(firstAlbum.videoId, _id); // 포스트 ID도 전달
+    if (
+      firstAlbum &&
+      firstAlbum.videoId &&
+      isPlayerReady &&
+      playerRef.current
+    ) {
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+        setIsPlaying(false);
+        currentPlayingPlayer = null;
+      } else {
+        if (
+          currentPlayingPlayer &&
+          currentPlayingPlayer !== playerRef.current
+        ) {
+          currentPlayingPlayer.pauseVideo();
+        }
+        playerRef.current.playVideo();
+        setIsPlaying(true);
+        currentPlayingPlayer = playerRef.current;
+      }
+    } else if (!isPlayerReady) {
+      alert('플레이어가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
     }
   };
+
+  const handleStateChange = (event) => {
+    switch (event.data) {
+      case YouTube.PlayerState.PLAYING:
+        setIsPlaying(true);
+        currentPlayingPlayer = playerRef.current;
+        break;
+      case YouTube.PlayerState.PAUSED:
+      case YouTube.PlayerState.ENDED:
+        setIsPlaying(false);
+        if (currentPlayingPlayer === playerRef.current) {
+          currentPlayingPlayer = null;
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleReady = (event) => {
+    playerRef.current = event.target;
+    setIsPlayerReady(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (playerRef.current && isPlayerReady) {
+        playerRef.current.stopVideo();
+        if (currentPlayingPlayer === playerRef.current) {
+          currentPlayingPlayer = null;
+        }
+      }
+    };
+  }, [isPlayerReady]);
 
   return (
     <Card onClick={() => onClick(post._id)}>
@@ -45,15 +105,14 @@ const PostCard = ({ post, onPlayPause, isPlaying, onClick }) => {
       <ImageContainer
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={handleImageClick}>
+        onClick={handlePlayPause}>
         {firstAlbum && (
           <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
         )}
-        {/* Hover 상태이거나 재생 중일 때 일시정지 버튼으로 변경 */}
         {(isHovered || isPlaying) && (
           <PlayButton>
             <PlayButtonImage
-              src={isPlaying ? pauseButtonIcon : playButtonIcon} // 재생 상태에 따라 아이콘 변경
+              src={isPlaying ? pauseButtonIcon : playButtonIcon}
               alt={isPlaying ? 'Pause' : 'Play'}
             />
           </PlayButton>
@@ -63,6 +122,22 @@ const PostCard = ({ post, onPlayPause, isPlaying, onClick }) => {
         <PostTitle>{parsedTitle}</PostTitle>
         <PostDescription>{description}</PostDescription>
       </CardContent>
+      {firstAlbum && firstAlbum.videoId && (
+        <YouTubePlayerContainer>
+          <YouTube
+            videoId={firstAlbum.videoId}
+            opts={{
+              height: '0',
+              width: '0',
+              playerVars: {
+                autoplay: 0,
+              },
+            }}
+            onReady={handleReady}
+            onStateChange={handleStateChange}
+          />
+        </YouTubePlayerContainer>
+      )}
     </Card>
   );
 };
@@ -172,4 +247,8 @@ const PlayButton = styled.div`
 const PlayButtonImage = styled.img`
   width: 30px;
   height: 30px;
+`;
+
+const YouTubePlayerContainer = styled.div`
+  display: none;
 `;
