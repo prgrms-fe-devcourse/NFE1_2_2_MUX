@@ -323,3 +323,16 @@ export const fetchPostsByAuthor = async (authorId, offset = 0, limit = 10) => {
     throw error; // 에러가 발생하면 throw
   }
 };
+
+// 포스트 목록을 가져오는 API
+export const getPosts = async (offset = 0, limit = 10) => {
+  try {
+    const response = await axios.get('/api/posts', {
+      params: { offset, limit },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    throw error;
+  }
+};
