@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  getChannelPosts,
-  getPostDetails,
-  deletePost,
-} from '../../utils/api.js';
+import { getChannelPosts, deletePost } from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
-import PostDetailModal from '../../components/modals/PostDetailModal.jsx';
 
 const PostFeed = () => {
   const [posts, setPosts] = useState([]);
@@ -14,8 +9,6 @@ const PostFeed = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const observer = useRef();
 
   const lastPostElementRef = useCallback(
@@ -67,31 +60,6 @@ const PostFeed = () => {
     }
   }, [channelId, token, page, hasMore, isLoading]);
 
-  const handlePostClick = useCallback(
-    async (postId) => {
-      try {
-        const postDetails = await getPostDetails(postId, token);
-        if (postDetails) {
-          setSelectedPost(postDetails);
-          setIsModalOpen(true);
-        } else {
-          throw new Error('포스트 정보를 가져오는데 실패했습니다.');
-        }
-      } catch (error) {
-        console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
-        alert(
-          '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
-        );
-      }
-    },
-    [token],
-  );
-
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedPost(null);
-  }, []);
-
   const handleLikeUpdate = useCallback(
     (postId, isLiked, newLikeCount) => {
       setPosts((prevPosts) =>
@@ -111,23 +79,21 @@ const PostFeed = () => {
     [userId],
   );
 
-  const handlePostDelete = useCallback(async (postId) => {
-    try {
-      const token = localStorage.getItem('token');
-      await deletePost(postId, token);
-
-      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
-      setIsModalOpen(false);
-      setSelectedPost(null);
-
-      alert('게시글이 삭제되었습니다.');
-    } catch (error) {
-      console.error('게시글 삭제 중 오류 발생:', error);
-      setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
-      setIsModalOpen(false);
-      setSelectedPost(null);
-    }
-  }, []);
+  const handlePostDelete = useCallback(
+    async (postId) => {
+      try {
+        await deletePost(postId, token);
+        setPosts((prevPosts) =>
+          prevPosts.filter((post) => post._id !== postId),
+        );
+        alert('게시글이 삭제되었습니다.');
+      } catch (error) {
+        console.error('게시글 삭제 중 오류 발생:', error);
+        alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+      }
+    },
+    [token],
+  );
 
   useEffect(() => {
     fetchPosts();
@@ -143,20 +109,16 @@ const PostFeed = () => {
             <div
               key={post._id}
               ref={index === posts.length - 1 ? lastPostElementRef : null}>
-              <PostCard post={post} onClick={() => handlePostClick(post._id)} />
+              <PostCard
+                post={post}
+                onLikeUpdate={handleLikeUpdate}
+                onPostDelete={handlePostDelete}
+              />
             </div>
           ))}
         </PostGrid>
         {isLoading && <LoadingMessage>포스트를 불러오는 중...</LoadingMessage>}
       </MainContent>
-      {isModalOpen && selectedPost && (
-        <PostDetailModal
-          post={selectedPost}
-          onClose={handleCloseModal}
-          onLikeUpdate={handleLikeUpdate}
-          onPostDelete={handlePostDelete}
-        />
-      )}
     </PageContainer>
   );
 };

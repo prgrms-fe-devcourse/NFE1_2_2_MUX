@@ -4,15 +4,19 @@ import YouTube from 'react-youtube';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import playButtonIcon from '../assets/icons/play-button.png';
 import pauseButtonIcon from '../assets/icons/stop-button.png';
+import PostDetailModal from '../components/modals/PostDetailModal';
+import { getPostDetails } from '../utils/api';
 
 // 정적 변수로 현재 재생 중인 플레이어 관리
 let currentPlayingPlayer = null;
 
-const PostCard = ({ post, onClick }) => {
+const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   const { author } = post;
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const playerRef = useRef(null);
 
   let parsedTitle, albums, description, nickName;
@@ -87,58 +91,114 @@ const PostCard = ({ post, onClick }) => {
 
   useEffect(() => {
     return () => {
-      if (playerRef.current && isPlayerReady) {
-        playerRef.current.stopVideo();
+      if (playerRef.current && playerRef.current.stopVideo) {
+        try {
+          playerRef.current.stopVideo();
+        } catch (error) {
+          console.error('Error stopping video:', error);
+        }
         if (currentPlayingPlayer === playerRef.current) {
           currentPlayingPlayer = null;
         }
       }
     };
-  }, [isPlayerReady]);
+  }, []);
+
+  const handleCardClick = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const postDetails = await getPostDetails(post._id, token);
+      if (postDetails) {
+        setSelectedPost(postDetails);
+        setIsModalOpen(true);
+      } else {
+        throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+      alert(
+        '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+      );
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  };
+
+  const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
+    if (onLikeUpdate) {
+      onLikeUpdate(postId, isLiked, newLikeCount);
+    }
+  };
+
+  const handlePostDelete = async (postId) => {
+    if (onPostDelete) {
+      await onPostDelete(postId);
+    }
+    handleCloseModal();
+  };
 
   return (
-    <Card onClick={() => onClick(post._id)}>
-      <CardHeader>
-        <AuthorImage src={author.image || defaultProfileImage} alt={nickName} />
-        <AuthorName>{nickName}</AuthorName>
-      </CardHeader>
-      <ImageContainer
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onClick={handlePlayPause}>
-        {firstAlbum && (
-          <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
-        )}
-        {(isHovered || isPlaying) && (
-          <PlayButton>
-            <PlayButtonImage
-              src={isPlaying ? pauseButtonIcon : playButtonIcon}
-              alt={isPlaying ? 'Pause' : 'Play'}
-            />
-          </PlayButton>
-        )}
-      </ImageContainer>
-      <CardContent>
-        <PostTitle>{parsedTitle}</PostTitle>
-        <PostDescription>{description}</PostDescription>
-      </CardContent>
-      {firstAlbum && firstAlbum.videoId && (
-        <YouTubePlayerContainer>
-          <YouTube
-            videoId={firstAlbum.videoId}
-            opts={{
-              height: '0',
-              width: '0',
-              playerVars: {
-                autoplay: 0,
-              },
-            }}
-            onReady={handleReady}
-            onStateChange={handleStateChange}
+    <>
+      <Card onClick={handleCardClick}>
+        <CardHeader>
+          <AuthorImage
+            src={author.image || defaultProfileImage}
+            alt={nickName}
           />
-        </YouTubePlayerContainer>
+          <AuthorName>{nickName}</AuthorName>
+        </CardHeader>
+        <ImageContainer
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={handlePlayPause}>
+          {firstAlbum && (
+            <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
+          )}
+          {(isHovered || isPlaying) && (
+            <PlayButton>
+              <PlayButtonImage
+                src={isPlaying ? pauseButtonIcon : playButtonIcon}
+                alt={isPlaying ? 'Pause' : 'Play'}
+              />
+            </PlayButton>
+          )}
+        </ImageContainer>
+        <CardContent>
+          <PostTitle>{parsedTitle}</PostTitle>
+          <PostDescription>{description}</PostDescription>
+        </CardContent>
+        {firstAlbum && firstAlbum.videoId && (
+          <YouTubePlayerContainer>
+            <YouTube
+              videoId={firstAlbum.videoId}
+              opts={{
+                height: '0',
+                width: '0',
+                playerVars: {
+                  autoplay: 0,
+                },
+              }}
+              onReady={(event) => {
+                playerRef.current = event.target;
+                setIsPlayerReady(true);
+              }}
+              onStateChange={handleStateChange}
+            />
+          </YouTubePlayerContainer>
+        )}
+      </Card>
+      {isModalOpen && selectedPost && (
+        <PostDetailModal
+          post={selectedPost}
+          onClose={handleCloseModal}
+          onLikeUpdate={handleLikeUpdate}
+          onPostDelete={handlePostDelete}
+        />
       )}
-    </Card>
+    </>
   );
 };
 
@@ -159,11 +219,11 @@ const Card = styled.div`
   border: 1px solid #e0e0e0;
   transition:
     transform 0.3s ease,
-    box-shadow 0.3s ease; // 트랜지션 추가
+    box-shadow 0.3s ease;
 
   &:hover {
-    transform: translateY(-10px); // 약간 떠오르는 효과
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); // 그림자 강화
+    transform: translateY(-10px);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   }
 `;
 
