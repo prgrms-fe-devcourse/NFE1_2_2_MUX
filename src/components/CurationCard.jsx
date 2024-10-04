@@ -121,6 +121,16 @@ const CardContainer = styled.div`
   caret-color: transparent;
   margin-bottom: 30px;
   -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 1023px) {
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    overflow-x: visible;
+  }
 `;
 
 const AlbumContainer = styled.div`
@@ -138,6 +148,18 @@ const AlbumContainer = styled.div`
   &:hover {
     transform: scale(1.04);
   }
+
+  @media (max-width: 1023px) {
+    width: 180px;
+    height: 220px;
+    margin: 8px;
+  }
+
+  @media (max-width: 767px) {
+    width: 100%;
+    height: auto;
+    margin: 15px 0;
+  }
 `;
 
 const AlbumCover = styled.img`
@@ -145,6 +167,16 @@ const AlbumCover = styled.img`
   margin-top: 10px;
   height: 170px;
   object-fit: cover;
+
+  @media (max-width: 1023px) {
+    height: 150px;
+  }
+
+  @media (max-width: 767px) {
+    width: 100%;
+    height: auto;
+    margin-top: 0;
+  }
 `;
 
 const PlayPauseButtonContainer = styled.div`
@@ -162,6 +194,11 @@ const PlayPauseButtonContainer = styled.div`
   ${AlbumContainer}:hover & {
     visibility: visible;
   }
+
+  @media (max-width: 767px) {
+    width: 40px;
+    height: 40px;
+  }
 `;
 
 const PlayPauseButton = styled.div`
@@ -177,21 +214,44 @@ const PlayPauseButton = styled.div`
     width: 30px;
     height: 30px;
   }
+
+  @media (max-width: 767px) {
+    width: 40px;
+    height: 40px;
+
+    img {
+      width: 25px;
+      height: 25px;
+    }
+  }
 `;
 
 const AlbumInfo = styled.div`
   margin-left: 15px;
   text-align: left;
+
+  @media (max-width: 767px) {
+    margin-left: 0;
+    text-align: center;
+  }
 `;
 
 const AlbumTitle = styled.h3`
   font-size: 14px;
   margin: 0;
   color: #ffffff;
+
+  @media (max-width: 767px) {
+    font-size: 16px;
+  }
 `;
 
 const AlbumArtist = styled.p`
   font-size: 13px;
   color: #ffffff;
   margin: 3px 0;
+
+  @media (max-width: 767px) {
+    font-size: 14px;
+  }
 `;
