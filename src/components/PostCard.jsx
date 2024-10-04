@@ -7,6 +7,7 @@ import playButtonIcon from '../assets/icons/play-button.png';
 import pauseButtonIcon from '../assets/icons/stop-button.png';
 import PostDetailModal from '../components/modals/PostDetailModal';
 import { getPostDetails } from '../utils/api';
+import ReactionCount from '../components/ReactionCount'; // ReactionCount 컴포넌트 import
 
 // 정적 변수로 현재 재생 중인 플레이어 관리
 let currentPlayingPlayer = null;
@@ -18,6 +19,8 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [likes, setLikes] = useState(post.likes.length);
+  const [comments, setComments] = useState(post.comments.length);
   const playerRef = useRef(null);
   const navigate = useNavigate();
 
@@ -136,9 +139,14 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   };
 
   const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
+    setLikes(newLikeCount);
     if (onLikeUpdate) {
       onLikeUpdate(postId, isLiked, newLikeCount);
     }
+  };
+
+  const handleCommentUpdate = (newCommentCount) => {
+    setComments(newCommentCount);
   };
 
   const handlePostDelete = async (postId) => {
@@ -181,6 +189,9 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
         <CardContent>
           <PostTitle>{parsedTitle}</PostTitle>
           <PostDescription>{description}</PostDescription>
+          <ReactionCountWrapper>
+            <ReactionCount likes={likes} comments={comments} />
+          </ReactionCountWrapper>
         </CardContent>
         {firstAlbum && firstAlbum.videoId && (
           <YouTubePlayerContainer>
@@ -205,6 +216,7 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
           onClose={handleCloseModal}
           onLikeUpdate={handleLikeUpdate}
           onPostDelete={handlePostDelete}
+          onCommentUpdate={handleCommentUpdate}
         />
       )}
     </>
@@ -329,4 +341,8 @@ const PlayButtonImage = styled.img`
 
 const YouTubePlayerContainer = styled.div`
   display: none;
+`;
+
+const ReactionCountWrapper = styled.div`
+  margin-top: 10px;
 `;
