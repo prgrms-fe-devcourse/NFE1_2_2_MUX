@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { fetchPostsByAuthor, logout } from '../utils/api'; 
@@ -9,8 +9,16 @@ import defaultProfileImage from '../assets/images/default-profile.png';
 const ProfilePage = ({ user, isMyPage }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const updateUserDetails = useCallback((updatedUser) => {
+    console.log('Updating user details:', updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  }, []);
+
+  const openModalHandler = () => setIsModalOpen(true);
+  const closeModalHandler = () => setIsModalOpen(false);
 
   // 유저가 작성한 포스트를 불러옴
   useEffect(() => {
@@ -68,7 +76,7 @@ const ProfilePage = ({ user, isMyPage }) => {
             <h2>{userFullName.nickName || '이름 없음'}</h2>
             {isMyPage && (
               <>
-                <EditButton onClick={() => setEditModalOpen(true)}>✏️ 회원정보 수정</EditButton>
+                <EditButton onClick={openModalHandler}>✏️ 회원정보 수정</EditButton>
                 <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>🚪 로그아웃</LogoutButton>
               </>
             )}
@@ -98,10 +106,12 @@ const ProfilePage = ({ user, isMyPage }) => {
           <h2>{userFullName.nickName || '이름 없음'}의 음원</h2>
         </MusicSection>
       </Content>
-      {isEditModalOpen && (
-        <ProfileEditModal 
-          user={user} 
-          closeModal={() => setEditModalOpen(false)}  
+      {isModalOpen && (
+        <ProfileEditModal
+          user={user}
+          token={localStorage.getItem('token')}
+          onClose={closeModalHandler}
+          setUser={updateUserDetails}
         />
       )}
     </Container>
