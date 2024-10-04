@@ -9,13 +9,18 @@ const UserProfileCard = ({ user, onNavigate }) => {
   const { image, fullName, _id } = user;
   let nickName = '닉네임이 없습니다.';
 
-  // fullName이 유효한 JSON 문자열인지 확인 후 파싱
-  if (fullName && typeof fullName === 'string') {
-    try {
-      const parsedFullName = JSON.parse(fullName);
-      nickName = parsedFullName.nickName || nickName;
-    } catch (error) {
-      console.error('fullName 파싱 오류:', error);
+  // fullName이 JSON 형식인지 체크한 후 파싱 시도
+  if (fullName) {
+    if (fullName.startsWith('{') && fullName.endsWith('}')) {
+      try {
+        const parsedFullName = JSON.parse(fullName);
+        nickName = parsedFullName.nickName || nickName; // 닉네임 설정
+      } catch (error) {
+        console.error('fullName 파싱 오류:', error);
+      }
+    } else {
+      // fullName이 JSON이 아닌 경우 그대로 사용
+      nickName = fullName;
     }
   }
 
