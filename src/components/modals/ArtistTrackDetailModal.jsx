@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import PreviousBtn from '../../assets/icons/Previous-Btn.png';
 import NextBtn from '../../assets/icons/Next-Btn.png';
-import playButtonIcon from '../../assets/icons/play-button.png';
-import stopButtonIcon from '../../assets/icons/stop-button.png';
+import PlayBtn from '../../assets/icons/play-button-2.png';
+import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import TrashBtn from '../../assets/icons/trash-button.png';
 import CommentIcon from '../../assets/icons/Comment.png';
@@ -14,14 +14,14 @@ import {
   addComment,
   deleteComment,
   getAuthUserData,
-  getPostDetails,
+  getTrackDetails,
 } from '../../utils/api.js';
 
 const ArtistTrackDetailModal = ({
-  post: initialPost,
+  track: initialTrack,
   onClose,
   onLikeUpdate,
-  onPostDelete,
+  onTrackDelete,
 }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
@@ -30,36 +30,36 @@ const ArtistTrackDetailModal = ({
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [post, setPost] = useState(initialPost);
+  const [track, setTrack] = useState(initialTrack);
   const [isDeleted, setIsDeleted] = useState(false);
-  const [commentCount, setCommentCount] = useState(initialPost.comments.length);
+  const [commentCount, setCommentCount] = useState(
+    initialTrack.comments.length,
+  );
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const token = localStorage.getItem('token');
   const audioRef = useRef(null);
   const progressBarRef = useRef(null);
-  const intervalRef = useRef(null);
 
-  const fetchPostDetails = useCallback(async () => {
+  const fetchTrackDetails = useCallback(async () => {
     if (isDeleted) return;
 
     try {
-      if (post && token) {
-        const updatedPost = await getPostDetails(post._id, token);
-        if (updatedPost) {
-          setPost(updatedPost);
-          updateLikeStatus(updatedPost);
+      if (track && token) {
+        const updatedTrack = await getTrackDetails(track._id, token);
+        if (updatedTrack) {
+          setTrack(updatedTrack);
+          updateLikeStatus(updatedTrack);
         } else {
           setIsDeleted(true);
           onClose();
         }
       }
     } catch (error) {
-      console.warn('Failed to fetch post details:', error);
+      console.warn('Failed to fetch track details:', error);
     }
-  }, [post, token, isDeleted, onClose]);
+  }, [track, token, isDeleted, onClose]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -74,65 +74,39 @@ const ArtistTrackDetailModal = ({
     };
 
     fetchUserData();
-    fetchPostDetails();
-  }, [token, fetchPostDetails]);
+    fetchTrackDetails();
+  }, [token, fetchTrackDetails]);
 
   const updateLikeStatus = useCallback(
-    (updatedPost) => {
+    (updatedTrack) => {
       if (currentUser) {
-        const userLike = updatedPost.likes.find(
+        const userLike = updatedTrack.likes.find(
           (like) => like.user === currentUser._id,
         );
         setIsLiked(!!userLike);
-        setLikeCount(updatedPost.likes.length);
+        setLikeCount(updatedTrack.likes.length);
       }
     },
     [currentUser],
   );
 
+  if (!track) return null;
+
+  let trackData = JSON.parse(track.title);
+  let authorData = JSON.parse(track.author.fullName);
+
+  const { title, albums, description } = trackData;
+  const authorNickname = authorData.nickName || '익명';
+  const authorImage = track.author?.image || '/default-profile.png';
+
   useEffect(() => {
-    if (post) {
-      const sortedComments = [...post.comments].sort(
+    if (track) {
+      const sortedComments = [...track.comments].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
       setComments(sortedComments);
     }
-  }, [post]);
-
-  useEffect(() => {
-    const updateProgress = () => {
-      if (audioRef.current && !isDragging) {
-        const { currentTime, duration } = audioRef.current;
-        setCurrentTime(currentTime);
-        setAudioProgress((currentTime / duration) * 100);
-        setAudioDuration(duration);
-      }
-    };
-
-    if (isPlaying) {
-      intervalRef.current = setInterval(updateProgress, 1000);
-    }
-
-    return () => {
-      clearInterval(intervalRef.current);
-    };
-  }, [isPlaying, isDragging]);
-
-  if (!post) return null;
-
-  let postData = { title: '', albums: [], description: '' };
-  let authorData = { nickName: '익명' };
-
-  try {
-    postData = JSON.parse(post.title);
-    authorData = JSON.parse(post.author.fullName);
-  } catch (error) {
-    console.error('데이터 파싱 에러:', error);
-  }
-
-  const { title, albums, description } = postData;
-  const authorNickname = authorData.nickName || '익명';
-  const authorImage = post.author?.image || '/default-profile.png';
+  }, [track]);
 
   const handleLike = async () => {
     try {
@@ -140,22 +114,22 @@ const ArtistTrackDetailModal = ({
       setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
 
       if (isLiked) {
-        const likeToRemove = post.likes.find(
+        const likeToRemove = track.likes.find(
           (like) => like.user === currentUser._id,
         );
         if (likeToRemove) {
           await removeLike(likeToRemove._id, token);
         }
       } else {
-        await addLike(post._id, token);
+        await addLike(track._id, token);
       }
 
-      const updatedPost = await getPostDetails(post._id, token);
-      setPost(updatedPost);
-      updateLikeStatus(updatedPost);
+      const updatedTrack = await getTrackDetails(track._id, token);
+      setTrack(updatedTrack);
+      updateLikeStatus(updatedTrack);
 
       if (onLikeUpdate) {
-        onLikeUpdate(post._id, !isLiked, updatedPost.likes.length);
+        onLikeUpdate(track._id, !isLiked, updatedTrack.likes.length);
       }
     } catch (error) {
       console.error('좋아요 처리 중 오류 발생:', error);
@@ -181,7 +155,7 @@ const ArtistTrackDetailModal = ({
     e.preventDefault();
     try {
       if (!comment.trim() || !currentUser) return;
-      const newComment = await addComment(post._id, comment, token);
+      const newComment = await addComment(track._id, comment, token);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
       setCommentCount((prevCount) => prevCount + 1);
@@ -216,36 +190,23 @@ const ArtistTrackDetailModal = ({
     }
   };
 
-  const handleAudioEnd = () => {
-    setIsPlaying(false);
-  };
-
-  const handleMouseDown = (event) => {
-    setIsDragging(true);
-    handleSeek(event);
-  };
-
-  const handleMouseMove = (event) => {
-    if (isDragging) {
-      handleSeek(event);
+  const handleAudioProgress = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      const progress = (audio.currentTime / audio.duration) * 100;
+      setAudioProgress(progress);
+      setCurrentTime(audio.currentTime);
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleSeek = (event) => {
+  const handleSeek = (e) => {
+    const audio = audioRef.current;
     const progressBar = progressBarRef.current;
-    const rect = progressBar.getBoundingClientRect();
-    const offsetX = event.clientX - rect.left;
-    const seekTime = Math.min(
-      (offsetX / rect.width) * audioDuration,
-      audioDuration,
-    );
-    audioRef.current.currentTime = seekTime;
-    setCurrentTime(seekTime);
-    setAudioProgress((seekTime / audioDuration) * 100);
+    if (audio && progressBar) {
+      const rect = progressBar.getBoundingClientRect();
+      const seekPosition = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = seekPosition * audio.duration;
+    }
   };
 
   const formatTime = (time) => {
@@ -254,15 +215,15 @@ const ArtistTrackDetailModal = ({
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const handleDeletePost = async () => {
-    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+  const handleDeleteTrack = async () => {
+    if (window.confirm('정말로 이 음원을 삭제하시겠습니까?')) {
       try {
-        if (onPostDelete) {
-          await onPostDelete(post._id);
+        if (onTrackDelete) {
+          await onTrackDelete(track._id);
         }
         onClose();
       } catch (error) {
-        console.error('게시글 삭제 중 오류 발생:', error);
+        console.error('음원 삭제 중 오류 발생:', error);
       }
     }
   };
@@ -277,7 +238,7 @@ const ArtistTrackDetailModal = ({
         <Header>
           <AuthorImage src={authorImage} alt={authorNickname} />
           <HeaderText>
-            <PostTitle>{title || 'Untitled'}</PostTitle>
+            <TrackTitle>{title || 'Untitled'}</TrackTitle>
             <AuthorName>{authorNickname}</AuthorName>
           </HeaderText>
         </Header>
@@ -287,62 +248,37 @@ const ArtistTrackDetailModal = ({
           <AlbumNavButton onClick={handlePrevAlbum}>
             <img src={PreviousBtn} alt="Previous" />
           </AlbumNavButton>
-          <AlbumImageContainer>
+          <AlbumImageContainer onClick={handlePlayPause}>
             <AlbumImage
               src={albums[currentAlbumIndex]?.coverUrl}
               alt={albums[currentAlbumIndex]?.title}
             />
+            <PlayOverlay $isPlaying={isPlaying}>
+              <PlayPauseIcon
+                src={isPlaying ? StopBtn : PlayBtn}
+                alt={isPlaying ? 'Pause' : 'Play'}
+              />
+            </PlayOverlay>
           </AlbumImageContainer>
           <AlbumNavButton onClick={handleNextAlbum}>
             <img src={NextBtn} alt="Next" />
           </AlbumNavButton>
         </AlbumSection>
 
-        <Pagination>
-          {albums.map((_, index) => (
-            <PaginationDot
-              key={index}
-              $active={index === currentAlbumIndex}
-              onClick={() => {
-                setCurrentAlbumIndex(index);
-                setIsPlaying(false);
-              }}
-            />
-          ))}
-        </Pagination>
-
-        <AlbumInfo>
-          <AlbumTitle>{albums[currentAlbumIndex]?.title}</AlbumTitle>
-          <AlbumArtist>{albums[currentAlbumIndex]?.artist}</AlbumArtist>
-        </AlbumInfo>
-
         <AudioControls>
-          <ProgressBarContainer
-            ref={progressBarRef}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}>
+          <ProgressBarContainer ref={progressBarRef} onClick={handleSeek}>
             <ProgressBarFill style={{ width: `${audioProgress}%` }} />
-            <ProgressCircle style={{ left: `${audioProgress}%` }} />
           </ProgressBarContainer>
           <TimeDisplay>
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(audioDuration)}</span>
           </TimeDisplay>
-          <PlayPauseButton onClick={handlePlayPause}>
-            <img
-              src={isPlaying ? stopButtonIcon : playButtonIcon}
-              alt="Play/Pause Button"
-            />
-          </PlayPauseButton>
-          <audio
-            ref={audioRef}
-            src={albums[currentAlbumIndex]?.videoUrl}
-            onLoadedMetadata={() => setAudioDuration(audioRef.current.duration)}
-            onEnded={handleAudioEnd}
-          />
         </AudioControls>
+
+        <AlbumInfo>
+          <AlbumTitle>{albums[currentAlbumIndex]?.title}</AlbumTitle>
+          <AlbumArtist>{albums[currentAlbumIndex]?.artist}</AlbumArtist>
+        </AlbumInfo>
 
         <DescriptionBox>
           <Description>{description || 'No description available'}</Description>
@@ -361,8 +297,8 @@ const ArtistTrackDetailModal = ({
               <Count>{commentCount}</Count>
             </CommentDisplay>
           </InteractionGroup>
-          {currentUser && currentUser._id === post.author._id && (
-            <DeleteButton onClick={handleDeletePost}>
+          {currentUser && currentUser._id === track.author._id && (
+            <DeleteButton onClick={handleDeleteTrack}>
               <img src={TrashBtn} alt="Delete" />
             </DeleteButton>
           )}
@@ -401,6 +337,13 @@ const ArtistTrackDetailModal = ({
             </CommentItem>
           ))}
         </CommentSection>
+
+        <audio
+          ref={audioRef}
+          src={albums[currentAlbumIndex]?.videoUrl}
+          onTimeUpdate={handleAudioProgress}
+          onLoadedMetadata={() => setAudioDuration(audioRef.current.duration)}
+        />
       </ModalContainer>
     </ModalOverlay>
   );
@@ -538,22 +481,6 @@ const AlbumImage = styled.img`
   object-fit: cover;
 `;
 
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-`;
-
-const PaginationDot = styled.div`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: ${(props) => (props.$active ? '#000' : '#ccc')};
-  margin: 0 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-`;
-
 const AlbumInfo = styled.div`
   text-align: center;
   margin-bottom: 20px;
@@ -594,16 +521,6 @@ const ProgressBarFill = styled.div`
   border-radius: 4px;
 `;
 
-const ProgressCircle = styled.div`
-  width: 15px;
-  height: 15px;
-  background-color: #3f3f44;
-  border-radius: 50%;
-  position: absolute;
-  top: -4px;
-  transform: translateX(-50%);
-`;
-
 const TimeDisplay = styled.div`
   display: flex;
   justify-content: space-between;
@@ -611,16 +528,6 @@ const TimeDisplay = styled.div`
   font-size: 12px;
   margin-bottom: 10px;
   color: #666;
-`;
-
-const PlayPauseButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  img {
-    width: 40px;
-    height: 40px;
-  }
 `;
 
 const DescriptionBox = styled.div`
