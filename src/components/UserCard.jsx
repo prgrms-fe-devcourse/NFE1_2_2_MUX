@@ -6,19 +6,23 @@ import { getUsers } from '../utils/api';
 
 const UserCard = ({ user, navigate }) => {
   const { image, fullName, role, _id } = user;
-  // 코멘트가 50자를 넘을 경우 자르고 '...'을 붙임
 
-  let nickName = '...';
-  let bio = '...';
+  let nickName = '닉네임이 없습니다.';
+  let bio = '소개글이 없습니다.';
 
-  // fullName이 JSON 문자열로 저장되어 있으므로 파싱
+  // fullName이 JSON 형식인지 체크한 후 파싱 시도
   if (fullName) {
-    try {
-      const parsedFullName = JSON.parse(fullName);
-      nickName = parsedFullName.nickName || nickName;
-      bio = parsedFullName.bio || bio; // bio도 파싱
-    } catch (error) {
-      console.error('fullName 파싱 오류:', error);
+    if (fullName.startsWith('{') && fullName.endsWith('}')) {
+      try {
+        const parsedFullName = JSON.parse(fullName);
+        nickName = parsedFullName.nickName || nickName; // 닉네임 설정
+        bio = parsedFullName.bio || bio; // bio 설정
+      } catch (error) {
+        console.error('fullName 파싱 오류:', error);
+      }
+    } else {
+      // fullName이 JSON이 아닌 경우 그대로 사용
+      nickName = fullName;
     }
   }
 
