@@ -7,6 +7,7 @@ import UserCard from '../components/UserCard';
 import UserProfile from '../components/UserProfile';
 import CurationCard from '../components/CurationCard';
 import ReactionCount from '../components/ReactionCount'; // 리액션 카운트 컴포넌트
+import ArtistCard from '../components/ArtistCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -121,6 +122,7 @@ const Dashboard = () => {
         />
       )}
       <CurationCard />
+      <ArtistCard />
     </DashboardContainer>
   );
 };
