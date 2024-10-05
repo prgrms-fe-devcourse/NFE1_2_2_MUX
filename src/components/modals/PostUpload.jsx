@@ -49,7 +49,9 @@ const PostUpload = ({ onPostSuccess }) => {
   // 앨범 선택 시 처리
   const selectAlbum = (album) => {
     // 중복 여부 확인
-    const isDuplicate = albums.some(existingAlbum => existingAlbum.videoId === album.videoId);
+    const isDuplicate = albums.some(
+      (existingAlbum) => existingAlbum.videoId === album.videoId,
+    );
 
     if (isDuplicate) {
       alert('중복된 앨범입니다.');
@@ -110,9 +112,9 @@ const PostUpload = ({ onPostSuccess }) => {
       player.stopVideo();
       setIsPlaying(false);
       setSelectedTrack(null);
-      setPlayer(null); 
+      setPlayer(null);
     }
-  
+
     const updatedAlbums = [...albums];
     updatedAlbums.splice(index, 1);
     setAlbums(updatedAlbums);
@@ -120,53 +122,64 @@ const PostUpload = ({ onPostSuccess }) => {
 
   // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
   const handlePost = async () => {
-    if (postTitle.trim() === "albums.length === 0  description.trim() === ") {
-      setErrorMessage('모든 필드를 채워주세요.');
+    if (postTitle.trim() === '') {
+      setErrorMessage('포스트 제목을 입력해 주세요.');
       return;
     }
-  
+
+    if (albums.length === 0) {
+      setErrorMessage('추천 포스트를 업로드 하세요.');
+      return;
+    }
+
+    if (description.trim() === '') {
+      setErrorMessage('노래 소개를 입력하세요.');
+      return;
+    }
+
     setErrorMessage('');
-  
+
     const token = localStorage.getItem('token');
-  
+
     if (!token) {
       setErrorMessage('로그인이 필요합니다.');
       return;
     }
-  
+
     const postData = {
       title: postTitle,
       albums: albums,
       description: description,
     };
-  
+
     const formData = new FormData();
     formData.append('title', JSON.stringify(postData));
-    formData.append('channelId', "66fb541ced2d3c14a64eb9ee");
+    formData.append('channelId', '66fb541ced2d3c14a64eb9ee');
 
     if (albums[0]?.coverUrl) {
       formData.append('image', albums[0].coverUrl);
     }
-  
+
     try {
       const response = await createPost(formData, token);
       console.log('Post uploaded successfully:', response);
-  
+
       alert('포스트가 성공적으로 업로드되었습니다!');
-  
+
       setAlbums([]);
       setPostTitle('');
       setDescription('');
-  
+
       if (typeof onPostSuccess === 'function') {
         onPostSuccess(response);
       }
     } catch (error) {
       console.error('포스트 업로드 실패:', error);
-      setErrorMessage(error.response?.data?.message || '포스트 업로드에 실패했습니다.');
+      setErrorMessage(
+        error.response?.data?.message || '포스트 업로드에 실패했습니다.',
+      );
     }
   };
-
 
   return (
     <PostUploadContainer>
@@ -223,7 +236,9 @@ const PostUpload = ({ onPostSuccess }) => {
                       alt="Play/Pause Button"
                     />
                   </PlayPauseButton>
-                  <RemoveButton onClick={() => removeAlbum(index)}>×</RemoveButton>
+                  <RemoveButton onClick={() => removeAlbum(index)}>
+                    ×
+                  </RemoveButton>
                 </AlbumCoverWrapper>
                 <AlbumInfo>
                   <AlbumTitle>{album.title}</AlbumTitle>
@@ -261,12 +276,15 @@ const PostUpload = ({ onPostSuccess }) => {
                 {searchResults.map((album) => (
                   <AlbumItem
                     key={album.videoId}
-                    onClick={() => selectAlbum(album)}
-                  >
+                    onClick={() => selectAlbum(album)}>
                     <AlbumThumbnail src={album.thumbnail} alt={album.title} />
                     <AlbumInfoLeftAligned>
-                      <AlbumTitleLeftAligned>{album.title}</AlbumTitleLeftAligned>
-                      <AlbumArtistLeftAligned>{album.author}</AlbumArtistLeftAligned>
+                      <AlbumTitleLeftAligned>
+                        {album.title}
+                      </AlbumTitleLeftAligned>
+                      <AlbumArtistLeftAligned>
+                        {album.author}
+                      </AlbumArtistLeftAligned>
                     </AlbumInfoLeftAligned>
                   </AlbumItem>
                 ))}
@@ -310,11 +328,23 @@ const PostUploadContainer = styled.div`
   width: 97%;
   height: 100%;
   background-color: #fff;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    width: 95%;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    width: 90%;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    width: 85%;
+  }
 `;
 
 const ContentWrapper = styled.div`
   background-color: #fff;
-  padding: 10px;
+  padding: 7px;
   border-radius: 15px;
   width: 100%;
   max-width: 650px;
@@ -323,11 +353,35 @@ const ContentWrapper = styled.div`
   flex-direction: column;
   justify-content: space-between;
   min-height: 60vh;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    padding: 10px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    padding: 15px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    padding: 20px;
+  }
 `;
 
 const PostTitleWrapper = styled.div`
   position: relative;
   margin-bottom: 0;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    margin-bottom: 10px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    margin-bottom: 15px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    margin-bottom: 20px;
+  }
 `;
 
 const PostTitleInput = styled.input`
@@ -336,6 +390,18 @@ const PostTitleInput = styled.input`
   border: 1px solid #ccc;
   border-radius: 5px;
   width: 97%;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 14px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 13px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 12px;
+  }
 `;
 
 const TitleCharCount = styled.p`
@@ -344,9 +410,16 @@ const TitleCharCount = styled.p`
   right: 10px;
   font-size: 13px;
   color: #666;
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 11px;
+  }
 `;
 
-/* 앨범 리스트 섹션 */
 const AlbumListSection = styled.div`
   margin-top: 0;
 `;
@@ -355,11 +428,25 @@ const AlbumListHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: -10px;
+  margin-bottom: -20px;
 `;
 
 const AlbumCount = styled.p`
   font-size: 14px;
   color: #666;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 13px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 11px;
+  }
 `;
 
 const AlbumList = styled.div`
@@ -367,6 +454,18 @@ const AlbumList = styled.div`
   flex-wrap: nowrap;
   overflow-x: auto;
   margin-top: 10px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    margin-top: 5px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    margin-top: 7px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    margin-top: 9px;
+  }
 `;
 
 const AlbumItemWrapper = styled.div`
@@ -381,6 +480,21 @@ const AlbumCoverWrapper = styled.div`
   height: 150px;
   border-radius: 10px;
   overflow: hidden;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    width: 140px;
+    height: 140px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    width: 130px;
+    height: 130px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    width: 120px;
+    height: 120px;
+  }
 `;
 
 const AlbumCover = styled.img`
@@ -397,9 +511,25 @@ const PlayPauseButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
+
   img {
     width: 40px;
     height: 40px;
+
+    @media all and (min-width:1024px) and (max-width:1279px) {
+      width: 35px;
+      height: 35px;
+    }
+
+    @media all and (min-width:768px) and (max-width:1023px) {
+      width: 30px;
+      height: 30px;
+    }
+
+    @media all and (min-width:480px) and (max-width:767px) {
+      width: 25px;
+      height: 25px;
+    }
   }
 `;
 
@@ -412,22 +542,70 @@ const RemoveButton = styled.button`
   font-size: 20px;
   color: white;
   cursor: pointer;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 18px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 16px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 14px;
+  }
 `;
 
 const AlbumInfo = styled.div`
   text-align: center;
   margin-top: 10px;
   width: 150px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    width: 140px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    width: 130px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    width: 120px;
+  }
 `;
 
 const AlbumTitle = styled.p`
   font-size: 14px;
   font-weight: bold;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 13px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 11px;
+  }
 `;
 
 const AlbumArtist = styled.p`
   font-size: 12px;
   color: #666;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 11px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 10px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 9px;
+  }
 `;
 
 const AlbumPlaceholder = styled.div`
@@ -442,6 +620,21 @@ const AlbumPlaceholder = styled.div`
   margin-bottom: 15px;
   margin-right: 15px;
   cursor: pointer;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    height: 140px;
+    width: 140px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    height: 130px;
+    width: 130px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    height: 120px;
+    width: 120px;
+  }
 `;
 
 const YouTubeMusicLink = styled.p`
@@ -453,15 +646,41 @@ const YouTubeMusicLink = styled.p`
   font-weight: bold;
   cursor: pointer;
   text-align: center;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 11px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 10px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 9px;
+  }
 `;
 
 const YoutubeMusicIconImage = styled.img`
   width: 30px;
   height: 30px;
   margin-bottom: 10px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    width: 28px;
+    height: 28px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    width: 26px;
+    height: 26px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    width: 24px;
+    height: 24px;
+  }
 `;
 
-/* 검색 및 노래 소개 */
 const SearchSection = styled.div`
   display: flex;
   margin-bottom: 13px;
@@ -475,6 +694,21 @@ const SearchInput = styled.input`
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 10px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 15px;
+    padding: 4px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 14px;
+    padding: 3px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 13px;
+    padding: 2px;
+  }
 `;
 
 const SearchButton = styled.button`
@@ -484,10 +718,34 @@ const SearchButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    padding: 4px 18px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    padding: 3px 16px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    padding: 2px 14px;
+  }
 `;
 
 const SearchResults = styled.div`
   margin-bottom: 10px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    margin-bottom: 8px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    margin-bottom: 6px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    margin-bottom: 4px;
+  }
 `;
 
 const AlbumItem = styled.div`
@@ -495,8 +753,21 @@ const AlbumItem = styled.div`
   align-items: center;
   margin-bottom: 5px;
   cursor: pointer;
+
   &:hover {
     background-color: #f1f1f1;
+  }
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    margin-bottom: 4px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    margin-bottom: 3px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    margin-bottom: 2px;
   }
 `;
 
@@ -504,22 +775,61 @@ const AlbumThumbnail = styled.img`
   width: 50px;
   height: 50px;
   margin-right: 10px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    width: 45px;
+    height: 45px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    width: 40px;
+    height: 40px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    width: 35px;
+    height: 35px;
+  }
 `;
 
 const AlbumInfoLeftAligned = styled.div`
-  text-align: left; /* 왼쪽 정렬 */
+  text-align: left;
 `;
 
 const AlbumTitleLeftAligned = styled.p`
   font-size: 14px;
   font-weight: bold;
   max-width: 100%;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 13px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 11px;
+  }
 `;
 
 const AlbumArtistLeftAligned = styled.p`
   font-size: 12px;
   color: #666;
   max-width: 100%;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 11px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 10px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 9px;
+  }
 `;
 
 const DescriptionSection = styled.div`
@@ -553,6 +863,18 @@ const DescriptionInput = styled.textarea`
   &::placeholder {
     color: white;
   }
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 13px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 11px;
+  }
 `;
 
 const CharCount = styled.p`
@@ -585,4 +907,17 @@ const PostButton = styled.button`
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+  margin-top: -5px;
+
+  @media all and (min-width:1024px) and (max-width:1279px) {
+    font-size: 15px;
+  }
+
+  @media all and (min-width:768px) and (max-width:1023px) {
+    font-size: 14px;
+  }
+
+  @media all and (min-width:480px) and (max-width:767px) {
+    font-size: 13px;
+  }
 `;
