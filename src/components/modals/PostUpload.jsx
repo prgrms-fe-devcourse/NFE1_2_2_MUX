@@ -120,11 +120,21 @@ const PostUpload = ({ onPostSuccess }) => {
 
   // 게시하기 버튼 클릭 시 유효성 검사 및 성공 시 처리
   const handlePost = async () => {
-    if (postTitle.trim() === "albums.length === 0  description.trim() === ") {
-      setErrorMessage('모든 필드를 채워주세요.');
+    if (postTitle.trim() === '') {
+      setErrorMessage('포스트 제목을 입력해 주세요.');
       return;
     }
-  
+
+    if (albums.length === 0) {
+      setErrorMessage('추천 포스트를 업로드 하세요.');
+      return;
+    }
+
+    if (description.trim() === '') {
+      setErrorMessage('노래 소개를 입력하세요.');
+      return;
+    }
+
     setErrorMessage('');
   
     const token = localStorage.getItem('token');
@@ -314,7 +324,7 @@ const PostUploadContainer = styled.div`
 
 const ContentWrapper = styled.div`
   background-color: #fff;
-  padding: 10px;
+  padding: 7px;
   border-radius: 15px;
   width: 100%;
   max-width: 650px;
@@ -355,6 +365,8 @@ const AlbumListHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: -10px;
+  margin-bottom: -20px;
 `;
 
 const AlbumCount = styled.p`
@@ -585,4 +597,5 @@ const PostButton = styled.button`
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+  margin-top: -5px;
 `;
