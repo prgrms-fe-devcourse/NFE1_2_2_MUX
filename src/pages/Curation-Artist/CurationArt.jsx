@@ -2,8 +2,26 @@ import React, { useState } from 'react';
 import CurationCard from '../../components/CurationCard';
 import ArtistCard from '../../components/ArtistCard';
 import styled from 'styled-components';
+import { deletePost } from '../../utils/api';
 
 const CurationArt = () => {
+  const handlePostDelete = async (postId) => {
+    console.log('CurationArt: handlePostDelete called with postId:', postId);
+    try {
+      const token = localStorage.getItem('token');
+      console.log(
+        'CurationArt: Token retrieved:',
+        token ? 'Token exists' : 'No token',
+      );
+      await deletePost(postId, token);
+      console.log('CurationArt: deletePost API call successful');
+      alert('트랙이 성공적으로 삭제되었습니다.');
+    } catch (error) {
+      console.error('CurationArt: Error in handlePostDelete:', error);
+      alert('트랙 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   return (
     <PageContainer>
       <Section>
@@ -11,8 +29,7 @@ const CurationArt = () => {
           새로운 아티스트들의 멋진 앨범을 <br />
           확인해 보세요!
         </SectionTitle>
-        {/* 재생 중인 트랙 ID와 핸들러 전달 */}
-        <ArtistCard />
+        <ArtistCard onPostDelete={handlePostDelete} />
       </Section>
       <Section>
         <SectionTitle>
