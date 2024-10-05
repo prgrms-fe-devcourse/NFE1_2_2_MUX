@@ -14,7 +14,7 @@ import {
   addComment,
   deleteComment,
   getAuthUserData,
-  getTrackDetails,
+  getPostDetails,
 } from '../../utils/api.js';
 
 const ArtistTrackDetailModal = ({
@@ -22,6 +22,7 @@ const ArtistTrackDetailModal = ({
   onClose,
   onLikeUpdate,
   onTrackDelete,
+  onCommentUpdate,
 }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
@@ -35,19 +36,15 @@ const ArtistTrackDetailModal = ({
   const [commentCount, setCommentCount] = useState(
     initialTrack.comments.length,
   );
-  const [audioProgress, setAudioProgress] = useState(0);
-  const [audioDuration, setAudioDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
   const token = localStorage.getItem('token');
   const audioRef = useRef(null);
-  const progressBarRef = useRef(null);
 
   const fetchTrackDetails = useCallback(async () => {
     if (isDeleted) return;
 
     try {
       if (track && token) {
-        const updatedTrack = await getTrackDetails(track._id, token);
+        const updatedTrack = await getPostDetails(track._id, token);
         if (updatedTrack) {
           setTrack(updatedTrack);
           updateLikeStatus(updatedTrack);
@@ -92,8 +89,15 @@ const ArtistTrackDetailModal = ({
 
   if (!track) return null;
 
-  let trackData = JSON.parse(track.title);
-  let authorData = JSON.parse(track.author.fullName);
+  let trackData = { title: '', albums: [], description: '' };
+  let authorData = { nickName: '익명' };
+
+  try {
+    trackData = JSON.parse(track.title);
+    authorData = JSON.parse(track.author.fullName);
+  } catch (error) {
+    console.error('데이터 파싱 에러:', error);
+  }
 
   const { title, albums, description } = trackData;
   const authorNickname = authorData.nickName || '익명';
@@ -124,7 +128,7 @@ const ArtistTrackDetailModal = ({
         await addLike(track._id, token);
       }
 
-      const updatedTrack = await getTrackDetails(track._id, token);
+      const updatedTrack = await getPostDetails(track._id, token);
       setTrack(updatedTrack);
       updateLikeStatus(updatedTrack);
 
@@ -158,7 +162,13 @@ const ArtistTrackDetailModal = ({
       const newComment = await addComment(track._id, comment, token);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
-      setCommentCount((prevCount) => prevCount + 1);
+      setCommentCount((prevCount) => {
+        const newCount = prevCount + 1;
+        if (onCommentUpdate) {
+          onCommentUpdate(newCount);
+        }
+        return newCount;
+      });
     } catch (error) {
       console.error('댓글 작성 중 오류 발생:', error);
       alert('댓글 작성 중 오류가 발생했습니다.');
@@ -171,7 +181,13 @@ const ArtistTrackDetailModal = ({
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== commentId),
       );
-      setCommentCount((prevCount) => prevCount - 1);
+      setCommentCount((prevCount) => {
+        const newCount = prevCount - 1;
+        if (onCommentUpdate) {
+          onCommentUpdate(newCount);
+        }
+        return newCount;
+      });
     } catch (error) {
       console.error('댓글 삭제 중 오류 발생:', error);
       alert('댓글을 삭제할 수 없습니다. 다시 시도해 주세요.');
@@ -179,51 +195,25 @@ const ArtistTrackDetailModal = ({
   };
 
   const handlePlayPause = () => {
-    const audio = audioRef.current;
-    if (audio) {
+    if (audioRef.current) {
       if (isPlaying) {
-        audio.pause();
+        audioRef.current.pause();
       } else {
-        audio.play();
+        audioRef.current.play();
       }
       setIsPlaying(!isPlaying);
     }
   };
 
-  const handleAudioProgress = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      const progress = (audio.currentTime / audio.duration) * 100;
-      setAudioProgress(progress);
-      setCurrentTime(audio.currentTime);
-    }
-  };
-
-  const handleSeek = (e) => {
-    const audio = audioRef.current;
-    const progressBar = progressBarRef.current;
-    if (audio && progressBar) {
-      const rect = progressBar.getBoundingClientRect();
-      const seekPosition = (e.clientX - rect.left) / rect.width;
-      audio.currentTime = seekPosition * audio.duration;
-    }
-  };
-
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-
   const handleDeleteTrack = async () => {
-    if (window.confirm('정말로 이 음원을 삭제하시겠습니까?')) {
+    if (window.confirm('정말로 이 트랙을 삭제하시겠습니까?')) {
       try {
         if (onTrackDelete) {
           await onTrackDelete(track._id);
         }
         onClose();
       } catch (error) {
-        console.error('음원 삭제 중 오류 발생:', error);
+        console.error('트랙 삭제 중 오류 발생:', error);
       }
     }
   };
@@ -264,16 +254,6 @@ const ArtistTrackDetailModal = ({
             <img src={NextBtn} alt="Next" />
           </AlbumNavButton>
         </AlbumSection>
-
-        <AudioControls>
-          <ProgressBarContainer ref={progressBarRef} onClick={handleSeek}>
-            <ProgressBarFill style={{ width: `${audioProgress}%` }} />
-          </ProgressBarContainer>
-          <TimeDisplay>
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(audioDuration)}</span>
-          </TimeDisplay>
-        </AudioControls>
 
         <AlbumInfo>
           <AlbumTitle>{albums[currentAlbumIndex]?.title}</AlbumTitle>
@@ -341,8 +321,7 @@ const ArtistTrackDetailModal = ({
         <audio
           ref={audioRef}
           src={albums[currentAlbumIndex]?.videoUrl}
-          onTimeUpdate={handleAudioProgress}
-          onLoadedMetadata={() => setAudioDuration(audioRef.current.duration)}
+          onEnded={() => setIsPlaying(false)}
         />
       </ModalContainer>
     </ModalOverlay>
