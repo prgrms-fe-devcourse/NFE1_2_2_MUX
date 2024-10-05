@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+// 버튼 이미지 파일
 import HomeIcon from '../../assets/icons/Home.png';
 import CurationArtistIcon from '../../assets/icons/CurationArtist.png';
 import PostFeedIcon from '../../assets/icons/PostFeed.png';
@@ -8,14 +10,21 @@ import BellIcon from '../../assets/icons/Bell.png';
 import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
 import LogoImage from '../../assets/images/Logo.png';
+//모달 파일
 import UploadModal from '../modals/UploadModal'; 
-import { Link } from 'react-router-dom';
+import NotificationModal from '../modals/NotificationModal';
+
 
 const Navigation = () => {
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
   const [user, setUser] = useState(null); // 유저 상태
   const navigate = useNavigate(); // useNavigate 훅 사용
+  const [showModal, setShowModal] = useState(false);
+
+
+  const handleNotificationClick = () => { setShowModal(true); };
+  const handleCloseModal = () => { setShowModal(false); };
 
   // 모달 열기/닫기 함수
   const openModal = () => setIsModalOpen(true);
@@ -96,9 +105,10 @@ const Navigation = () => {
           </a>
 
           {/* 알림 아이콘 */}
-          <a href="/notifications">
-            <img className="notification" src={BellIcon} alt="알림" />
-          </a>
+          <NotificationButton onClick={handleNotificationClick}>
+        <img src={BellIcon} alt="알림" />
+      </NotificationButton>
+         <NotificationModal show={showModal} onClose={handleCloseModal} />
         </ProfileSection>
       </HeaderContainer>
 
@@ -257,6 +267,19 @@ const ProfileSection = styled.div`
   }
 `;
 
+const NotificationButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 30px;  /* 이미지 크기 조정 */
+    height: 30px;
+  }
+`;
 // 모달 배경 및 컨테이너 스타일 정의
 const ModalBackground = styled.div`
   position: fixed;

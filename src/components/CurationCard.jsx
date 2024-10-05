@@ -9,42 +9,42 @@ const AlbumCurationCard = () => {
   const [albums, setAlbums] = useState([]);
   const [playingVideoId, setPlayingVideoId] = useState(null);
   const playerRef = useRef(null);
+  const cardContainerRef = useRef(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
 
   useEffect(() => {
     const fetchTopAlbums = async () => {
       const options = {
         method: 'GET',
-        url: 'https://youtube-music6.p.rapidapi.com/ytmusic/',
-        params: { query: '2024 k-pop , j-pop song' },
+        url: 'https://yt-api.p.rapidapi.com/search',
+        params: { query: '2024 j-pop playlist' },
+        params: { query: '2024 k-pop playlist' },
         headers: {
           'x-rapidapi-key':
-          '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
-          'x-rapidapi-host': 'youtube-music6.p.rapidapi.com',
+            '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
+          'x-rapidapi-host': 'yt-api.p.rapidapi.com',
         },
       };
 
       try {
         const response = await axios.request(options);
-        const results = response.data || [];
+        const results = response.data.data || [];
+
         setAlbums(
           results
-            .filter((album) => album.videoId && album.category !== 'Episodes')
-            .map((album) => ({
-              videoId: album.videoId,
-              title: album.title,
-              artist:
-                album.artists && album.artists.length > 0
-                  ? album.artists[0].name
-                  : 'Unknown Artist',
-              coverUrl:
-                album.thumbnails && album.thumbnails[0]
-                  ? album.thumbnails[0].url
-                  : '',
-              duration: album.duration,
+            .filter((video) => video.videoId && video.type === 'video')
+            .map((video) => ({
+              videoId: video.videoId,
+              title: video.title,
+              artist: video.channelTitle || 'Unknown Artist',
+              coverUrl: video.thumbnail ? video.thumbnail[0].url : '',
+              duration: video.lengthText || 'Unknown Duration',
             })),
         );
       } catch (error) {
-        console.error('데이터 불러오는 중 오류 발생:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -75,8 +75,33 @@ const AlbumCurationCard = () => {
     },
   };
 
+  const handleMouseDown = (e) => {
+    isDown.current = true;
+    startX.current = e.pageX - cardContainerRef.current.offsetLeft;
+    scrollLeft.current = cardContainerRef.current.scrollLeft;
+    cardContainerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDown.current) return;
+    e.preventDefault();
+    const x = e.pageX - cardContainerRef.current.offsetLeft;
+    const walk = (x - startX.current) * 2;
+    cardContainerRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDown.current = false;
+    cardContainerRef.current.style.cursor = 'grab';
+  };
+
   return (
-    <CardContainer>
+    <CardContainer
+      ref={cardContainerRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUpOrLeave}
+      onMouseLeave={handleMouseUpOrLeave}>
       {albums.map((album) => (
         <AlbumContainer key={album.videoId}>
           <AlbumCover src={album.coverUrl} alt={album.title} />
@@ -121,15 +146,30 @@ const CardContainer = styled.div`
   caret-color: transparent;
   margin-bottom: 30px;
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
 
-  @media (max-width: 1023px) {
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+  ::-webkit-scrollbar {
+    display: none;
   }
 
-  @media (max-width: 767px) {
-    flex-direction: column;
-    overflow-x: visible;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    flex-direction: row;
+    align-items: scroll;
+    flex-wrap: nowrap;
   }
 `;
 
@@ -138,43 +178,56 @@ const AlbumContainer = styled.div`
   width: 250px;
   height: 300px;
   margin: 15px;
-  cursor: pointer;
   border-radius: 12px;
   overflow: hidden;
-  background-color: #c0afe3;
+  background-color: #bf94e4;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     transform: scale(1.05);
   }
 
-  @media (max-width: 1023px) {
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
     width: 220px;
     height: 270px;
     margin: 12px;
   }
 
-  @media (max-width: 767px) {
-    width: 100%;
-    height: auto;
-    margin: 20px 0;
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 200px;
+    height: 250px;
+    margin: 10px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 180px;
+    height: 240px;
+    margin: 8px;
   }
 `;
 
 const AlbumCover = styled.img`
   width: 90%;
-  margin-top: 15px;
   height: 210px;
   object-fit: cover;
+  margin: 0 auto;
+  pointer-events: none;
 
-  @media (max-width: 1023px) {
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
     height: 180px;
   }
 
-  @media (max-width: 767px) {
-    width: 100%;
-    height: auto;
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    height: 160px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    height: 150px;
     margin-top: 0;
   }
 `;
@@ -195,7 +248,7 @@ const PlayPauseButtonContainer = styled.div`
     visibility: visible;
   }
 
-  @media (max-width: 767px) {
+  @media all and (min-width: 480px) and (max-width: 767px) {
     width: 50px;
     height: 50px;
   }
@@ -209,13 +262,14 @@ const PlayPauseButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   img {
     width: 35px;
     height: 35px;
   }
 
-  @media (max-width: 767px) {
+  @media all and (min-width: 480px) and (max-width: 767px) {
     width: 50px;
     height: 50px;
 
@@ -232,7 +286,7 @@ const AlbumInfo = styled.div`
   width: 100%;
   box-sizing: border-box;
 
-  @media (max-width: 767px) {
+  @media all and (min-width: 480px) and (max-width: 767px) {
     text-align: center;
   }
 `;
@@ -244,19 +298,19 @@ const AlbumTitle = styled.h3`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90%; // 부모 컨테이너의 90%까지만 차지하도록 설정
+  max-width: 90%;
 
-  @media (max-width: 767px) {
+  @media all and (min-width: 480px) and (max-width: 767px) {
     font-size: 18px;
   }
 `;
 
 const AlbumArtist = styled.p`
   font-size: 14px;
-  color: #ffffff;
+  color: #867a7a;
   margin: 5px 0;
 
-  @media (max-width: 767px) {
+  @media all and (min-width: 480px) and (max-width: 767px) {
     font-size: 16px;
   }
 `;

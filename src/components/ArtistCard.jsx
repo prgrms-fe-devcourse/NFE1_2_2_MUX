@@ -10,6 +10,10 @@ const ArtistCard = ({ artistId }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const audioRefs = useRef([]);
+  const cardContainerRef = useRef(null);
+  const isDown = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
 
   const channelId = '66fb53f9ed2d3c14a64eb9ea';
   const token = localStorage.getItem('token');
@@ -19,7 +23,7 @@ const ArtistCard = ({ artistId }) => {
       try {
         const fetchedPosts = await getChannelPosts(channelId, 0, 10, token);
         const sortedPosts = fetchedPosts.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
         setPosts(sortedPosts);
       } catch (error) {
@@ -48,7 +52,9 @@ const ArtistCard = ({ artistId }) => {
       setPlayingPostId(null);
     } else {
       if (playingPostId !== null) {
-        const currentAudioIndex = posts.findIndex((p) => p._id === playingPostId);
+        const currentAudioIndex = posts.findIndex(
+          (p) => p._id === playingPostId,
+        );
         const currentAudio = audioRefs.current[currentAudioIndex];
         if (currentAudio) {
           currentAudio.pause();
@@ -90,8 +96,33 @@ const ArtistCard = ({ artistId }) => {
     return <div>Loading...</div>;
   }
 
+  const handleMouseDown = (e) => {
+    isDown.current = true;
+    startX.current = e.pageX - cardContainerRef.current.offsetLeft;
+    scrollLeft.current = cardContainerRef.current.scrollLeft;
+    cardContainerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDown.current) return;
+    e.preventDefault();
+    const x = e.pageX - cardContainerRef.current.offsetLeft;
+    const walk = (x - startX.current) * 2;
+    cardContainerRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDown.current = false;
+    cardContainerRef.current.style.cursor = 'grab';
+  };
+
   return (
-    <CardContainer>
+    <CardContainer
+      ref={cardContainerRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUpOrLeave}
+      onMouseLeave={handleMouseUpOrLeave}>
       {posts.map((post, index) => {
         const titleObject = JSON.parse(post.title);
         const { title, description, albums } = titleObject;
@@ -106,9 +137,7 @@ const ArtistCard = ({ artistId }) => {
                 alt={nickName}
                 onClick={handleArtistClick}
               />
-              <ArtistName onClick={handleArtistClick}>
-                {nickName}
-              </ArtistName>
+              <ArtistName onClick={handleArtistClick}>{nickName}</ArtistName>
             </ArtistInfo>
             <CardImageContainer>
               <CardImageWrapper>
@@ -118,8 +147,16 @@ const ArtistCard = ({ artistId }) => {
                 />
                 <PlayPauseButton onClick={() => togglePlayPause(post, index)}>
                   <img
-                    src={playingPostId === post._id ? stopButtonIcon : playButtonIcon}
-                    alt={playingPostId === post._id ? "Pause Button" : "Play Button"}
+                    src={
+                      playingPostId === post._id
+                        ? stopButtonIcon
+                        : playButtonIcon
+                    }
+                    alt={
+                      playingPostId === post._id
+                        ? 'Pause Button'
+                        : 'Play Button'
+                    }
                   />
                 </PlayPauseButton>
               </CardImageWrapper>
@@ -131,7 +168,10 @@ const ArtistCard = ({ artistId }) => {
               </PostContent>
             </CardContent>
             {album?.videoUrl && (
-              <audio ref={(el) => (audioRefs.current[index] = el)} src={album.videoUrl} />
+              <audio
+                ref={(el) => (audioRefs.current[index] = el)}
+                src={album.videoUrl}
+              />
             )}
           </PostWrapper>
         );
@@ -143,6 +183,7 @@ const ArtistCard = ({ artistId }) => {
 export default ArtistCard;
 
 // Styled Components
+
 const CardContainer = styled.div`
   display: flex;
   overflow-x: auto;
@@ -151,23 +192,34 @@ const CardContainer = styled.div`
   caret-color: transparent;
   margin-bottom: 30px;
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
+  width: 100%;
 
-  /* 노트북 & 테블릿 가로 (해상도 1024px ~ ) */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    width: 100%;
   }
 
-  /* 테블릿 가로 (해상도 768px ~ 1023px) */
   @media all and (min-width: 768px) and (max-width: 1023px) {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    width: 100%;
   }
 
-  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
   @media all and (min-width: 480px) and (max-width: 767px) {
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: scroll;
+    flex-wrap: nowrap;
+    width: 100%;
   }
 `;
 
@@ -176,10 +228,9 @@ const PostWrapper = styled.div`
   width: 300px;
   height: 480px;
   margin: 10px;
-  cursor: pointer;
   border-radius: 10px;
   overflow: hidden;
-  background-color: #f3e8fb;
+  background-color: #ddd5f3;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
 
@@ -187,21 +238,19 @@ const PostWrapper = styled.div`
     transform: scale(1.02);
   }
 
-  /* 노트북 & 테블릿 가로 (해상도 1024px ~ ) */
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     width: 260px;
     height: 420px;
+    justify-content: flex-start;
   }
 
-  /* 테블릿 가로 (해상도 768px ~ 1023px) */
   @media all and (min-width: 768px) and (max-width: 1023px) {
     width: 240px;
     height: 400px;
   }
 
-  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
   @media all and (min-width: 480px) and (max-width: 767px) {
-    width: 100%;
+    width: 220px;
     height: 380px;
   }
 `;
@@ -239,11 +288,29 @@ const CardImageContainer = styled.div`
 
 const CardImageWrapper = styled.div`
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 270px;
   height: 300px;
 
   &:hover div {
     opacity: 1;
+  }
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 240px;
+    height: 280px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 220px;
+    height: 260px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 200px;
+    height: 240px;
   }
 `;
 
@@ -252,11 +319,22 @@ const CardImage = styled.img`
   height: 100%;
   object-fit: cover;
   border-radius: 10px;
+  pointer-events: none;
 
-  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    height: 280px;
+    width: 240px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    height: 260px;
+    width: 220px;
+  }
+
   @media all and (min-width: 480px) and (max-width: 767px) {
-    width: 100%;
     height: 240px;
+    width: 200px;
+    margin-top: 0;
   }
 `;
 
@@ -272,6 +350,7 @@ const PlayPauseButton = styled.div`
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
+  cursor: pointer;
 
   img {
     width: 100%;
