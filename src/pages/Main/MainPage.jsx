@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { getUsers, getPosts } from '../../utils/api';
 import UserProfile from '../../components/UserProfile';
 import PostCard from '../../components/PostCard';
@@ -8,7 +9,7 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 
 const CardSection = ({ cards, cardWidth, isUserProfile = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const visibleCards = isUserProfile ? 5 : 4;  // 유저 프로필 카드는 5개, 다른 카드는 4개
+  const visibleCards = isUserProfile ? 5 : 4;
 
   const nextCards = () => {
     setCurrentIndex((prevIndex) => 
@@ -95,7 +96,7 @@ const MainPage = () => {
         <Underline />
         <CardSection 
           cards={artistCards}
-          cardWidth="w-40"  // 카드 너비를 줄임
+          cardWidth="w-40"
           isUserProfile={true}
         />
       </Section>
@@ -103,7 +104,7 @@ const MainPage = () => {
       <Section>
         <SectionHeader>
           <Title>사람들이 가장 공감하고 있는 노래는 무엇일까요?</Title>
-          <MoreLink>More <ChevronRight className="w-4 h-4 ml-1" /></MoreLink>
+          <MoreLink as={Link} to="/postfeed">More <ChevronRight className="w-4 h-4 ml-1" /></MoreLink>
         </SectionHeader>
         <Underline />
         <CardSection 
@@ -115,7 +116,6 @@ const MainPage = () => {
       <Section>
         <SectionHeader>
           <Title>지금 가장 주목받고 있는 노래들은 무엇일까요?</Title>
-          <MoreLink>More <ChevronRight className="w-4 h-4 ml-1" /></MoreLink>
         </SectionHeader>
         <Underline />
         <AlbumCurationCard />
@@ -126,7 +126,6 @@ const MainPage = () => {
 
 export default MainPage;
 
-// Styled Components
 // Styled Components
 const PageContainer = styled.div`
   padding: 1.5rem;
@@ -158,7 +157,7 @@ const Underline = styled.div`
   margin-bottom: 2rem;
 `;
 
-const MoreLink = styled.a`
+const MoreLink = styled(Link)`
   display: flex;
   align-items: center;
   color: #6b7280;
