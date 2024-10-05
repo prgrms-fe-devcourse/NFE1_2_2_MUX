@@ -253,6 +253,12 @@ const CardHeader = styled.div`
   align-items: center;
   padding: 8px;
   border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
 `;
 
 const AuthorImage = styled.img`
@@ -267,6 +273,12 @@ const AuthorName = styled.p`
   font-size: 0.8em;
   font-weight: bold;
   margin: 0;
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
+
+  ${CardHeader}:hover & {
+    text-decoration: underline;
+  }
 `;
 
 const ImageContainer = styled.div`
