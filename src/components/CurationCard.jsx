@@ -17,7 +17,8 @@ const AlbumCurationCard = () => {
         url: 'https://youtube-music6.p.rapidapi.com/ytmusic/',
         params: { query: '2024 k-pop , j-pop song' },
         headers: {
-          'x-rapidapi-key': '',
+          'x-rapidapi-key':
+          '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
           'x-rapidapi-host': 'youtube-music6.p.rapidapi.com',
         },
       };
