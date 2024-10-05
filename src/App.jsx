@@ -33,13 +33,16 @@ const App = () => {
           <NavLink to="/signup">회원가입</NavLink>
           <NavLink to="/dashboard">대시보드</NavLink>
           <NavLink to="/postfeed">포스트 피드</NavLink>
+          <NavLink to="/curationart">큐레이션-아티스트</NavLink>
         </Nav>
         <Routes>
+          <Route path="/" element={<Login />} />
           <Route path="mainpage/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/postfeed" element={<PostFeed />} />
+          <Route path="/curationart" element={<CurationArt />} />
           {/* 유저 페이지/마이페이지 */}
           <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
         </Routes>
