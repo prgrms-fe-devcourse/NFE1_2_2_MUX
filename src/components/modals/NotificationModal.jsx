@@ -132,6 +132,11 @@ const ModalContainer = styled.div`
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
   z-index: 1000; /* 다른 요소보다 위에 나타나도록 z-index 설정 */
 
+  /* 스크롤바 숨기기 */
+  &::-webkit-scrollbar {
+    display: none; /* 기본적으로 스크롤바 숨기기 */
+  }
+
   h2 {
     font-size: 20px;
     font-weight: 400;
