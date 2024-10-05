@@ -1,27 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { getChannelPosts } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
+import { getChannelPosts, getPostDetails } from '../utils/api';
 import playButtonIcon from '../assets/icons/play-button.png';
 import stopButtonIcon from '../assets/icons/stop-button.png';
 import defaultProfileImage from '../assets/images/default-profile.png';
+import ReactionCount from '../components/ReactionCount';
+import ArtistTrackDetailModal from './modals/ArtistTrackDetailModal';
 
-const ArtistCard = ({ artistId }) => {
+const ArtistCard = ({ onLikeUpdate, onPostDelete }) => {
   const [playingPostId, setPlayingPostId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const audioRefs = useRef([]);
   const cardContainerRef = useRef(null);
   const isDown = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+  const navigate = useNavigate();
 
   const channelId = '66fb53f9ed2d3c14a64eb9ea';
-  const token = localStorage.getItem('token');
+
+  const handleArtistClick = (e, authorId) => {
+    e.stopPropagation();
+    navigate(`/user/${authorId}`);
+  };
 
   useEffect(() => {
     const fetchChannelPosts = async () => {
       try {
-        const fetchedPosts = await getChannelPosts(channelId, 0, 10, token);
+        const fetchedPosts = await getChannelPosts(channelId);
         const sortedPosts = fetchedPosts.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
@@ -33,9 +43,10 @@ const ArtistCard = ({ artistId }) => {
     };
 
     fetchChannelPosts();
-  }, [channelId, token]);
+  }, [channelId]);
 
-  const togglePlayPause = (post, index) => {
+  const togglePlayPause = (post, index, e) => {
+    e.stopPropagation();
     const titleObject = JSON.parse(post.title);
     const album = titleObject.albums?.[0];
 
@@ -58,7 +69,7 @@ const ArtistCard = ({ artistId }) => {
         const currentAudio = audioRefs.current[currentAudioIndex];
         if (currentAudio) {
           currentAudio.pause();
-          audioElement.currentTime = 0;
+          currentAudio.currentTime = 0;
         }
       }
 
@@ -71,8 +82,59 @@ const ArtistCard = ({ artistId }) => {
     }
   };
 
-  const handleArtistClick = (e) => {
+  const handleCardClick = async (e, post) => {
+    if (
+      !e.target.closest('.profile-area') &&
+      !e.target.closest('.play-button')
+    ) {
+      try {
+        const postDetails = await getPostDetails(post._id);
+        if (postDetails) {
+          setSelectedPost(postDetails);
+          setIsModalOpen(true);
+        } else {
+          throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+        alert(
+          '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+        );
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  };
+
+  const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? { ...post, likes: { length: newLikeCount } }
+          : post,
+      ),
+    );
+    if (onLikeUpdate) {
+      onLikeUpdate(postId, isLiked, newLikeCount);
+    }
+  };
+
+  const handleCommentUpdate = (postId, newCommentCount) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === postId
+          ? { ...post, comments: { length: newCommentCount } }
+          : post,
+      ),
+    );
+  };
+
+  const handleProfileClick = (e, authorId) => {
     e.stopPropagation();
+    navigate(`/user/${authorId}`);
   };
 
   const parseAuthorNickName = (author) => {
@@ -116,6 +178,22 @@ const ArtistCard = ({ artistId }) => {
     cardContainerRef.current.style.cursor = 'grab';
   };
 
+  const handleTrackDelete = async (trackId) => {
+    try {
+      if (onPostDelete) {
+        await onPostDelete(trackId);
+        // 삭제 후 posts 상태 업데이트
+        setPosts((prevPosts) =>
+          prevPosts.filter((post) => post._id !== trackId),
+        );
+      }
+      handleCloseModal();
+    } catch (error) {
+      console.error('트랙 삭제 중 오류 발생:', error);
+      alert('트랙을 삭제할 수 없습니다. 다시 시도해주세요.');
+    }
+  };
+
   return (
     <CardContainer
       ref={cardContainerRef}
@@ -130,14 +208,15 @@ const ArtistCard = ({ artistId }) => {
         const nickName = parseAuthorNickName(post.author);
 
         return (
-          <PostWrapper key={post._id}>
-            <ArtistInfo>
+          <PostWrapper key={post._id} onClick={(e) => handleCardClick(e, post)}>
+            <ArtistInfo
+              className="profile-area"
+              onClick={(e) => handleArtistClick(e, post.author._id)}>
               <ArtistAvatar
                 src={post.author.image || defaultProfileImage}
                 alt={nickName}
-                onClick={handleArtistClick}
               />
-              <ArtistName onClick={handleArtistClick}>{nickName}</ArtistName>
+              <ArtistName>{nickName}</ArtistName>
             </ArtistInfo>
             <CardImageContainer>
               <CardImageWrapper>
@@ -145,7 +224,9 @@ const ArtistCard = ({ artistId }) => {
                   src={album?.coverUrl || 'default-image-url'}
                   alt={`${nickName}의 아트워크`}
                 />
-                <PlayPauseButton onClick={() => togglePlayPause(post, index)}>
+                <PlayPauseButton
+                  className="play-button"
+                  onClick={(e) => togglePlayPause(post, index, e)}>
                   <img
                     src={
                       playingPostId === post._id
@@ -166,6 +247,12 @@ const ArtistCard = ({ artistId }) => {
                 <SongTitle>{title}</SongTitle>
                 <SongInformation>{description}</SongInformation>
               </PostContent>
+              <ReactionCountWrapper>
+                <ReactionCount
+                  likes={post.likes.length}
+                  comments={post.comments.length}
+                />
+              </ReactionCountWrapper>
             </CardContent>
             {album?.videoUrl && (
               <audio
@@ -176,6 +263,27 @@ const ArtistCard = ({ artistId }) => {
           </PostWrapper>
         );
       })}
+      {isModalOpen && selectedPost && (
+        <ArtistTrackDetailModal
+          track={selectedPost}
+          onClose={handleCloseModal}
+          onLikeUpdate={(postId, isLiked, newLikeCount) => {
+            handleLikeUpdate(postId, isLiked, newLikeCount);
+            setSelectedPost((prev) => ({
+              ...prev,
+              likes: { length: newLikeCount },
+            }));
+          }}
+          onTrackDelete={handleTrackDelete}
+          onCommentUpdate={(newCommentCount) => {
+            handleCommentUpdate(selectedPost._id, newCommentCount);
+            setSelectedPost((prev) => ({
+              ...prev,
+              comments: { length: newCommentCount },
+            }));
+          }}
+        />
+      )}
     </CardContainer>
   );
 };
@@ -226,7 +334,7 @@ const CardContainer = styled.div`
 const PostWrapper = styled.div`
   flex: none;
   width: 300px;
-  height: 480px;
+  height: 490px;
   margin: 10px;
   border-radius: 10px;
   overflow: hidden;
@@ -293,6 +401,7 @@ const CardImageWrapper = styled.div`
   align-items: center;
   width: 270px;
   height: 300px;
+  margin-top: 10px;
 
   &:hover div {
     opacity: 1;
@@ -386,4 +495,17 @@ const SongInformation = styled.p`
   color: #666666;
   font-size: 12px;
   margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.2em;
+  height: 2.4em; // line-height * 2줄
+`;
+
+const ReactionCountWrapper = styled.div`
+  margin-top: 20px; // 소개글과의 간격 조정
+  margin-bottom: 20px;
 `;
