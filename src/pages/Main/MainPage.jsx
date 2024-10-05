@@ -90,7 +90,7 @@ const MainPage = () => {
   return (
     <PageContainer>
       <CardSection 
-        title="지금 가장 핫한 아티스트의 음원을 확인해보세요." 
+        title="취향이 비슷한 유저가 있을지도 몰라요. 프로필을 눌러 확인해보세요!" 
         cards={artistCards}
         cardWidth="w-48"
       />
@@ -99,6 +99,15 @@ const MainPage = () => {
         cards={postCards}
         cardWidth="w-64"
       />
+      <Section>
+        <Header>
+          <Title>지금 가장 주목받고 있는 노래들은 무엇일까요?</Title>
+          <MoreButton>
+            More <ChevronRight className="w-4 h-4 ml-1" />
+          </MoreButton>
+        </Header>
+        <AlbumCurationCard />
+      </Section>
     </PageContainer>
   );
 };
