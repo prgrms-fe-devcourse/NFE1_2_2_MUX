@@ -13,6 +13,7 @@ import {
   deleteComment,
   getAuthUserData,
   getPostDetails,
+  createNotification,
 } from '../../utils/api.js';
 
 const ArtistTrackDetailModal = ({
@@ -135,6 +136,7 @@ const ArtistTrackDetailModal = ({
 
   const handleLike = async () => {
     try {
+      // 즉시 UI 업데이트
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
 
@@ -146,34 +148,33 @@ const ArtistTrackDetailModal = ({
           await removeLike(likeToRemove._id, token);
         }
       } else {
-        await addLike(track._id, token);
+        const newLike = await addLike(track._id, token);
+        // 좋아요 클릭 시 알림 생성
+        await createNotification(
+          'LIKE',
+          newLike._id,
+          track.author._id,
+          newLike.post,
+          token,
+        );
       }
 
+      // 서버에서 최신 데이터 가져오기
       const updatedTrack = await getPostDetails(track._id, token);
       setTrack(updatedTrack);
       updateLikeStatus(updatedTrack);
 
+      // 부모 컴포넌트에 좋아요 상태 변경을 알림
       if (onLikeUpdate) {
         onLikeUpdate(track._id, !isLiked, updatedTrack.likes.length);
       }
     } catch (error) {
       console.error('좋아요 처리 중 오류 발생:', error);
       alert('좋아요 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      // 오류 발생 시 원래 상태로 되돌리기
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount + 1 : prevCount - 1));
     }
-  };
-
-  const handleNextAlbum = () => {
-    const nextIndex = (currentAlbumIndex + 1) % albums.length;
-    setCurrentAlbumIndex(nextIndex);
-    setIsPlaying(false);
-  };
-
-  const handlePrevAlbum = () => {
-    const prevIndex = (currentAlbumIndex - 1 + albums.length) % albums.length;
-    setCurrentAlbumIndex(prevIndex);
-    setIsPlaying(false);
   };
 
   const handleCommentSubmit = async (e) => {
@@ -183,13 +184,20 @@ const ArtistTrackDetailModal = ({
       const newComment = await addComment(track._id, comment, token);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
-      setCommentCount((prevCount) => {
-        const newCount = prevCount + 1;
-        if (onCommentUpdate) {
-          onCommentUpdate(newCount);
-        }
-        return newCount;
-      });
+      setCommentCount((prevCount) => prevCount + 1);
+
+      // 댓글 작성 시 알림 생성
+      await createNotification(
+        'COMMENT',
+        newComment._id,
+        track.author._id,
+        newComment.post,
+        token,
+      );
+
+      if (onCommentUpdate) {
+        onCommentUpdate(commentCount + 1);
+      }
     } catch (error) {
       console.error('댓글 작성 중 오류 발생:', error);
       alert('댓글 작성 중 오류가 발생했습니다.');
@@ -222,9 +230,27 @@ const ArtistTrackDetailModal = ({
       } else {
         audioRef.current.play();
       }
-      setIsPlaying(!isPlaying);
     }
   };
+
+  useEffect(() => {
+    const audioElement = audioRef.current;
+    if (audioElement) {
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+      const handleEnded = () => setIsPlaying(false);
+
+      audioElement.addEventListener('play', handlePlay);
+      audioElement.addEventListener('pause', handlePause);
+      audioElement.addEventListener('ended', handleEnded);
+
+      return () => {
+        audioElement.removeEventListener('play', handlePlay);
+        audioElement.removeEventListener('pause', handlePause);
+        audioElement.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, []);
 
   const handleDeleteTrack = async () => {
     if (window.confirm('정말로 이 트랙을 삭제하시겠습니까?')) {
@@ -235,6 +261,7 @@ const ArtistTrackDetailModal = ({
         onClose();
       } catch (error) {
         console.error('트랙 삭제 중 오류 발생:', error);
+        alert('트랙을 삭제할 수 없습니다. 다시 시도해 주세요.');
       }
     }
   };
