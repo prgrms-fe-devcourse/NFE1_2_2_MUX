@@ -479,6 +479,18 @@ const TrackUploadContent = styled.div`
   width: 100%;
   height: 100%;
   caret-color: transparent;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 95%;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 90%;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 85%;
+  }
 `;
 
 const UploadedContent = styled.div`
@@ -487,6 +499,20 @@ const UploadedContent = styled.div`
   align-items: flex-start;
   width: 90%;
   padding: 10px;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 85%;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const LeftSection = styled.div`
@@ -495,11 +521,33 @@ const LeftSection = styled.div`
   align-items: center;
   justify-content: flex-start;
   width: 36%;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 40%;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 100%;
+    margin-bottom: 20px;
+  }
 `;
 
 const AlbumSection = styled.div`
   text-align: center;
   margin-bottom: 20px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    margin-bottom: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    margin-bottom: 10px;
+  }
 `;
 
 const AlbumCover = styled.div`
@@ -508,6 +556,16 @@ const AlbumCover = styled.div`
     height: 260px;
     border-radius: 10px;
     object-fit: cover;
+
+    @media all and (min-width: 768px) and (max-width: 1023px) {
+      width: 220px;
+      height: 220px;
+    }
+
+    @media all and (min-width: 480px) and (max-width: 767px) {
+      width: 200px;
+      height: 200px;
+    }
   }
 `;
 
@@ -524,6 +582,14 @@ const CoverChangeText = styled.p`
   font-size: 20px;
   margin-top: 0px;
   margin-right: 5px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 18px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 16px;
+  }
 `;
 
 const ChangeIcon = styled.img`
@@ -560,6 +626,14 @@ const ProgressBarContainer = styled.div`
   margin-bottom: 10px;
   cursor: pointer;
   position: relative;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    height: 7px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    height: 6px;
+  }
 `;
 
 const ProgressBarFill = styled.div`
@@ -585,6 +659,14 @@ const TimeDisplay = styled.div`
   font-size: 12px;
   margin-bottom: 0;
   color: #666;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 11px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 10px;
+  }
 `;
 
 const PlayPauseButton = styled.button`
@@ -592,9 +674,20 @@ const PlayPauseButton = styled.button`
   border: none;
   cursor: pointer;
   margin-top: -5px;
+
   img {
     width: 40px;
     height: 40px;
+
+    @media all and (min-width: 768px) and (max-width: 1023px) {
+      width: 35px;
+      height: 35px;
+    }
+
+    @media all and (min-width: 480px) and (max-width: 767px) {
+      width: 30px;
+      height: 30px;
+    }
   }
 `;
 
@@ -610,6 +703,14 @@ const RightSection = styled.div`
   justify-content: flex-start;
   align-items: flex-start;
   width: 55%;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 100%;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 100%;
+  }
 `;
 
 const TitleField = styled.div`
@@ -619,12 +720,28 @@ const TitleField = styled.div`
   border-radius: 10px;
   margin-bottom: 10px;
   flex-direction: row;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    padding: 12px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    padding: 10px;
+  }
 `;
 
 const TitleLabel = styled.span`
   color: white;
   font-size: 17px;
   font-weight: bold;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 16px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 15px;
+  }
 `;
 
 const TextInput = styled.input`
@@ -638,6 +755,14 @@ const TextInput = styled.input`
 
   &::placeholder {
     color: white;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 14px;
   }
 `;
 
@@ -666,6 +791,14 @@ const InputLabel = styled.span`
   margin-bottom: 5px;
   padding-bottom: 10px;
   border-bottom: 1px solid white;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 16px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 15px;
+  }
 `;
 
 const InputArea = styled.textarea`
@@ -681,6 +814,14 @@ const InputArea = styled.textarea`
 
   &::placeholder {
     color: white;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 14px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 13px;
   }
 `;
 
@@ -700,6 +841,14 @@ const ButtonContainer = styled.div`
   position: absolute;
   bottom: 0;
   left: 0;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    padding: 8px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    padding: 6px;
+  }
 `;
 
 const PrevButton = styled.button`
@@ -712,6 +861,14 @@ const PrevButton = styled.button`
   font-size: 16px;
   margin-left: 15px;
   margin-bottom: 10px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 14px;
+  }
 `;
 
 const ErrorText = styled.p`
@@ -730,6 +887,14 @@ const PostButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   margin-bottom: 10px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 14px;
+  }
 `;
 
 const CompletedSection = styled.div`
@@ -751,6 +916,14 @@ const SuccessMessage = styled.p`
   font-weight: bold;
   text-align: center;
   margin-bottom: 40px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 22px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 20px;
+  }
 `;
 
 const NextButton = styled.button`
@@ -761,6 +934,14 @@ const NextButton = styled.button`
   border-radius: 5px;
   cursor: pointer;
   font-size: 20px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 18px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 16px;
+  }
 `;
 
 const UploadArea = styled.div`
@@ -774,6 +955,18 @@ const UploadArea = styled.div`
   align-items: center;
   padding: 20px;
   border: 2px dashed white;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    padding: 18px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    padding: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    padding: 12px;
+  }
 `;
 
 const ProgressContainer = styled.div`
@@ -784,14 +977,34 @@ const ProgressContainer = styled.div`
 const ProgressBar = styled.div`
   background-color: #bf94e4;
   height: 25px;
-  width: ${(props) => props.progress}%!;
+  width: ${(props) => props.progress}%;
   border-radius: 5px;
   transition: width 0.2s;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    height: 23px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    height: 21px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    height: 20px;
+  }
 `;
 
 const ProgressText = styled.span`
   margin-top: 10px;
   font-size: 16px;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 14px;
+  }
 `;
 
 const MainText = styled.p`
@@ -800,6 +1013,14 @@ const MainText = styled.p`
   font-weight: bold;
   margin-bottom: 50px;
   text-align: center;
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 28px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 26px;
+  }
 `;
 
 const UploadButton = styled.label`
@@ -814,6 +1035,21 @@ const UploadButton = styled.label`
   justify-content: center;
   align-items: center;
   width: 70%;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    font-size: 18px;
+    padding: 18px 36px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 16px;
+    padding: 15px 30px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 14px;
+    padding: 12px 24px;
+  }
 `;
 
 const AudioInfoText = styled.p`
@@ -827,3 +1063,4 @@ const AudioErrorText = styled.p`
   font-size: 12px;
   margin-top: 10px;
 `;
+

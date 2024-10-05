@@ -22,31 +22,31 @@ const AlbumCurationCard = () => {
         params: { query: '2024 j-pop playlist' },
         params: { query: '2024 k-pop playlist' },
         headers: {
-          'x-rapidapi-key': '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
-          'x-rapidapi-host': 'yt-api.p.rapidapi.com'
-        }
+          'x-rapidapi-key':
+            '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
+          'x-rapidapi-host': 'yt-api.p.rapidapi.com',
+        },
       };
-    
+
       try {
         const response = await axios.request(options);
-        const results = response.data.data || []; 
-    
+        const results = response.data.data || [];
+
         setAlbums(
           results
-            .filter((video) => video.videoId && video.type === 'video') 
+            .filter((video) => video.videoId && video.type === 'video')
             .map((video) => ({
               videoId: video.videoId,
               title: video.title,
-              artist: video.channelTitle || 'Unknown Artist', 
-              coverUrl: video.thumbnail ? video.thumbnail[0].url : '', 
-              duration: video.lengthText || 'Unknown Duration', 
-            }))
+              artist: video.channelTitle || 'Unknown Artist',
+              coverUrl: video.thumbnail ? video.thumbnail[0].url : '',
+              duration: video.lengthText || 'Unknown Duration',
+            })),
         );
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-    
 
     fetchTopAlbums();
   }, []);
@@ -180,7 +180,7 @@ const AlbumContainer = styled.div`
   margin: 15px;
   border-radius: 12px;
   overflow: hidden;
-  background-color: #BF94E4;
+  background-color: #bf94e4;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
   display: flex;
@@ -199,15 +199,15 @@ const AlbumContainer = styled.div`
   }
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
-    width: 220px;
-    height: 270px;
-    margin: 12px;
+    width: 200px;
+    height: 250px;
+    margin: 10px;
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
-    width: 220px;
-    height: 270px;
-    margin: 12px
+    width: 180px;
+    height: 240px;
+    margin: 8px;
   }
 `;
 
@@ -223,11 +223,11 @@ const AlbumCover = styled.img`
   }
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
-    height: 180px;
+    height: 160px;
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
-    height: 180px;
+    height: 150px;
     margin-top: 0;
   }
 `;
@@ -307,7 +307,7 @@ const AlbumTitle = styled.h3`
 
 const AlbumArtist = styled.p`
   font-size: 14px;
-  color: #867A7A;
+  color: #867a7a;
   margin: 5px 0;
 
   @media all and (min-width: 480px) and (max-width: 767px) {

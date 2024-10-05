@@ -194,28 +194,32 @@ const CardContainer = styled.div`
   -webkit-overflow-scrolling: touch;
   cursor: grab;
   user-select: none;
-  
+  width: 100%;
+
   ::-webkit-scrollbar {
     display: none;
   }
 
   -ms-overflow-style: none;
   scrollbar-width: none;
-  
+
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     flex-direction: row;
     flex-wrap: nowrap;
+    width: 100%;
   }
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
     flex-direction: row;
     flex-wrap: nowrap;
+    width: 100%;
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
     flex-direction: row;
     align-items: scroll;
     flex-wrap: nowrap;
+    width: 100%;
   }
 `;
 
@@ -226,7 +230,7 @@ const PostWrapper = styled.div`
   margin: 10px;
   border-radius: 10px;
   overflow: hidden;
-  background-color: #DDD5F3;
+  background-color: #ddd5f3;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
 
@@ -315,7 +319,7 @@ const CardImage = styled.img`
   height: 100%;
   object-fit: cover;
   border-radius: 10px;
-  pointer-events: none; 
+  pointer-events: none;
 
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     height: 280px;
@@ -324,7 +328,7 @@ const CardImage = styled.img`
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
     height: 260px;
-    width: 220px
+    width: 220px;
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
