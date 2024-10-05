@@ -13,7 +13,7 @@ const CurationArt = () => {
           확인해 보세요!
         </SectionTitle>
         {/* 재생 중인 트랙 ID와 핸들러 전달 */}
-        <ArtistCard />
+        <ArtistCard/>
       </Section>
       <Section>
         <SectionTitle>
@@ -21,7 +21,7 @@ const CurationArt = () => {
           음악을 추천해 드릴게요
         </SectionTitle>
         {/* 재생 중인 트랙 ID와 핸들러 전달 */}
-        <CurationCard />
+        <CurationCard/>
       </Section>
     </PageContainer>
   );
