@@ -1,85 +1,208 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import ExampleImage from '../assets/images/default-profile.png';
+import { getChannelPosts } from '../utils/api';
 import playButtonIcon from '../assets/icons/play-button.png';
 import stopButtonIcon from '../assets/icons/stop-button.png';
+import defaultProfileImage from '../assets/images/default-profile.png';
 
-const ArtistCard = ({ artist, albumId, artistId, postId }) => {
-  const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(false);
+const ArtistCard = ({ artistId }) => {
+  const [playingPostId, setPlayingPostId] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState(null);
+  const audioRefs = useRef([]);
 
-  // 유저 페이지 이동 부분
+  const channelId = '66fb53f9ed2d3c14a64eb9ea';
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchChannelPosts = async () => {
+      try {
+        const fetchedPosts = await getChannelPosts(channelId, 0, 10, token);
+        const sortedPosts = fetchedPosts.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setPosts(sortedPosts);
+      } catch (error) {
+        console.error('Failed to fetch channel posts:', error);
+        setError('포스트를 불러오는 중 문제가 발생했습니다.');
+      }
+    };
+
+    fetchChannelPosts();
+  }, [channelId, token]);
+
+  const togglePlayPause = (post, index) => {
+    const titleObject = JSON.parse(post.title);
+    const album = titleObject.albums?.[0];
+
+    if (!album || !album.videoUrl) {
+      console.error('오디오 URL을 찾을 수 없습니다.');
+      return;
+    }
+
+    const audioElement = audioRefs.current[index];
+
+    if (playingPostId === post._id) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setPlayingPostId(null);
+    } else {
+      if (playingPostId !== null) {
+        const currentAudioIndex = posts.findIndex((p) => p._id === playingPostId);
+        const currentAudio = audioRefs.current[currentAudioIndex];
+        if (currentAudio) {
+          currentAudio.pause();
+          audioElement.currentTime = 0;
+        }
+      }
+
+      audioElement.play();
+      setPlayingPostId(post._id);
+
+      audioElement.addEventListener('ended', () => {
+        setPlayingPostId(null);
+      });
+    }
+  };
+
   const handleArtistClick = (e) => {
     e.stopPropagation();
-    navigate(`/artist/${artistId}`);
-  }; 
-
-  //가운데 앨범 클릭했을때 부분
-  const handleAlbumClick = (e) => {
-    e.stopPropagation();
-    console.log(`앨범 ${albumId}를 재생목록에 추가`);
   };
 
-  // 포스트 클릭했을
-  const handlePostClick = () => {
-    navigate(`/post/${postId}`);
+  const parseAuthorNickName = (author) => {
+    let nickName = '익명';
+
+    try {
+      const authorInfo = JSON.parse(author.fullName);
+      nickName = authorInfo.nickName || '익명';
+    } catch (error) {
+      console.error('닉네임 파싱 중 오류 발생:', error);
+    }
+
+    return nickName;
   };
 
-  const togglePlayPause = (e) => {
-    e.stopPropagation();
-    setIsPlaying((prev) => !prev);
-  };
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (posts.length === 0) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <CardContainer onClick={handlePostClick}>
-      <ArtistInfo>
-        <ArtistAvatar src={ExampleImage} alt="Artist profile" onClick={handleArtistClick} />
-        <ArtistName onClick={handleArtistClick}>Artist. Sun_gliter</ArtistName>
-      </ArtistInfo>
-      <CardImageContainer>
-        <CardImageWrapper onClick={togglePlayPause}>
-          <CardImage
-            src="https://via.placeholder.com/270x300"
-            alt={`${artist}의 아트워크`}
-          />
-          <PlayPauseButton>
-            <img
-              src={isPlaying ? stopButtonIcon : playButtonIcon}
-              alt="Play/Pause Button"
-            />
-          </PlayPauseButton>
-        </CardImageWrapper>
-      </CardImageContainer>
-      <CardContent>
-        <PostContent>
-          <SongTitle>나란 놈은 답은 너다(feat. 하림)</SongTitle>
-          <SongInformation>이별 후 듣기 좋은 노래. 이별 후 듣기 좋은 노래. 이별 후 듣기 좋은 노래 ...더보기</SongInformation>
-        </PostContent>
-      </CardContent>
-      <ExtraSpace />
+    <CardContainer>
+      {posts.map((post, index) => {
+        const titleObject = JSON.parse(post.title);
+        const { title, description, albums } = titleObject;
+        const album = albums?.[0];
+        const nickName = parseAuthorNickName(post.author);
+
+        return (
+          <PostWrapper key={post._id}>
+            <ArtistInfo>
+              <ArtistAvatar
+                src={post.author.image || defaultProfileImage}
+                alt={nickName}
+                onClick={handleArtistClick}
+              />
+              <ArtistName onClick={handleArtistClick}>
+                {nickName}
+              </ArtistName>
+            </ArtistInfo>
+            <CardImageContainer>
+              <CardImageWrapper>
+                <CardImage
+                  src={album?.coverUrl || 'default-image-url'}
+                  alt={`${nickName}의 아트워크`}
+                />
+                <PlayPauseButton onClick={() => togglePlayPause(post, index)}>
+                  <img
+                    src={playingPostId === post._id ? stopButtonIcon : playButtonIcon}
+                    alt={playingPostId === post._id ? "Pause Button" : "Play Button"}
+                  />
+                </PlayPauseButton>
+              </CardImageWrapper>
+            </CardImageContainer>
+            <CardContent>
+              <PostContent>
+                <SongTitle>{title}</SongTitle>
+                <SongInformation>{description}</SongInformation>
+              </PostContent>
+            </CardContent>
+            {album?.videoUrl && (
+              <audio ref={(el) => (audioRefs.current[index] = el)} src={album.videoUrl} />
+            )}
+          </PostWrapper>
+        );
+      })}
     </CardContainer>
   );
 };
 
 export default ArtistCard;
 
-// 스타일드 컴포넌트
+// Styled Components
 const CardContainer = styled.div`
-  width: 300px;
-  height: 480px; // 높이를 늘렸습니다
-  background-color: #f3e8fb;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  font-family: 'Arial', sans-serif;
-  transition: transform 0.2s ease-in-out;
   display: flex;
-  flex-direction: column;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 20px;
+  caret-color: transparent;
+  margin-bottom: 30px;
+  -webkit-overflow-scrolling: touch;
+
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ ) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
+const PostWrapper = styled.div`
+  flex: none;
+  width: 300px;
+  height: 480px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f3e8fb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
 
   &:hover {
     transform: scale(1.02);
+  }
+
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ ) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 260px;
+    height: 420px;
+  }
+
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 240px;
+    height: 400px;
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 100%;
+    height: 380px;
   }
 `;
 
@@ -129,6 +252,12 @@ const CardImage = styled.img`
   height: 100%;
   object-fit: cover;
   border-radius: 10px;
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 100%;
+    height: 240px;
+  }
 `;
 
 const PlayPauseButton = styled.div`
@@ -148,11 +277,14 @@ const PlayPauseButton = styled.div`
     width: 100%;
     height: 100%;
   }
+
+  ${CardImageWrapper}:hover & {
+    opacity: 1;
+  }
 `;
 
 const CardContent = styled.div`
   padding: 15px;
-  width: 270px;
   text-align: left;
 `;
 
@@ -175,9 +307,4 @@ const SongInformation = styled.p`
   color: #666666;
   font-size: 12px;
   margin-bottom: 10px;
-`;
-
-const ExtraSpace = styled.div`
-  flex: 1;
-  // 필요에 따라 여기에 추가 스타일을 적용할 수 있습니다.
 `;
