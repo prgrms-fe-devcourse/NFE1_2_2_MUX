@@ -5,6 +5,7 @@ import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import TrashBtn from '../../assets/icons/trash-button.png';
 import CommentIcon from '../../assets/icons/Comment.png';
+import { useNavigate } from 'react-router-dom';
 
 import {
   addLike,
@@ -36,6 +37,12 @@ const ArtistTrackDetailModal = ({
   const [isDeleted, setIsDeleted] = useState(false);
   const token = localStorage.getItem('token');
   const audioRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    onClose(); // 모달을 닫습니다.
+    navigate(`/user/${track.author._id}`);
+  };
 
   const updateLikeStatus = useCallback(
     (updatedTrack) => {
@@ -274,10 +281,25 @@ const ArtistTrackDetailModal = ({
         <CloseButton onClick={onClose}>&times;</CloseButton>
 
         <Header>
-          <AuthorImage src={authorImage} alt={authorNickname} />
+          <AuthorImage
+            src={authorImage}
+            alt={authorNickname}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleProfileClick();
+            }}
+            style={{ cursor: 'pointer' }}
+          />
           <HeaderText>
             <PostTitle>{title || 'Untitled'}</PostTitle>
-            <AuthorName>{authorNickname}</AuthorName>
+            <AuthorName
+              onClick={(e) => {
+                e.stopPropagation();
+                handleProfileClick();
+              }}
+              style={{ cursor: 'pointer' }}>
+              {authorNickname}
+            </AuthorName>
           </HeaderText>
         </Header>
         <Divider />
@@ -448,6 +470,12 @@ const AuthorImage = styled.img`
   border-radius: 50%;
   margin-right: 10px;
   border: 1px solid lightgray;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const HeaderText = styled.div`
@@ -463,6 +491,12 @@ const PostTitle = styled.h2`
 const AuthorName = styled.span`
   font-size: 14px;
   color: #666;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #444;
+  }
 `;
 
 const Divider = styled.hr`

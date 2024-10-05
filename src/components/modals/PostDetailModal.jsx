@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PreviousBtn from '../../assets/icons/Previous-Btn.png';
 import NextBtn from '../../assets/icons/Next-Btn.png';
@@ -39,6 +40,13 @@ const PostDetailModal = ({
   const [commentCount, setCommentCount] = useState(initialPost.comments.length);
   const token = localStorage.getItem('token');
   const playerRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    console.log('Profile clicked, navigating to:', `/user/${post.author._id}`);
+    onClose(); // 모달을 닫습니다.
+    navigate(`/user/${post.author._id}`);
+  };
 
   const fetchPostDetails = useCallback(async () => {
     if (isDeleted) return; // 게시글이 삭제되었다면 데이터를 가져오지 않음
@@ -278,10 +286,19 @@ const PostDetailModal = ({
         <CloseButton onClick={onClose}>&times;</CloseButton>
 
         <Header>
-          <AuthorImage src={authorImage} alt={authorNickname} />
+          <AuthorImage
+            src={authorImage}
+            alt={authorNickname}
+            onClick={handleProfileClick}
+            style={{ cursor: 'pointer' }}
+          />
           <HeaderText>
             <PostTitle>{title || 'Untitled'}</PostTitle>
-            <AuthorName>{authorNickname}</AuthorName>
+            <AuthorName
+              onClick={handleProfileClick}
+              style={{ cursor: 'pointer' }}>
+              {authorNickname}
+            </AuthorName>
           </HeaderText>
         </Header>
         <Divider />
@@ -498,6 +515,12 @@ const AuthorImage = styled.img`
   border-radius: 50%;
   margin-right: 10px;
   border: 1px solid lightgray;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const HeaderText = styled.div`
@@ -513,6 +536,12 @@ const PostTitle = styled.h2`
 const AuthorName = styled.span`
   font-size: 14px;
   color: #666;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #444;
+  }
 `;
 
 const Divider = styled.hr`
