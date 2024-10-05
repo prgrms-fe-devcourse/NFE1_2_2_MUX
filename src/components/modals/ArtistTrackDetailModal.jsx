@@ -460,7 +460,7 @@ const AlbumImageContainer = styled.div`
   height: 250px;
   position: relative;
   cursor: pointer;
-  margin: 0 auto;
+  margin: 30px auto; // 상하 마진을 30px로 설정
 `;
 
 const AlbumImage = styled.img`
@@ -471,7 +471,8 @@ const AlbumImage = styled.img`
 
 const AlbumInfo = styled.div`
   text-align: center;
-  margin-bottom: 20px;
+  margin-top: 30px; // 상단 마진 추가
+  margin-bottom: 30px; // 20px에서 30px로 증가
 `;
 
 const AlbumTitle = styled.h3`
@@ -485,21 +486,15 @@ const AlbumArtist = styled.p`
   color: #666;
 `;
 
-const AudioControls = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 80%;
-  margin: 0 auto 20px;
-`;
-
 const DescriptionBox = styled.div`
   background-color: #c0afe2;
   border-radius: 10px;
   padding: 15px;
-  margin-bottom: 20px;
-  width: 280px;
-  max-height: 150px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 200px;
   overflow-y: auto;
   margin-left: auto;
   margin-right: auto;
@@ -509,9 +504,12 @@ const Description = styled.p`
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
-  text-align: center;
+  text-align: left;
   color: #fff;
   font-weight: bold;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 `;
 
 const LikeSection = styled.div`

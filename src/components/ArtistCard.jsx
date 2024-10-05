@@ -334,7 +334,7 @@ const CardContainer = styled.div`
 const PostWrapper = styled.div`
   flex: none;
   width: 300px;
-  height: 480px;
+  height: 490px;
   margin: 10px;
   border-radius: 10px;
   overflow: hidden;
@@ -495,8 +495,17 @@ const SongInformation = styled.p`
   color: #666666;
   font-size: 12px;
   margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.2em;
+  height: 2.4em; // line-height * 2줄
 `;
 
 const ReactionCountWrapper = styled.div`
   margin-top: 20px; // 소개글과의 간격 조정
+  margin-bottom: 20px;
 `;
