@@ -397,15 +397,32 @@ const ModalContainer = styled.div`
 
   position: relative;
 
-  @media (max-width: 768px) {
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ 1279px) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
     width: 90%;
-    height: 90vh;
+    max-width: 750px;
   }
 
-  @media (max-width: 480px) {
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 85%;
+    max-width: 700px;
+    height: 85vh;
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 90%;
+    height: 80vh;
+    padding: 15px;
+  }
+
+  /* 모바일 세로 (해상도 ~ 479px) */
+  @media all and (max-width: 479px) {
     width: 100%;
     height: 100vh;
     border-radius: 0;
+    padding: 10px;
   }
 `;
 

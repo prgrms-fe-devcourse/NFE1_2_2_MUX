@@ -134,13 +134,15 @@ const PageContainer = styled.div`
 
 const MainContent = styled.main`
   flex: 1;
-  padding: 20px;
+  padding: 30px;
+  max-width: 1400px;
+  margin: 10px auto;
 `;
 
 const PostGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 80px;
   justify-content: center;
 `;
 
