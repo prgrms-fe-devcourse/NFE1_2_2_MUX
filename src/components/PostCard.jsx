@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import YouTube from 'react-youtube';
-import { useNavigate } from 'react-router-dom';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import playButtonIcon from '../assets/icons/play-button.png';
 import pauseButtonIcon from '../assets/icons/stop-button.png';
 import PostDetailModal from '../components/modals/PostDetailModal';
 import { getPostDetails } from '../utils/api';
-import ReactionCount from '../components/ReactionCount'; // ReactionCount 컴포넌트 import
 
 // 정적 변수로 현재 재생 중인 플레이어 관리
 let currentPlayingPlayer = null;
@@ -19,10 +17,7 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [likes, setLikes] = useState(post.likes.length);
-  const [comments, setComments] = useState(post.comments.length);
   const playerRef = useRef(null);
-  const navigate = useNavigate();
 
   let parsedTitle, albums, description, nickName;
   try {
@@ -109,27 +104,21 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
     };
   }, []);
 
-  const handleCardClick = async (e) => {
-    // 프로필 영역이나 재생 버튼 클릭 시 모달 열지 않음
-    if (
-      !e.target.closest('.profile-area') &&
-      !e.target.closest('.play-button')
-    ) {
-      try {
-        const token = localStorage.getItem('token');
-        const postDetails = await getPostDetails(post._id, token);
-        if (postDetails) {
-          setSelectedPost(postDetails);
-          setIsModalOpen(true);
-        } else {
-          throw new Error('포스트 정보를 가져오는데 실패했습니다.');
-        }
-      } catch (error) {
-        console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
-        alert(
-          '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
-        );
+  const handleCardClick = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const postDetails = await getPostDetails(post._id, token);
+      if (postDetails) {
+        setSelectedPost(postDetails);
+        setIsModalOpen(true);
+      } else {
+        throw new Error('포스트 정보를 가져오는데 실패했습니다.');
       }
+    } catch (error) {
+      console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+      alert(
+        '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+      );
     }
   };
 
@@ -139,14 +128,9 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   };
 
   const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
-    setLikes(newLikeCount);
     if (onLikeUpdate) {
       onLikeUpdate(postId, isLiked, newLikeCount);
     }
-  };
-
-  const handleCommentUpdate = (newCommentCount) => {
-    setComments(newCommentCount);
   };
 
   const handlePostDelete = async (postId) => {
@@ -156,15 +140,10 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
     handleCloseModal();
   };
 
-  const handleProfileClick = (e) => {
-    e.stopPropagation(); // 이벤트 버블링 방지
-    navigate(`/user/${author._id}`); // 작성자의 프로필 페이지로 이동
-  };
-
   return (
     <>
       <Card onClick={handleCardClick}>
-        <CardHeader onClick={handleProfileClick} className="profile-area">
+        <CardHeader>
           <AuthorImage
             src={author.image || defaultProfileImage}
             alt={nickName}
@@ -173,12 +152,13 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
         </CardHeader>
         <ImageContainer
           onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}>
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={handlePlayPause}>
           {firstAlbum && (
             <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
           )}
           {(isHovered || isPlaying) && (
-            <PlayButton className="play-button" onClick={handlePlayPause}>
+            <PlayButton>
               <PlayButtonImage
                 src={isPlaying ? pauseButtonIcon : playButtonIcon}
                 alt={isPlaying ? 'Pause' : 'Play'}
@@ -189,9 +169,6 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
         <CardContent>
           <PostTitle>{parsedTitle}</PostTitle>
           <PostDescription>{description}</PostDescription>
-          <ReactionCountWrapper>
-            <ReactionCount likes={likes} comments={comments} />
-          </ReactionCountWrapper>
         </CardContent>
         {firstAlbum && firstAlbum.videoId && (
           <YouTubePlayerContainer>
@@ -204,7 +181,10 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
                   autoplay: 0,
                 },
               }}
-              onReady={handleReady}
+              onReady={(event) => {
+                playerRef.current = event.target;
+                setIsPlayerReady(true);
+              }}
               onStateChange={handleStateChange}
             />
           </YouTubePlayerContainer>
@@ -216,7 +196,6 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
           onClose={handleCloseModal}
           onLikeUpdate={handleLikeUpdate}
           onPostDelete={handlePostDelete}
-          onCommentUpdate={handleCommentUpdate}
         />
       )}
     </>
@@ -227,18 +206,20 @@ export default PostCard;
 
 // Styled Components
 const Card = styled.div`
-  width: 280px;
-  height: 420px;
-  margin: 12px;
-  border-radius: 8px;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+  width: 340px;
+  height: 500px;
+  margin: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   overflow: hidden;
   border: 1px solid #e0e0e0;
-  transition: all 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-8px);
@@ -251,12 +232,6 @@ const CardHeader = styled.div`
   align-items: center;
   padding: 8px;
   border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
 `;
 
 const AuthorImage = styled.img`
@@ -271,19 +246,36 @@ const AuthorName = styled.p`
   font-size: 0.8em;
   font-weight: bold;
   margin: 0;
-  transform: translateY(-1px);
-  transition: all 0.3s ease;
+`;
 
-  ${CardHeader}:hover & {
-    text-decoration: underline;
-  }
+const ImageContainer = styled.div`
+  position: relative;
+  cursor: pointer;
 `;
 
 const PostImage = styled.img`
   width: 100%;
-  height: 250px;
+  height: 300px;
   object-fit: cover;
   border: 1px solid #e0e0e0;
+`;
+
+const PlayButton = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PlayButtonImage = styled.img`
+  width: 25px;
+  height: 25px;
 `;
 
 const CardContent = styled.div`
@@ -312,8 +304,8 @@ const PostDescription = styled.p`
   -webkit-box-orient: vertical;
   flex-grow: 1;
   word-break: break-word;
-  max-height: 2.4em;
-  line-height: 1.2em;
+  max-height: 2.7em;
+  line-height: 1.3em;
 `;
 
 const ImageContainer = styled.div`
@@ -328,15 +320,15 @@ const PlayButton = styled.div`
   transform: translate(-50%, -50%);
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 50%;
-  padding: 8px;
+  padding: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
 const PlayButtonImage = styled.img`
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
 `;
 
 const YouTubePlayerContainer = styled.div`
@@ -344,5 +336,5 @@ const YouTubePlayerContainer = styled.div`
 `;
 
 const ReactionCountWrapper = styled.div`
-  margin-top: 8px;
+  margin-top: 10px;
 `;
