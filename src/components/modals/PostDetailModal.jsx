@@ -16,6 +16,7 @@ import {
   deleteComment,
   getAuthUserData,
   getPostDetails,
+  createNotification
 } from '../../utils/api.js';
 
 const PostDetailModal = ({
@@ -119,7 +120,7 @@ const PostDetailModal = ({
       // 즉시 UI 업데이트
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
-
+  
       if (isLiked) {
         const likeToRemove = post.likes.find(
           (like) => like.user === currentUser._id,
@@ -128,14 +129,16 @@ const PostDetailModal = ({
           await removeLike(likeToRemove._id, token);
         }
       } else {
-        await addLike(post._id, token);
+        const newLike = await addLike(post._id, token); 
+        // 좋아요 클릭 시 알림 생성
+        await createNotification('LIKE', newLike._id, post.author._id, newLike.post, token);
       }
-
+  
       // 서버에서 최신 데이터 가져오기
       const updatedPost = await getPostDetails(post._id, token);
       setPost(updatedPost);
       updateLikeStatus(updatedPost);
-
+  
       // 부모 컴포넌트에 좋아요 상태 변경을 알림
       if (onLikeUpdate) {
         onLikeUpdate(post._id, !isLiked, updatedPost.likes.length);
@@ -175,6 +178,11 @@ const PostDetailModal = ({
       const newComment = await addComment(post._id, comment, token);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
+      setCommentCount((prevCount) => prevCount + 1); // 댓글 수 증가
+  
+      // 댓글 작성 시 알림 생성, newComment._id를 사용
+      await createNotification('COMMENT', newComment._id, post.author._id, newComment.post, token);
+      
       setCommentCount((prevCount) => {
         const newCount = prevCount + 1;
         if (onCommentUpdate) {
