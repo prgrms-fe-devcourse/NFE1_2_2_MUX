@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import { getChannelPosts, getPostDetails } from '../utils/api';
 import playButtonIcon from '../assets/icons/play-button.png';
 import stopButtonIcon from '../assets/icons/stop-button.png';
@@ -14,6 +15,7 @@ const ArtistCard = ({ onLikeUpdate, onPostDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const audioRefs = useRef([]);
+  const navigate = useNavigate();
 
   const channelId = '66fb53f9ed2d3c14a64eb9ea';
 
@@ -121,6 +123,11 @@ const ArtistCard = ({ onLikeUpdate, onPostDelete }) => {
     );
   };
 
+  const handleProfileClick = (e, authorId) => {
+    e.stopPropagation();
+    navigate(`/user/${authorId}`);
+  };
+
   const parseAuthorNickName = (author) => {
     let nickName = '익명';
 
@@ -152,7 +159,9 @@ const ArtistCard = ({ onLikeUpdate, onPostDelete }) => {
 
         return (
           <PostWrapper key={post._id} onClick={(e) => handleCardClick(e, post)}>
-            <ArtistInfo className="profile-area">
+            <ArtistInfo
+              className="profile-area"
+              onClick={(e) => handleProfileClick(e, post.author._id)}>
               <ArtistAvatar
                 src={post.author.image || defaultProfileImage}
                 alt={nickName}

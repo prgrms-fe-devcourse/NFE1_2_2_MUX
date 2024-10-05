@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import PreviousBtn from '../../assets/icons/Previous-Btn.png';
-import NextBtn from '../../assets/icons/Next-Btn.png';
 import PlayBtn from '../../assets/icons/play-button-2.png';
 import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
@@ -24,7 +22,6 @@ const ArtistTrackDetailModal = ({
   onTrackDelete,
   onCommentUpdate,
 }) => {
-  const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -121,6 +118,7 @@ const ArtistTrackDetailModal = ({
 
   const { title, albums, description, authorNickname, authorImage } =
     parseTrackData(track);
+  const album = albums[0]; // 단일 앨범 사용
 
   useEffect(() => {
     fetchTrackDetails();
@@ -257,30 +255,19 @@ const ArtistTrackDetailModal = ({
         </Header>
         <Divider />
 
-        <AlbumSection>
-          <AlbumNavButton onClick={handlePrevAlbum}>
-            <img src={PreviousBtn} alt="Previous" />
-          </AlbumNavButton>
-          <AlbumImageContainer onClick={handlePlayPause}>
-            <AlbumImage
-              src={albums[currentAlbumIndex]?.coverUrl}
-              alt={albums[currentAlbumIndex]?.title}
+        <AlbumImageContainer onClick={handlePlayPause}>
+          <AlbumImage src={album?.coverUrl} alt={album?.title} />
+          <PlayOverlay $isPlaying={isPlaying}>
+            <PlayPauseIcon
+              src={isPlaying ? StopBtn : PlayBtn}
+              alt={isPlaying ? 'Pause' : 'Play'}
             />
-            <PlayOverlay $isPlaying={isPlaying}>
-              <PlayPauseIcon
-                src={isPlaying ? StopBtn : PlayBtn}
-                alt={isPlaying ? 'Pause' : 'Play'}
-              />
-            </PlayOverlay>
-          </AlbumImageContainer>
-          <AlbumNavButton onClick={handleNextAlbum}>
-            <img src={NextBtn} alt="Next" />
-          </AlbumNavButton>
-        </AlbumSection>
+          </PlayOverlay>
+        </AlbumImageContainer>
 
         <AlbumInfo>
-          <AlbumTitle>{albums[currentAlbumIndex]?.title}</AlbumTitle>
-          <AlbumArtist>{albums[currentAlbumIndex]?.artist}</AlbumArtist>
+          <AlbumTitle>{album?.title}</AlbumTitle>
+          <AlbumArtist>{album?.artist}</AlbumArtist>
         </AlbumInfo>
 
         <DescriptionBox>
@@ -343,7 +330,7 @@ const ArtistTrackDetailModal = ({
 
         <audio
           ref={audioRef}
-          src={albums[currentAlbumIndex]?.videoUrl}
+          src={album?.videoUrl}
           onEnded={() => setIsPlaying(false)}
         />
       </ModalContainer>
@@ -441,40 +428,12 @@ const Divider = styled.hr`
   margin-bottom: 20px;
 `;
 
-const AlbumSection = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-`;
-
-const AlbumNavButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  margin: 0 20px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  img {
-    max-width: 80%;
-    max-height: 80%;
-    object-fit: contain;
-  }
-
-  &:hover {
-    opacity: 0.7;
-  }
-`;
-
 const AlbumImageContainer = styled.div`
   width: 250px;
   height: 250px;
   position: relative;
+  cursor: pointer;
+  margin: 0 auto;
 `;
 
 const AlbumImage = styled.img`
@@ -505,31 +464,6 @@ const AudioControls = styled.div`
   align-items: center;
   width: 80%;
   margin: 0 auto 20px;
-`;
-
-const ProgressBarContainer = styled.div`
-  width: 100%;
-  height: 8px;
-  background-color: #c0bfc3;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  position: relative;
-`;
-
-const ProgressBarFill = styled.div`
-  height: 100%;
-  background-color: #3f3f44;
-  border-radius: 4px;
-`;
-
-const TimeDisplay = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  font-size: 12px;
-  margin-bottom: 10px;
-  color: #666;
 `;
 
 const DescriptionBox = styled.div`
@@ -687,16 +621,16 @@ const PlayOverlay = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  opacity: ${(props) => (props.$isPlaying ? 1 : 0)};
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
   transition: opacity 0.3s ease;
 
-  &:hover {
+  ${AlbumImageContainer}:hover & {
     opacity: 1;
   }
 `;
@@ -704,4 +638,9 @@ const PlayOverlay = styled.div`
 const PlayPauseIcon = styled.img`
   width: 50px;
   height: 50px;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 `;
