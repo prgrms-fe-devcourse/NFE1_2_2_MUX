@@ -8,7 +8,8 @@ import Navigation from './components/main/Navigation';
 import PostFeed from './pages/PostFeed/PostFeed';
 import ProfilePage from '../src/profile/ProfilePage.jsx';
 import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
-
+import NotificationModal from './components/modals/NotificationModal.jsx';
+import PostDetailModal from './components/modals/PostDetailModal.jsx';
 const App = () => {
   const [user, setUser] = useState(null);
 

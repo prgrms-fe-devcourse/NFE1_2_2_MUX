@@ -3,8 +3,13 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 // AWS 자격 증명 및 설정
 const REGION = import.meta.env.VITE_AWS_REGION;
+console.log('All Environment Variables:', import.meta.env);
+console.log('AWS Region:', REGION); // 로그 출력
 const ACCESS_KEY = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
 const SECRET_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
+// 환경 변수가 올바르게 로드되었는지 확인
+console.log('AWS Access Key:', ACCESS_KEY);
+console.log('AWS Secret Key:', SECRET_KEY);
 const BUCKET_NAME = 'mux-track';
 
 // AWS S3 클라이언트 생성
