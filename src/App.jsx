@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import Navigation from './components/main/Navigation';
 import PostFeed from './pages/PostFeed/PostFeed';
 import ProfilePage from '../src/profile/ProfilePage.jsx';
+import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
 
 const App = () => {
   const [user, setUser] = useState(null);
