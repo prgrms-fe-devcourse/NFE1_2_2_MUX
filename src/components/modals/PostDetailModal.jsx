@@ -23,6 +23,7 @@ const PostDetailModal = ({
   onClose,
   onLikeUpdate,
   onPostDelete,
+  onCommentUpdate,
 }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
@@ -162,15 +163,25 @@ const PostDetailModal = ({
     setIsPlaying(false);
   };
 
+  useEffect(() => {
+    setComments(initialPost.comments);
+    setCommentCount(initialPost.comments.length);
+  }, [initialPost]);
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     try {
       if (!comment.trim() || !currentUser) return;
       const newComment = await addComment(post._id, comment, token);
-      console.log('New comment:', newComment);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
-      setCommentCount((prevCount) => prevCount + 1); // 댓글 수 증가
+      setCommentCount((prevCount) => {
+        const newCount = prevCount + 1;
+        if (onCommentUpdate) {
+          onCommentUpdate(newCount); // postId 제거, 댓글 수만 전달
+        }
+        return newCount;
+      });
     } catch (error) {
       console.error('댓글 작성 중 오류 발생:', error);
       alert('댓글 작성 중 오류가 발생했습니다.');
@@ -183,7 +194,13 @@ const PostDetailModal = ({
       setComments((prevComments) =>
         prevComments.filter((comment) => comment._id !== commentId),
       );
-      setCommentCount((prevCount) => prevCount - 1); // 댓글 수 감소
+      setCommentCount((prevCount) => {
+        const newCount = prevCount - 1;
+        if (onCommentUpdate) {
+          onCommentUpdate(newCount); // postId 제거, 댓글 수만 전달
+        }
+        return newCount;
+      });
     } catch (error) {
       console.error('댓글 삭제 중 오류 발생:', error);
       alert('댓글을 삭제할 수 없습니다. 다시 시도해 주세요.');

@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import YouTube from 'react-youtube';
+import { useNavigate } from 'react-router-dom';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import playButtonIcon from '../assets/icons/play-button.png';
 import pauseButtonIcon from '../assets/icons/stop-button.png';
 import PostDetailModal from '../components/modals/PostDetailModal';
 import { getPostDetails } from '../utils/api';
+import ReactionCount from '../components/ReactionCount'; // ReactionCount 컴포넌트 import
 
 // 정적 변수로 현재 재생 중인 플레이어 관리
 let currentPlayingPlayer = null;
@@ -17,7 +19,10 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [likes, setLikes] = useState(post.likes.length);
+  const [comments, setComments] = useState(post.comments.length);
   const playerRef = useRef(null);
+  const navigate = useNavigate();
 
   let parsedTitle, albums, description, nickName;
   try {
@@ -104,21 +109,27 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
     };
   }, []);
 
-  const handleCardClick = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const postDetails = await getPostDetails(post._id, token);
-      if (postDetails) {
-        setSelectedPost(postDetails);
-        setIsModalOpen(true);
-      } else {
-        throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+  const handleCardClick = async (e) => {
+    // 프로필 영역이나 재생 버튼 클릭 시 모달 열지 않음
+    if (
+      !e.target.closest('.profile-area') &&
+      !e.target.closest('.play-button')
+    ) {
+      try {
+        const token = localStorage.getItem('token');
+        const postDetails = await getPostDetails(post._id, token);
+        if (postDetails) {
+          setSelectedPost(postDetails);
+          setIsModalOpen(true);
+        } else {
+          throw new Error('포스트 정보를 가져오는데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
+        alert(
+          '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+        );
       }
-    } catch (error) {
-      console.error('포스트 상세 정보를 가져오는데 실패했습니다:', error);
-      alert(
-        '포스트 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
-      );
     }
   };
 
@@ -128,9 +139,14 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
   };
 
   const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
+    setLikes(newLikeCount);
     if (onLikeUpdate) {
       onLikeUpdate(postId, isLiked, newLikeCount);
     }
+  };
+
+  const handleCommentUpdate = (newCommentCount) => {
+    setComments(newCommentCount);
   };
 
   const handlePostDelete = async (postId) => {
@@ -140,10 +156,15 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
     handleCloseModal();
   };
 
+  const handleProfileClick = (e) => {
+    e.stopPropagation(); // 이벤트 버블링 방지
+    navigate(`/user/${author._id}`); // 작성자의 프로필 페이지로 이동
+  };
+
   return (
     <>
       <Card onClick={handleCardClick}>
-        <CardHeader>
+        <CardHeader onClick={handleProfileClick} className="profile-area">
           <AuthorImage
             src={author.image || defaultProfileImage}
             alt={nickName}
@@ -152,13 +173,12 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
         </CardHeader>
         <ImageContainer
           onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onClick={handlePlayPause}>
+          onMouseLeave={() => setIsHovered(false)}>
           {firstAlbum && (
             <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
           )}
           {(isHovered || isPlaying) && (
-            <PlayButton>
+            <PlayButton className="play-button" onClick={handlePlayPause}>
               <PlayButtonImage
                 src={isPlaying ? pauseButtonIcon : playButtonIcon}
                 alt={isPlaying ? 'Pause' : 'Play'}
@@ -169,6 +189,9 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
         <CardContent>
           <PostTitle>{parsedTitle}</PostTitle>
           <PostDescription>{description}</PostDescription>
+          <ReactionCountWrapper>
+            <ReactionCount likes={likes} comments={comments} />
+          </ReactionCountWrapper>
         </CardContent>
         {firstAlbum && firstAlbum.videoId && (
           <YouTubePlayerContainer>
@@ -181,10 +204,7 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
                   autoplay: 0,
                 },
               }}
-              onReady={(event) => {
-                playerRef.current = event.target;
-                setIsPlayerReady(true);
-              }}
+              onReady={handleReady}
               onStateChange={handleStateChange}
             />
           </YouTubePlayerContainer>
@@ -196,6 +216,7 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
           onClose={handleCloseModal}
           onLikeUpdate={handleLikeUpdate}
           onPostDelete={handlePostDelete}
+          onCommentUpdate={handleCommentUpdate}
         />
       )}
     </>
@@ -217,9 +238,7 @@ const Card = styled.div`
   cursor: pointer;
   overflow: hidden;
   border: 1px solid #e0e0e0;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-10px);
@@ -232,6 +251,12 @@ const CardHeader = styled.div`
   align-items: center;
   padding: 10px;
   border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
 `;
 
 const AuthorImage = styled.img`
@@ -247,6 +272,11 @@ const AuthorName = styled.p`
   font-weight: bold;
   margin: 0;
   transform: translateY(-1px);
+  transition: all 0.3s ease;
+
+  ${CardHeader}:hover & {
+    text-decoration: underline;
+  }
 `;
 
 const PostImage = styled.img`
@@ -311,4 +341,8 @@ const PlayButtonImage = styled.img`
 
 const YouTubePlayerContainer = styled.div`
   display: none;
+`;
+
+const ReactionCountWrapper = styled.div`
+  margin-top: 10px;
 `;
