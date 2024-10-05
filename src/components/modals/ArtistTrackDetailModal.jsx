@@ -7,7 +7,6 @@ import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import TrashBtn from '../../assets/icons/trash-button.png';
 import CommentIcon from '../../assets/icons/Comment.png';
-import YouTube from 'react-youtube';
 
 import {
   addLike,
@@ -18,46 +17,46 @@ import {
   getPostDetails,
 } from '../../utils/api.js';
 
-const PostDetailModal = ({
-  post: initialPost,
+const ArtistTrackDetailModal = ({
+  track: initialTrack,
   onClose,
   onLikeUpdate,
-  onPostDelete,
+  onTrackDelete,
   onCommentUpdate,
 }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentVideoId, setCurrentVideoId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [post, setPost] = useState(initialPost);
+  const [track, setTrack] = useState(initialTrack);
   const [isDeleted, setIsDeleted] = useState(false);
-  const [commentCount, setCommentCount] = useState(initialPost.comments.length);
+  const [commentCount, setCommentCount] = useState(
+    initialTrack.comments.length,
+  );
   const token = localStorage.getItem('token');
-  const playerRef = useRef(null);
+  const audioRef = useRef(null);
 
-  const fetchPostDetails = useCallback(async () => {
-    if (isDeleted) return; // 게시글이 삭제되었다면 데이터를 가져오지 않음
+  const fetchTrackDetails = useCallback(async () => {
+    if (isDeleted) return;
 
     try {
-      if (post && token) {
-        const updatedPost = await getPostDetails(post._id, token);
-        if (updatedPost) {
-          setPost(updatedPost);
-          updateLikeStatus(updatedPost);
+      if (track && token) {
+        const updatedTrack = await getPostDetails(track._id, token);
+        if (updatedTrack) {
+          setTrack(updatedTrack);
+          updateLikeStatus(updatedTrack);
         } else {
           setIsDeleted(true);
           onClose();
         }
       }
     } catch (error) {
-      console.warn('Failed to fetch post details:', error);
-      // 오류 발생 시 무시하고 계속 진행
+      console.warn('Failed to fetch track details:', error);
     }
-  }, [post, token, isDeleted, onClose]);
+  }, [track, token, isDeleted, onClose]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -72,78 +71,73 @@ const PostDetailModal = ({
     };
 
     fetchUserData();
-    fetchPostDetails();
-  }, [token, fetchPostDetails]);
+    fetchTrackDetails();
+  }, [token, fetchTrackDetails]);
 
   const updateLikeStatus = useCallback(
-    (updatedPost) => {
+    (updatedTrack) => {
       if (currentUser) {
-        const userLike = updatedPost.likes.find(
+        const userLike = updatedTrack.likes.find(
           (like) => like.user === currentUser._id,
         );
         setIsLiked(!!userLike);
-        setLikeCount(updatedPost.likes.length);
+        setLikeCount(updatedTrack.likes.length);
       }
     },
     [currentUser],
   );
 
-  if (!post) return null;
+  if (!track) return null;
 
-  let postData = { title: '', albums: [], description: '' };
+  let trackData = { title: '', albums: [], description: '' };
   let authorData = { nickName: '익명' };
 
   try {
-    postData = JSON.parse(post.title);
-    authorData = JSON.parse(post.author.fullName);
+    trackData = JSON.parse(track.title);
+    authorData = JSON.parse(track.author.fullName);
   } catch (error) {
     console.error('데이터 파싱 에러:', error);
   }
 
-  const { title, albums, description } = postData;
+  const { title, albums, description } = trackData;
   const authorNickname = authorData.nickName || '익명';
-  const authorImage = post.author?.image || '/default-profile.png';
+  const authorImage = track.author?.image || '/default-profile.png';
 
   useEffect(() => {
-    if (post) {
-      const sortedComments = [...post.comments].sort(
+    if (track) {
+      const sortedComments = [...track.comments].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       );
       setComments(sortedComments);
-      // console.log('Sorted comments:', sortedComments);
     }
-  }, [post]);
+  }, [track]);
 
   const handleLike = async () => {
     try {
-      // 즉시 UI 업데이트
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
 
       if (isLiked) {
-        const likeToRemove = post.likes.find(
+        const likeToRemove = track.likes.find(
           (like) => like.user === currentUser._id,
         );
         if (likeToRemove) {
           await removeLike(likeToRemove._id, token);
         }
       } else {
-        await addLike(post._id, token);
+        await addLike(track._id, token);
       }
 
-      // 서버에서 최신 데이터 가져오기
-      const updatedPost = await getPostDetails(post._id, token);
-      setPost(updatedPost);
-      updateLikeStatus(updatedPost);
+      const updatedTrack = await getPostDetails(track._id, token);
+      setTrack(updatedTrack);
+      updateLikeStatus(updatedTrack);
 
-      // 부모 컴포넌트에 좋아요 상태 변경을 알림
       if (onLikeUpdate) {
-        onLikeUpdate(post._id, !isLiked, updatedPost.likes.length);
+        onLikeUpdate(track._id, !isLiked, updatedTrack.likes.length);
       }
     } catch (error) {
       console.error('좋아요 처리 중 오류 발생:', error);
       alert('좋아요 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
-      // 오류 발생 시 원래 상태로 되돌리기
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount + 1 : prevCount - 1));
     }
@@ -152,33 +146,26 @@ const PostDetailModal = ({
   const handleNextAlbum = () => {
     const nextIndex = (currentAlbumIndex + 1) % albums.length;
     setCurrentAlbumIndex(nextIndex);
-    setCurrentVideoId(albums[nextIndex].videoId);
     setIsPlaying(false);
   };
 
   const handlePrevAlbum = () => {
     const prevIndex = (currentAlbumIndex - 1 + albums.length) % albums.length;
     setCurrentAlbumIndex(prevIndex);
-    setCurrentVideoId(albums[prevIndex].videoId);
     setIsPlaying(false);
   };
-
-  useEffect(() => {
-    setComments(initialPost.comments);
-    setCommentCount(initialPost.comments.length);
-  }, [initialPost]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     try {
       if (!comment.trim() || !currentUser) return;
-      const newComment = await addComment(post._id, comment, token);
+      const newComment = await addComment(track._id, comment, token);
       setComments((prevComments) => [newComment, ...prevComments]);
       setComment('');
       setCommentCount((prevCount) => {
         const newCount = prevCount + 1;
         if (onCommentUpdate) {
-          onCommentUpdate(newCount); // postId 제거, 댓글 수만 전달
+          onCommentUpdate(newCount);
         }
         return newCount;
       });
@@ -197,7 +184,7 @@ const PostDetailModal = ({
       setCommentCount((prevCount) => {
         const newCount = prevCount - 1;
         if (onCommentUpdate) {
-          onCommentUpdate(newCount); // postId 제거, 댓글 수만 전달
+          onCommentUpdate(newCount);
         }
         return newCount;
       });
@@ -208,44 +195,25 @@ const PostDetailModal = ({
   };
 
   const handlePlayPause = () => {
-    const videoId = albums[currentAlbumIndex]?.videoId;
-    if (!videoId) return;
-
-    if (playerRef.current) {
+    if (audioRef.current) {
       if (isPlaying) {
-        playerRef.current.pauseVideo();
+        audioRef.current.pause();
       } else {
-        playerRef.current.loadVideoById(videoId);
-        playerRef.current.playVideo();
+        audioRef.current.play();
       }
       setIsPlaying(!isPlaying);
     }
   };
 
-  const handleStateChange = (event) => {
-    if (event.data === YouTube.PlayerState.PLAYING) {
-      setIsPlaying(true);
-    } else if (
-      event.data === YouTube.PlayerState.PAUSED ||
-      event.data === YouTube.PlayerState.ENDED
-    ) {
-      setIsPlaying(false);
-    }
-  };
-
-  useEffect(() => {
-    setCurrentVideoId(albums[currentAlbumIndex]?.videoId);
-  }, [currentAlbumIndex, albums]);
-
-  const handleDeletePost = async () => {
-    if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+  const handleDeleteTrack = async () => {
+    if (window.confirm('정말로 이 트랙을 삭제하시겠습니까?')) {
       try {
-        if (onPostDelete) {
-          await onPostDelete(post._id);
+        if (onTrackDelete) {
+          await onTrackDelete(track._id);
         }
         onClose();
       } catch (error) {
-        console.error('게시글 삭제 중 오류 발생:', error);
+        console.error('트랙 삭제 중 오류 발생:', error);
       }
     }
   };
@@ -260,7 +228,7 @@ const PostDetailModal = ({
         <Header>
           <AuthorImage src={authorImage} alt={authorNickname} />
           <HeaderText>
-            <PostTitle>{title || 'Untitled'}</PostTitle>
+            <TrackTitle>{title || 'Untitled'}</TrackTitle>
             <AuthorName>{authorNickname}</AuthorName>
           </HeaderText>
         </Header>
@@ -287,20 +255,6 @@ const PostDetailModal = ({
           </AlbumNavButton>
         </AlbumSection>
 
-        <Pagination>
-          {albums.map((_, index) => (
-            <PaginationDot
-              key={index}
-              $active={index === currentAlbumIndex}
-              onClick={() => {
-                setCurrentAlbumIndex(index);
-                setCurrentVideoId(albums[index].videoId);
-                setIsPlaying(false);
-              }}
-            />
-          ))}
-        </Pagination>
-
         <AlbumInfo>
           <AlbumTitle>{albums[currentAlbumIndex]?.title}</AlbumTitle>
           <AlbumArtist>{albums[currentAlbumIndex]?.artist}</AlbumArtist>
@@ -323,8 +277,8 @@ const PostDetailModal = ({
               <Count>{commentCount}</Count>
             </CommentDisplay>
           </InteractionGroup>
-          {currentUser && currentUser._id === post.author._id && (
-            <DeleteButton onClick={handleDeletePost}>
+          {currentUser && currentUser._id === track.author._id && (
+            <DeleteButton onClick={handleDeleteTrack}>
               <img src={TrashBtn} alt="Delete" />
             </DeleteButton>
           )}
@@ -340,64 +294,43 @@ const PostDetailModal = ({
             <CommentSubmitButton type="submit">댓글 작성</CommentSubmitButton>
           </CommentForm>
 
-          {comments.map((commentItem) => {
-            /*
-            console.log('Comment item:', commentItem);
-            console.log('Comment author ID:', commentItem.author._id);
-            console.log('Current user ID:', currentUser?._id);
-            console.log(
-              'Is author:',
-              currentUser?._id === commentItem.author._id,
-            );*/
-
-            return (
-              <CommentItem key={commentItem._id}>
-                <AuthorImage
-                  src={commentItem.author.image || '/default-profile.png'}
-                  alt={
-                    JSON.parse(commentItem.author.fullName)?.nickName || '익명'
-                  }
-                />
-                <CommentContent>
-                  <CommentAuthor>
-                    {JSON.parse(commentItem.author.fullName)?.nickName ||
-                      '익명'}
-                  </CommentAuthor>
-                  <CommentText>{commentItem.comment}</CommentText>
-                </CommentContent>
-                {currentUser?._id === commentItem.author._id && (
-                  <DeleteButton
-                    onClick={() => handleDeleteComment(commentItem._id)}>
-                    🗑️
-                  </DeleteButton>
-                )}
-              </CommentItem>
-            );
-          })}
+          {comments.map((commentItem) => (
+            <CommentItem key={commentItem._id}>
+              <AuthorImage
+                src={commentItem.author.image || '/default-profile.png'}
+                alt={
+                  JSON.parse(commentItem.author.fullName)?.nickName || '익명'
+                }
+              />
+              <CommentContent>
+                <CommentAuthor>
+                  {JSON.parse(commentItem.author.fullName)?.nickName || '익명'}
+                </CommentAuthor>
+                <CommentText>{commentItem.comment}</CommentText>
+              </CommentContent>
+              {currentUser?._id === commentItem.author._id && (
+                <DeleteButton
+                  onClick={() => handleDeleteComment(commentItem._id)}>
+                  🗑️
+                </DeleteButton>
+              )}
+            </CommentItem>
+          ))}
         </CommentSection>
 
-        <YouTube
-          videoId={currentVideoId}
-          opts={{
-            height: '0',
-            width: '0',
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-            },
-          }}
-          onReady={(event) => {
-            playerRef.current = event.target;
-          }}
-          onStateChange={handleStateChange}
+        <audio
+          ref={audioRef}
+          src={albums[currentAlbumIndex]?.videoUrl}
+          onEnded={() => setIsPlaying(false)}
         />
       </ModalContainer>
     </ModalOverlay>
   );
 };
 
-export default PostDetailModal;
+export default ArtistTrackDetailModal;
 
+// Styled components
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -482,15 +415,14 @@ const Divider = styled.hr`
   border: none;
   border-top: 1px solid #e0e0e0;
   margin-top: 20px;
-  margin-left: 10px;
+  margin-bottom: 20px;
 `;
 
 const AlbumSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 `;
 
 const AlbumNavButton = styled.button`
@@ -499,7 +431,7 @@ const AlbumNavButton = styled.button`
   cursor: pointer;
   width: 24px;
   height: 24px;
-  margin: 0 40px;
+  margin: 0 20px;
   padding: 0;
   display: flex;
   align-items: center;
@@ -520,57 +452,12 @@ const AlbumImageContainer = styled.div`
   width: 250px;
   height: 250px;
   position: relative;
-  cursor: pointer;
 `;
 
 const AlbumImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-`;
-
-const PlayOverlay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.3);
-  opacity: ${(props) => (props.$isPlaying ? 1 : 0)};
-  transition: opacity 0.3s ease;
-
-  ${AlbumImageContainer}:hover & {
-    opacity: 1;
-  }
-`;
-
-const PlayPauseIcon = styled.img`
-  width: 50px;
-  height: 50px;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-`;
-
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-`;
-
-const PaginationDot = styled.div`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: ${(props) => (props.$active ? '#000' : '#ccc')};
-  margin: 0 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 `;
 
 const AlbumInfo = styled.div`
@@ -586,6 +473,39 @@ const AlbumTitle = styled.h3`
 const AlbumArtist = styled.p`
   margin: 5px 0 0;
   font-size: 14px;
+  color: #666;
+`;
+
+const AudioControls = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+  margin: 0 auto 20px;
+`;
+
+const ProgressBarContainer = styled.div`
+  width: 100%;
+  height: 8px;
+  background-color: #c0bfc3;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  position: relative;
+`;
+
+const ProgressBarFill = styled.div`
+  height: 100%;
+  background-color: #3f3f44;
+  border-radius: 4px;
+`;
+
+const TimeDisplay = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  margin-bottom: 10px;
   color: #666;
 `;
 
@@ -614,7 +534,7 @@ const LikeSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px;
+  margin: 20px 0;
 `;
 
 const InteractionGroup = styled.div`
@@ -638,7 +558,6 @@ const CommentDisplay = styled.div`
   align-items: center;
   color: #333;
   font-size: 14px;
-  pointer-events: none;
 `;
 
 const LikeIconImg = styled.img`
@@ -652,14 +571,44 @@ const LikeIconImg = styled.img`
   transition: filter 0.3s ease;
 `;
 
+const CommentIconImg = styled.img`
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+`;
+
+const Count = styled.span`
+  font-weight: bold;
+`;
+
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.1);
+  }
+`;
+
 const CommentSection = styled.div`
   margin-top: 20px;
-  margin-left: 20px;
 `;
 
 const CommentForm = styled.form`
   display: flex;
   gap: 10px;
+  margin-bottom: 20px;
 `;
 
 const CommentInput = styled.input`
@@ -681,7 +630,7 @@ const CommentSubmitButton = styled.button`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #c86edf;
+    background-color: #a08fd1;
   }
 `;
 
@@ -708,36 +657,5 @@ const CommentAuthor = styled.span`
 const CommentText = styled.p`
   margin: 0;
   font-size: 14px;
-  font-weight: bold;
   color: black;
-`;
-
-const DeleteButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  img {
-    width: 16px;
-    height: 16px;
-    transition: transform 0.2s ease;
-  }
-
-  &:hover img {
-    transform: scale(1.1);
-  }
-`;
-
-const CommentIconImg = styled.img`
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-`;
-
-const Count = styled.span`
-  font-weight: bold;
 `;

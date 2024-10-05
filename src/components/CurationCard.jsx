@@ -17,8 +17,7 @@ const AlbumCurationCard = () => {
         url: 'https://youtube-music6.p.rapidapi.com/ytmusic/',
         params: { query: '2024 k-pop , j-pop song' },
         headers: {
-          'x-rapidapi-key':
-            '474a94c639ec3a9ee5cc079e1d96ffa5687f2765',
+          'x-rapidapi-key': '',
           'x-rapidapi-host': 'youtube-music6.p.rapidapi.com',
         },
       };
@@ -135,41 +134,41 @@ const CardContainer = styled.div`
 
 const AlbumContainer = styled.div`
   flex: none;
-  width: 200px;
-  height: 240px;
-  margin: 10px;
+  width: 250px;
+  height: 300px;
+  margin: 15px;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   background-color: #c0afe3;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
 
   &:hover {
-    transform: scale(1.04);
+    transform: scale(1.05);
   }
 
   @media (max-width: 1023px) {
-    width: 180px;
-    height: 220px;
-    margin: 8px;
+    width: 220px;
+    height: 270px;
+    margin: 12px;
   }
 
   @media (max-width: 767px) {
     width: 100%;
     height: auto;
-    margin: 15px 0;
+    margin: 20px 0;
   }
 `;
 
 const AlbumCover = styled.img`
   width: 90%;
-  margin-top: 10px;
-  height: 170px;
+  margin-top: 15px;
+  height: 210px;
   object-fit: cover;
 
   @media (max-width: 1023px) {
-    height: 150px;
+    height: 180px;
   }
 
   @media (max-width: 767px) {
@@ -184,8 +183,8 @@ const PlayPauseButtonContainer = styled.div`
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,14 +195,14 @@ const PlayPauseButtonContainer = styled.div`
   }
 
   @media (max-width: 767px) {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
   }
 `;
 
 const PlayPauseButton = styled.div`
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 50%;
   display: flex;
@@ -211,47 +210,52 @@ const PlayPauseButton = styled.div`
   justify-content: center;
 
   img {
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
   }
 
   @media (max-width: 767px) {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
 
     img {
-      width: 25px;
-      height: 25px;
+      width: 30px;
+      height: 30px;
     }
   }
 `;
 
 const AlbumInfo = styled.div`
-  margin-left: 15px;
+  padding: 10px 15px;
   text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 
   @media (max-width: 767px) {
-    margin-left: 0;
     text-align: center;
   }
 `;
 
 const AlbumTitle = styled.h3`
-  font-size: 14px;
+  font-size: 16px;
   margin: 0;
   color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%; // 부모 컨테이너의 90%까지만 차지하도록 설정
 
   @media (max-width: 767px) {
-    font-size: 16px;
+    font-size: 18px;
   }
 `;
 
 const AlbumArtist = styled.p`
-  font-size: 13px;
+  font-size: 14px;
   color: #ffffff;
-  margin: 3px 0;
+  margin: 5px 0;
 
   @media (max-width: 767px) {
-    font-size: 14px;
+    font-size: 16px;
   }
 `;
