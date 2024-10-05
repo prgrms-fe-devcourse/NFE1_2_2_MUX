@@ -8,12 +8,16 @@ import defaultProfileImage from '../assets/images/default-profile.png';
 
 const ProfilePage = ({ user, isMyPage }) => {
   const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [filteredMusicPosts, setFilteredMusicPosts] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const channelIdA = '66fb541ced2d3c14a64eb9ee'; // 채널 ID A
+  const channelIdB = '66fb53f9ed2d3c14a64eb9ea'; // 채널 ID B
+
   const updateUserDetails = useCallback((updatedUser) => {
-    console.log('Updating user details:', updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
   }, []);
 
@@ -25,8 +29,17 @@ const ProfilePage = ({ user, isMyPage }) => {
     const loadUserPosts = async () => {
       if (user?._id) {
         try {
+          console.log("Fetching posts for user:", user._id);
           const fetchedPosts = await fetchPostsByAuthor(user._id);
+          console.log("Fetched posts:", fetchedPosts);
           setPosts(fetchedPosts);
+
+          // 채널 ID에 따라 포스트를 필터링
+          const postsInChannelA = fetchedPosts.filter(post => post.channel._id === channelIdA);
+          const postsInChannelB = fetchedPosts.filter(post => post.channel._id === channelIdB);
+
+          setFilteredPosts(postsInChannelA);
+          setFilteredMusicPosts(postsInChannelB);
         } catch (err) {
           setError('포스트를 불러오는 데 실패했습니다.');
         }
@@ -92,18 +105,27 @@ const ProfilePage = ({ user, isMyPage }) => {
           <h2>{userFullName.nickName || '이름 없음'}의 추천 포스트</h2>
           {error && <p>{error}</p>}
           <div>
-            {posts.length > 0 ? (
-              posts.map((post) => (
+            {filteredPosts.length > 0 ? (
+              filteredPosts.map((post) => (
                 <PostCard key={post._id} post={post} />
               ))
             ) : (
-              <p>포스트가 없습니다.</p>
+              <p>추천 포스트가 없습니다.</p>
             )}
           </div>
         </PostSection>
         <Separator><div></div></Separator>
         <MusicSection>
           <h2>{userFullName.nickName || '이름 없음'}의 음원</h2>
+          <div>
+            {filteredMusicPosts.length > 0 ? (
+              filteredMusicPosts.map((post) => (
+                <PostCard key={post._id} post={post} />
+              ))
+            ) : (
+              <p>음원이 없습니다.</p>
+            )}
+          </div>
         </MusicSection>
       </Content>
       {isModalOpen && (
@@ -231,7 +253,7 @@ const PostSection = styled.div`
   flex: 2;
   padding-right: 20px;
   position: relative;
-  h2 {
+  > h2 {
     font-size: 20px;
     font-weight: 400;
     border-bottom: 1px solid #000000;
@@ -244,7 +266,7 @@ const MusicSection = styled.div`
   flex: 1;
   min-width: 250px;
   padding-left: 20px;
-  h2 {
+  > h2 {
     font-size: 20px;
     font-weight: 400;
     border-bottom: 1px solid #000000;
