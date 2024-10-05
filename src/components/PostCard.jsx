@@ -288,7 +288,7 @@ const ImageContainer = styled.div`
 
 const PostImage = styled.img`
   width: 100%;
-  height: 300px;
+  height: 250px; // 300px에서 축소
   object-fit: cover;
   border: 1px solid #e0e0e0;
 `;
@@ -337,31 +337,8 @@ const PostDescription = styled.p`
   -webkit-box-orient: vertical;
   flex-grow: 1;
   word-break: break-word;
-  max-height: 2.7em;
-  line-height: 1.3em;
-`;
-
-const ImageContainer = styled.div`
-  position: relative;
-  cursor: pointer;
-`;
-
-const PlayButton = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const PlayButtonImage = styled.img`
-  width: 30px;
-  height: 30px;
+  max-height: 2.4em;
+  line-height: 1.2em;
 `;
 
 const YouTubePlayerContainer = styled.div`
