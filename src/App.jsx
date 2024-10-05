@@ -28,14 +28,14 @@ const App = () => {
       </div>
       <Container>
         <Nav>
-          <NavLink to="/">홈</NavLink>  {/* 메인 페이지로 가는 링크 추가 */}
+          <NavLink to="/mainpage">홈</NavLink>  {/* 메인 페이지로 가는 링크 추가 */}
           <NavLink to="/login">로그인</NavLink>
           <NavLink to="/signup">회원가입</NavLink>
           <NavLink to="/dashboard">대시보드</NavLink>
           <NavLink to="/postfeed">포스트 피드</NavLink>
         </Nav>
         <Routes>
-          <Route path="/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
+          <Route path="mainpage/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
