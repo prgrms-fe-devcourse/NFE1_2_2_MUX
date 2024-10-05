@@ -28,51 +28,16 @@ const ArtistTrackDetailModal = ({
   const [comment, setComment] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [comments, setComments] = useState([]);
+  const [likeCount, setLikeCount] = useState(initialTrack.likes.length);
+  const [comments, setComments] = useState(initialTrack.comments);
   const [currentUser, setCurrentUser] = useState(null);
   const [track, setTrack] = useState(initialTrack);
-  const [isDeleted, setIsDeleted] = useState(false);
   const [commentCount, setCommentCount] = useState(
     initialTrack.comments.length,
   );
+  const [isDeleted, setIsDeleted] = useState(false);
   const token = localStorage.getItem('token');
   const audioRef = useRef(null);
-
-  const fetchTrackDetails = useCallback(async () => {
-    if (isDeleted) return;
-
-    try {
-      if (track && token) {
-        const updatedTrack = await getPostDetails(track._id, token);
-        if (updatedTrack) {
-          setTrack(updatedTrack);
-          updateLikeStatus(updatedTrack);
-        } else {
-          setIsDeleted(true);
-          onClose();
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to fetch track details:', error);
-    }
-  }, [track, token, isDeleted, onClose]);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        if (token) {
-          const userData = await getAuthUserData(token);
-          setCurrentUser(userData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-      }
-    };
-
-    fetchUserData();
-    fetchTrackDetails();
-  }, [token, fetchTrackDetails]);
 
   const updateLikeStatus = useCallback(
     (updatedTrack) => {
@@ -87,21 +52,79 @@ const ArtistTrackDetailModal = ({
     [currentUser],
   );
 
+  const fetchTrackDetails = useCallback(() => {
+    if (isDeleted) return;
+
+    const fetchData = async () => {
+      try {
+        if (track && token) {
+          const updatedTrack = await getPostDetails(track._id, token);
+          if (updatedTrack) {
+            setTrack(updatedTrack);
+            updateLikeStatus(updatedTrack);
+          } else {
+            setIsDeleted(true);
+            onClose();
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to fetch track details:', error);
+      }
+    };
+
+    fetchData();
+  }, [track, token, isDeleted, onClose, updateLikeStatus]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (token) {
+          const userData = await getAuthUserData(token);
+          setCurrentUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [token]);
+
+  useEffect(() => {
+    fetchTrackDetails();
+  }, [fetchTrackDetails]);
+
   if (!track) return null;
 
-  let trackData = { title: '', albums: [], description: '' };
-  let authorData = { nickName: '익명' };
+  const parseTrackData = (track) => {
+    let trackData = { title: '', albums: [], description: '' };
+    let authorData = { nickName: '익명' };
 
-  try {
-    trackData = JSON.parse(track.title);
-    authorData = JSON.parse(track.author.fullName);
-  } catch (error) {
-    console.error('데이터 파싱 에러:', error);
-  }
+    try {
+      trackData = JSON.parse(track.title);
+      authorData = JSON.parse(track.author.fullName);
+    } catch (error) {
+      console.error('데이터 파싱 에러:', error);
+    }
 
-  const { title, albums, description } = trackData;
-  const authorNickname = authorData.nickName || '익명';
-  const authorImage = track.author?.image || '/default-profile.png';
+    return {
+      title: trackData.title,
+      albums: trackData.albums,
+      description: trackData.description,
+      authorNickname: authorData.nickName || '익명',
+      authorImage: track.author?.image || '/default-profile.png',
+    };
+  };
+
+  if (!track) return null;
+  if (isDeleted) return null;
+
+  const { title, albums, description, authorNickname, authorImage } =
+    parseTrackData(track);
+
+  useEffect(() => {
+    fetchTrackDetails();
+  }, [fetchTrackDetails]);
 
   useEffect(() => {
     if (track) {
@@ -228,7 +251,7 @@ const ArtistTrackDetailModal = ({
         <Header>
           <AuthorImage src={authorImage} alt={authorNickname} />
           <HeaderText>
-            <TrackTitle>{title || 'Untitled'}</TrackTitle>
+            <PostTitle>{title || 'Untitled'}</PostTitle>
             <AuthorName>{authorNickname}</AuthorName>
           </HeaderText>
         </Header>
@@ -658,4 +681,27 @@ const CommentText = styled.p`
   margin: 0;
   font-size: 14px;
   color: black;
+`;
+
+const PlayOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: ${(props) => (props.$isPlaying ? 1 : 0)};
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const PlayPauseIcon = styled.img`
+  width: 50px;
+  height: 50px;
 `;
