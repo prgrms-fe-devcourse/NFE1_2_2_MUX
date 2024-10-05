@@ -1,86 +1,66 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { getChannelPosts, getPostDetails } from '../utils/api';
+import { getPostDetails } from '../utils/api';
 import playButtonIcon from '../assets/icons/play-button.png';
 import stopButtonIcon from '../assets/icons/stop-button.png';
 import defaultProfileImage from '../assets/images/default-profile.png';
 import ReactionCount from '../components/ReactionCount';
 import ArtistTrackDetailModal from './modals/ArtistTrackDetailModal';
 
-const ArtistCard = ({ onLikeUpdate, onPostDelete }) => {
-  const [playingPostId, setPlayingPostId] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
+const ArtistCard = ({
+  post,
+  isPlaying,
+  onPlayPause,
+  onLikeUpdate,
+  onTrackDelete,
+}) => {
+  if (!post || !post.author) {
+    return null;
+  }
+
+  const { author } = post;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
-  const audioRefs = useRef([]);
-  const cardContainerRef = useRef(null);
-  const isDown = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
+  const [likes, setLikes] = useState(post.likes ? post.likes.length : 0);
+  const [comments, setComments] = useState(
+    post.comments ? post.comments.length : 0,
+  );
+  const audioRef = useRef(null);
   const navigate = useNavigate();
 
-  const channelId = '66fb53f9ed2d3c14a64eb9ea';
+  let parsedTitle, albums, description, nickName;
+  try {
+    const titleObject = JSON.parse(post.title);
+    parsedTitle = titleObject.title;
+    albums = titleObject.albums;
+    description = titleObject.description;
 
-  const handleArtistClick = (e, authorId) => {
+    const authorInfo = JSON.parse(author.fullName);
+    nickName = authorInfo.nickName || '익명';
+  } catch (error) {
+    console.error('JSON 파싱 에러:', error);
+    parsedTitle = '제목 없음';
+    albums = [];
+    description = '';
+    nickName = '익명';
+  }
+
+  const firstAlbum = albums && albums.length > 0 ? albums[0] : null;
+
+  const handleArtistClick = (e) => {
     e.stopPropagation();
-    navigate(`/user/${authorId}`);
+    navigate(`/user/${author._id}`);
   };
 
   useEffect(() => {
-    const fetchChannelPosts = async () => {
-      try {
-        const fetchedPosts = await getChannelPosts(channelId);
-        const sortedPosts = fetchedPosts.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-        );
-        setPosts(sortedPosts);
-      } catch (error) {
-        console.error('Failed to fetch channel posts:', error);
-        setError('포스트를 불러오는 중 문제가 발생했습니다.');
-      }
-    };
-
-    fetchChannelPosts();
-  }, [channelId]);
-
-  const togglePlayPause = (post, index, e) => {
-    e.stopPropagation();
-    const titleObject = JSON.parse(post.title);
-    const album = titleObject.albums?.[0];
-
-    if (!album || !album.videoUrl) {
-      console.error('오디오 URL을 찾을 수 없습니다.');
-      return;
+    if (isPlaying && audioRef.current) {
+      audioRef.current.play();
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
-
-    const audioElement = audioRefs.current[index];
-
-    if (playingPostId === post._id) {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      setPlayingPostId(null);
-    } else {
-      if (playingPostId !== null) {
-        const currentAudioIndex = posts.findIndex(
-          (p) => p._id === playingPostId,
-        );
-        const currentAudio = audioRefs.current[currentAudioIndex];
-        if (currentAudio) {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-        }
-      }
-
-      audioElement.play();
-      setPlayingPostId(post._id);
-
-      audioElement.addEventListener('ended', () => {
-        setPlayingPostId(null);
-      });
-    }
-  };
+  }, [isPlaying]);
 
   const handleCardClick = async (e, post) => {
     if (
@@ -104,187 +84,84 @@ const ArtistCard = ({ onLikeUpdate, onPostDelete }) => {
     }
   };
 
+  
+  const handlePlayPauseClick = (e) => {
+    e.stopPropagation();
+    onPlayPause();
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedPost(null);
   };
 
   const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === postId
-          ? { ...post, likes: { length: newLikeCount } }
-          : post,
-      ),
-    );
+    setLikes(newLikeCount);
     if (onLikeUpdate) {
       onLikeUpdate(postId, isLiked, newLikeCount);
     }
   };
 
-  const handleCommentUpdate = (postId, newCommentCount) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === postId
-          ? { ...post, comments: { length: newCommentCount } }
-          : post,
-      ),
-    );
+  const handleCommentUpdate = (newCommentCount) => {
+    setComments(newCommentCount);
   };
 
-  const handleProfileClick = (e, authorId) => {
-    e.stopPropagation();
-    navigate(`/user/${authorId}`);
-  };
-
-  const parseAuthorNickName = (author) => {
-    let nickName = '익명';
-
-    try {
-      const authorInfo = JSON.parse(author.fullName);
-      nickName = authorInfo.nickName || '익명';
-    } catch (error) {
-      console.error('닉네임 파싱 중 오류 발생:', error);
+  const handleTrackDelete = async (postId) => {
+    if (onTrackDelete) {
+      await onTrackDelete(postId);
     }
-
-    return nickName;
-  };
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  if (posts.length === 0) {
-    return <div>Loading...</div>;
-  }
-
-  const handleMouseDown = (e) => {
-    isDown.current = true;
-    startX.current = e.pageX - cardContainerRef.current.offsetLeft;
-    scrollLeft.current = cardContainerRef.current.scrollLeft;
-    cardContainerRef.current.style.cursor = 'grabbing';
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDown.current) return;
-    e.preventDefault();
-    const x = e.pageX - cardContainerRef.current.offsetLeft;
-    const walk = (x - startX.current) * 2;
-    cardContainerRef.current.scrollLeft = scrollLeft.current - walk;
-  };
-
-  const handleMouseUpOrLeave = () => {
-    isDown.current = false;
-    cardContainerRef.current.style.cursor = 'grab';
-  };
-
-  const handleTrackDelete = async (trackId) => {
-    try {
-      if (onPostDelete) {
-        await onPostDelete(trackId);
-        // 삭제 후 posts 상태 업데이트
-        setPosts((prevPosts) =>
-          prevPosts.filter((post) => post._id !== trackId),
-        );
-      }
-      handleCloseModal();
-    } catch (error) {
-      console.error('트랙 삭제 중 오류 발생:', error);
-      alert('트랙을 삭제할 수 없습니다. 다시 시도해주세요.');
-    }
+    handleCloseModal();
   };
 
   return (
-    <CardContainer
-      ref={cardContainerRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUpOrLeave}
-      onMouseLeave={handleMouseUpOrLeave}>
-      {posts.map((post, index) => {
-        const titleObject = JSON.parse(post.title);
-        const { title, description, albums } = titleObject;
-        const album = albums?.[0];
-        const nickName = parseAuthorNickName(post.author);
-
-        return (
-          <PostWrapper key={post._id} onClick={(e) => handleCardClick(e, post)}>
-            <ArtistInfo
-              className="profile-area"
-              onClick={(e) => handleArtistClick(e, post.author._id)}>
-              <ArtistAvatar
-                src={post.author.image || defaultProfileImage}
-                alt={nickName}
+    <>
+      <CardContainer>
+        <PostWrapper key={post._id} onClick={(e) => handleCardClick(e, post)}>
+          <ArtistInfo className="profile-area" onClick={handleArtistClick}>
+            <ArtistAvatar
+              src={author.image || defaultProfileImage}
+              alt={nickName}
+            />
+            <ArtistName>{nickName}</ArtistName>
+          </ArtistInfo>
+          <CardImageContainer>
+            <CardImageWrapper>
+              <CardImage
+                src={firstAlbum ? firstAlbum.coverUrl : 'default-image-url'}
+                alt={parsedTitle}
               />
-              <ArtistName>{nickName}</ArtistName>
-            </ArtistInfo>
-            <CardImageContainer>
-              <CardImageWrapper>
-                <CardImage
-                  src={album?.coverUrl || 'default-image-url'}
-                  alt={`${nickName}의 아트워크`}
+              <PlayPauseButton onClick={handlePlayPauseClick}>
+                <img
+                  src={isPlaying ? stopButtonIcon : playButtonIcon}
+                  alt="play-pause"
                 />
-                <PlayPauseButton
-                  className="play-button"
-                  onClick={(e) => togglePlayPause(post, index, e)}>
-                  <img
-                    src={
-                      playingPostId === post._id
-                        ? stopButtonIcon
-                        : playButtonIcon
-                    }
-                    alt={
-                      playingPostId === post._id
-                        ? 'Pause Button'
-                        : 'Play Button'
-                    }
-                  />
-                </PlayPauseButton>
-              </CardImageWrapper>
-            </CardImageContainer>
-            <CardContent>
-              <PostContent>
-                <SongTitle>{title}</SongTitle>
-                <SongInformation>{description}</SongInformation>
-              </PostContent>
-              <ReactionCountWrapper>
-                <ReactionCount
-                  likes={post.likes.length}
-                  comments={post.comments.length}
-                />
-              </ReactionCountWrapper>
-            </CardContent>
-            {album?.videoUrl && (
-              <audio
-                ref={(el) => (audioRefs.current[index] = el)}
-                src={album.videoUrl}
-              />
-            )}
-          </PostWrapper>
-        );
-      })}
+              </PlayPauseButton>
+            </CardImageWrapper>
+          </CardImageContainer>
+          <CardContent>
+            <PostContent>
+              <SongTitle>{parsedTitle}</SongTitle>
+              <SongInformation>{description}</SongInformation>
+            </PostContent>
+            <ReactionCountWrapper>
+              <ReactionCount likes={likes} comments={comments} />
+            </ReactionCountWrapper>
+          </CardContent>
+          {firstAlbum && firstAlbum.videoId && (
+            <audio ref={audioRef} src={firstAlbum.videoUrl} />
+          )}
+        </PostWrapper>
+      </CardContainer>
       {isModalOpen && selectedPost && (
         <ArtistTrackDetailModal
           track={selectedPost}
           onClose={handleCloseModal}
-          onLikeUpdate={(postId, isLiked, newLikeCount) => {
-            handleLikeUpdate(postId, isLiked, newLikeCount);
-            setSelectedPost((prev) => ({
-              ...prev,
-              likes: { length: newLikeCount },
-            }));
-          }}
+          onLikeUpdate={handleLikeUpdate}
           onTrackDelete={handleTrackDelete}
-          onCommentUpdate={(newCommentCount) => {
-            handleCommentUpdate(selectedPost._id, newCommentCount);
-            setSelectedPost((prev) => ({
-              ...prev,
-              comments: { length: newCommentCount },
-            }));
-          }}
+          onCommentUpdate={handleCommentUpdate}
         />
       )}
-    </CardContainer>
+    </>
   );
 };
 
@@ -299,35 +176,18 @@ const CardContainer = styled.div`
   padding-bottom: 20px;
   caret-color: transparent;
   margin-bottom: 30px;
-  -webkit-overflow-scrolling: touch;
-  cursor: grab;
-  user-select: none;
-  width: 100%;
-
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
   }
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
     flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
     flex-direction: row;
     align-items: scroll;
-    flex-wrap: nowrap;
-    width: 100%;
   }
 `;
 
@@ -347,9 +207,8 @@ const PostWrapper = styled.div`
   }
 
   @media all and (min-width: 1024px) and (max-width: 1279px) {
-    width: 260px;
-    height: 420px;
-    justify-content: flex-start;
+    width: 280px;
+    height: 460px;
   }
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
@@ -358,8 +217,8 @@ const PostWrapper = styled.div`
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
-    width: 220px;
-    height: 380px;
+    width: 180px;
+    height: 320px;
   }
 `;
 
@@ -367,6 +226,18 @@ const ArtistInfo = styled.div`
   display: flex;
   align-items: center;
   padding: 13px;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    padding: 12px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    padding: 10px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    padding: 8px;
+  }
 `;
 
 const ArtistAvatar = styled.img`
@@ -375,6 +246,21 @@ const ArtistAvatar = styled.img`
   border-radius: 50%;
   margin-right: 8px;
   cursor: pointer;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 28px;
+    height: 28px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 25px;
+    height: 25px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 20px;
+    height: 20px;
+  }
 `;
 
 const ArtistName = styled.span`
@@ -385,6 +271,18 @@ const ArtistName = styled.span`
 
   &:hover {
     text-decoration: underline;
+  }
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 11px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 10px;
   }
 `;
 
@@ -408,18 +306,18 @@ const CardImageWrapper = styled.div`
   }
 
   @media all and (min-width: 1024px) and (max-width: 1279px) {
-    width: 240px;
+    width: 250px;
     height: 280px;
   }
 
   @media all and (min-width: 768px) and (max-width: 1023px) {
-    width: 220px;
-    height: 260px;
+    width: 210px;
+    height: 250px;
   }
 
   @media all and (min-width: 480px) and (max-width: 767px) {
-    width: 200px;
-    height: 240px;
+    width: 160px;
+    height: 180px;
   }
 `;
 
@@ -429,22 +327,6 @@ const CardImage = styled.img`
   object-fit: cover;
   border-radius: 10px;
   pointer-events: none;
-
-  @media all and (min-width: 1024px) and (max-width: 1279px) {
-    height: 280px;
-    width: 240px;
-  }
-
-  @media all and (min-width: 768px) and (max-width: 1023px) {
-    height: 260px;
-    width: 220px;
-  }
-
-  @media all and (min-width: 480px) and (max-width: 767px) {
-    height: 240px;
-    width: 200px;
-    margin-top: 0;
-  }
 `;
 
 const PlayPauseButton = styled.div`
@@ -457,7 +339,7 @@ const PlayPauseButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s ease-in-out;
   cursor: pointer;
 
@@ -469,11 +351,38 @@ const PlayPauseButton = styled.div`
   ${CardImageWrapper}:hover & {
     opacity: 1;
   }
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 45px;
+    height: 45px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 40px;
+    height: 40px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 30px;
+    height: 30px;
+  }
 `;
 
 const CardContent = styled.div`
   padding: 15px;
   text-align: left;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    padding: 14px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    padding: 10px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    padding: 8px;
+  }
 `;
 
 const PostContent = styled.div`
@@ -489,6 +398,18 @@ const SongTitle = styled.h3`
   color: #333333;
   font-size: 16px;
   font-weight: 600;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    font-size: 15px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 14px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 12px;
+  }
 `;
 
 const SongInformation = styled.p`
@@ -502,10 +423,37 @@ const SongInformation = styled.p`
   text-overflow: ellipsis;
   white-space: normal;
   line-height: 1.2em;
-  height: 2.4em; // line-height * 2줄
+  height: 2.4em;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    font-size: 12px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    font-size: 11px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    font-size: 10px;
+  }
 `;
 
 const ReactionCountWrapper = styled.div`
-  margin-top: 20px; // 소개글과의 간격 조정
+  margin-top: 20px;
   margin-bottom: 20px;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 `;
