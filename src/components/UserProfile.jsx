@@ -14,7 +14,7 @@ const UserProfileCard = ({ user, onNavigate }) => {
     if (fullName.startsWith('{') && fullName.endsWith('}')) {
       try {
         const parsedFullName = JSON.parse(fullName);
-        nickName = parsedFullName.nickName || nickName; // 닉네임 설정
+        nickName = parsedFullName.nickName || nickName;
       } catch (error) {
         console.error('fullName 파싱 오류:', error);
       }
@@ -29,11 +29,13 @@ const UserProfileCard = ({ user, onNavigate }) => {
   };
 
   return (
-    <Card onClick={handleCardClick}>
-      <ProfileImage src={image || ExampleImage} alt={nickName} />
-      <UserInfo>
-        <UserName>{nickName}</UserName>
-      </UserInfo>
+    <Card>
+      <ClickableContent onClick={handleCardClick}>
+        <ProfileImage src={image || ExampleImage} alt={nickName} />
+        <UserInfo>
+          <UserName>{nickName}</UserName>
+        </UserInfo>
+      </ClickableContent>
     </Card>
   );
 };
@@ -57,19 +59,15 @@ const App = () => {
   }, []);
 
   return (
-    <div>
-      <h1>유저 카드 리스트</h1>
-      <UserList>
-        {users.map((user) => (
-          <UserProfileCard key={user._id} user={user} onNavigate={navigate} />
-        ))}
-      </UserList>
-    </div>
+    <UserList>
+      {users.map((user) => (
+        <UserProfileCard key={user._id} user={user} onNavigate={navigate} />
+      ))}
+    </UserList>
   );
 };
 
 export default App;
-
 
 // Styled Components
 const UserList = styled.div`
@@ -81,31 +79,42 @@ const UserList = styled.div`
 const Card = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px;
-  border-radius: 10px;
-  width: 130px;
-  cursor: pointer;
-  transition: box-shadow 0.3s ease;
+  padding: 15px;
+  border-radius: 15px;
+  width: 180px;
+  height: 230px;
   flex-direction: column;
+`;
+
+const ClickableContent = styled.div`
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
 
   &:hover {
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
   }
 `;
 
 const ProfileImage = styled.img`
-  width: 110px;
-  height: 110px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
+  transition: transform 0.3s ease;
 `;
 
 const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
 `;
 
 const UserName = styled.h2`
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 550;
-  margin-top: 10px;
+  margin-top: 20px;
+  text-align: center;
+  transition: transform 0.3s ease;
 `;
