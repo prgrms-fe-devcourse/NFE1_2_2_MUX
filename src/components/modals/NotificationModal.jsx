@@ -31,46 +31,40 @@ const NotificationModal = ({ show, onClose }) => {
     }
   }, [show]); // show 값이 변경될 때마다 실행됨
 
-// NotificationModal.js
-const handleNotificationClick = async (notificationId) => {
-  const token = localStorage.getItem('token');
-  
-  // token이 null인 경우 처리
-  if (!token) {
-    console.error('No token found');
-    return;
-  }
-
-  try {
-    // API 호출 - 토큰만 보내기
-    await markNotificationsAsSeen(token); 
-
-    // 클릭한 알림을 '본 것으로' 처리하여 UI 업데이트
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notification) =>
-        notification._id === notificationId ? { ...notification, seen: true } : notification
-      )
-    );
-  } catch (error) {
-    console.error('Error marking notification as seen:', error);
-  }
-};
-
-// 알림 작성자의 이름을 가져오는 함수 (닉네임이 없을 경우 전체 이름 또는 'Unknown'을 반환)
-const getAuthorName = (author) => {
-  if (author && typeof author === 'object') {
-    try {
-      // fullName을 JSON 파싱
-      const parsedFullName = JSON.parse(author.fullName); 
-      // 닉네임이 있으면 닉네임 반환, 없으면 전체 이름 반환
-      return parsedFullName.nickName || parsedFullName.fullName || 'Unknown';
-    } catch (error) {
-      console.error('Error parsing fullName:', error);
-      return 'Unknown'; // 파싱 실패 시 'Unknown' 반환
+  // 알림 클릭 시 처리하는 함수
+  const handleNotificationClick = async (notificationId) => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.error('No token found');
+      return;
     }
-  }
-  return 'Unknown'; // 작성자가 없거나 타입이 맞지 않으면 'Unknown' 반환
-};
+
+    try {
+      await markNotificationsAsSeen(token); // API 호출 - 토큰만 보내기
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification._id === notificationId ? { ...notification, seen: true } : notification
+        )
+      ); // 클릭한 알림을 '본 것으로' 처리하여 UI 업데이트
+    } catch (error) {
+      console.error('Error marking notification as seen:', error);
+    }
+  };
+
+  // 알림 작성자의 이름을 가져오는 함수 (닉네임이 없을 경우 전체 이름 또는 'Unknown'을 반환)
+  const getAuthorName = (author) => {
+    if (author && typeof author === 'object') {
+      try {
+        const parsedFullName = JSON.parse(author.fullName); // fullName을 JSON 파싱
+        return parsedFullName.nickName || parsedFullName.fullName || 'Unknown'; // 닉네임이 있으면 닉네임 반환
+      } catch (error) {
+        console.error('Error parsing fullName:', error);
+        return 'Unknown'; // 파싱 실패 시 'Unknown' 반환
+      }
+    }
+    return 'Unknown'; // 작성자가 없거나 타입이 맞지 않으면 'Unknown' 반환
+  };
 
   return (
     <ModalBackground show={show} onClick={onClose}> {/* 모달이 열려 있는지 여부에 따라 백그라운드가 보임 */}
@@ -80,7 +74,7 @@ const getAuthorName = (author) => {
           <p>로딩 중...</p>
         ) : (
           <>
-<NotificationList>
+            <NotificationList>
               {notifications.length === 0 ? (
                 <p>알림이 없습니다.</p>
               ) : (
@@ -103,7 +97,7 @@ const getAuthorName = (author) => {
             </NotificationList>
           </>
         )}
-        <button onClick={onClose}>X</button> {/* 모달 닫기 버튼 */}
+        <CloseButton onClick={onClose}>닫기</CloseButton> {/* 모달 닫기 버튼 */}
       </ModalContainer>
     </ModalBackground>
   );
@@ -132,31 +126,24 @@ const ModalContainer = styled.div`
   color: white;
   padding: 20px;
   border-radius: 10px;
-  width: 300px;
+  width: 280px;
   max-height: 300px; /* 모달 최대 높이 지정 */
   overflow-y: auto; /* 내용이 많으면 스크롤 추가 */
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
   z-index: 1000; /* 다른 요소보다 위에 나타나도록 z-index 설정 */
 
-  h2{
+  h2 {
     font-size: 20px;
     font-weight: 400;
     margin-left: 10px;
   }
-
-  button{
-    color: white;
-    background-color: transparent;
-    border: none;
-    right: 20px;
-    padding: 15px;
-    font-size: 20px;
-    position: absolute;
-  }
 `;
+
+// 알림 목록 스타일링
 const NotificationList = styled.ul`
   padding: 0;
   list-style: none;
+  font-size: 15px;
 `;
 
 // 각각의 알림 아이템 스타일링
@@ -165,11 +152,24 @@ const NotificationItem = styled.li`
   border-bottom: 1px solid #444;
   cursor: pointer;
   color: ${({ seen }) => (seen ? '#888' : 'white')}; /* seen 상태에 따라 글씨 색상 변경 */
+  
   &:last-child {
     border-bottom: none;
   }
+
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
+`;
+
+// 모달 닫기 버튼 스타일링
+const CloseButton = styled.button`
+  color: white;
+  background-color: transparent;
+  border: none;
+  right: 20px;
+  padding: 15px;
+  font-size: 15px;
+  position: absolute;
 `;
 
