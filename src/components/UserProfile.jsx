@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import ExampleImage from '../assets/images/default-profile.png';
 import { useNavigate } from 'react-router-dom';
-import { getUsers } from '../utils/api'; 
 
-// 유저 프로필 카드 컴포넌트
-const UserProfileCard = ({ user, onNavigate }) => {
+const UserProfileCard = ({ user }) => {
   const { image, fullName, _id } = user;
   let nickName = '닉네임이 없습니다.';
+  const navigate = useNavigate();
 
   // fullName이 JSON 형식인지 체크한 후 파싱 시도
   if (fullName) {
@@ -25,12 +24,12 @@ const UserProfileCard = ({ user, onNavigate }) => {
   }
 
   const handleCardClick = () => {
-    onNavigate(`/user/${_id}`);
+    navigate(`/user/${_id}`);
   };
 
   return (
-    <Card>
-      <ClickableContent onClick={handleCardClick}>
+    <Card onClick={handleCardClick}>
+      <ClickableContent>
         <ProfileImage src={image || ExampleImage} alt={nickName} />
         <UserInfo>
           <UserName>{nickName}</UserName>
@@ -40,50 +39,16 @@ const UserProfileCard = ({ user, onNavigate }) => {
   );
 };
 
-// 유저 리스트 컴포넌트
-const App = () => {
-  const [users, setUsers] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const usersData = await getUsers();
-        setUsers(usersData);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  return (
-    <UserList>
-      {users.map((user) => (
-        <UserProfileCard key={user._id} user={user} onNavigate={navigate} />
-      ))}
-    </UserList>
-  );
-};
-
-export default App;
+export default UserProfileCard;
 
 // Styled Components
-const UserList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-`;
-
 const Card = styled.div`
   display: flex;
   align-items: center;
-  padding: 15px;
-  border-radius: 15px;
-  width: 180px;
-  height: 230px;
-  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;  // 추가: 카드 내부의 오버플로우를 숨김
 `;
 
 const ClickableContent = styled.div`
@@ -92,6 +57,8 @@ const ClickableContent = styled.div`
   flex-direction: column;
   align-items: center;
   transition: transform 0.3s ease;
+  width: 100%;
+  padding: 10px;  // 추가: 내부 여백을 줘서 호버 시 잘리지 않도록 함
 
   &:hover {
     transform: scale(1.05);
@@ -102,19 +69,23 @@ const ProfileImage = styled.img`
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  transition: transform 0.3s ease;
+  object-fit: cover;
 `;
 
 const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 `;
 
 const UserName = styled.h2`
-  font-size: 15px;
-  font-weight: 550;
-  margin-top: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1rem;
   text-align: center;
-  transition: transform 0.3s ease;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
