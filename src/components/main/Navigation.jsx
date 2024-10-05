@@ -10,10 +10,9 @@ import BellIcon from '../../assets/icons/Bell.png';
 import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
 import LogoImage from '../../assets/images/Logo.png';
-//모달 파일
-import UploadModal from '../modals/UploadModal'; 
+// 모달 파일
+import UploadModal from '../modals/UploadModal';
 import NotificationModal from '../modals/NotificationModal';
-
 
 const Navigation = () => {
   const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
@@ -21,10 +20,16 @@ const Navigation = () => {
   const [user, setUser] = useState(null); // 유저 상태
   const navigate = useNavigate(); // useNavigate 훅 사용
   const [showModal, setShowModal] = useState(false);
+  const [unseenNotifications, setUnseenNotifications] = useState(true); // 확인하지 않은 알림 상태
 
-
-  const handleNotificationClick = () => { setShowModal(true); };
-  const handleCloseModal = () => { setShowModal(false); };
+  const handleNotificationClick = () => { 
+    setShowModal(true); 
+    setUnseenNotifications(false); // 모달 열 때 주홍색 점 숨김
+  };
+  
+  const handleCloseModal = () => { 
+    setShowModal(false); 
+  };
 
   // 모달 열기/닫기 함수
   const openModal = () => setIsModalOpen(true);
@@ -105,10 +110,10 @@ const Navigation = () => {
           </a>
 
           {/* 알림 아이콘 */}
-          <NotificationButton onClick={handleNotificationClick}>
-        <img src={BellIcon} alt="알림" />
-      </NotificationButton>
-         <NotificationModal show={showModal} onClose={handleCloseModal} />
+          <NotificationButton onClick={handleNotificationClick} unseen={unseenNotifications}>
+            <img src={BellIcon} alt="알림" />
+          </NotificationButton>
+          <NotificationModal show={showModal} onClose={handleCloseModal} />
         </ProfileSection>
       </HeaderContainer>
 
@@ -146,7 +151,6 @@ const Logo = styled.div`
 const Navbar = styled.nav`
   display: flex;
   gap: 20px;
-
 `;
 
 const NavItem = styled.a`
@@ -232,11 +236,6 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: 15px;
 
-  /* @media (max-width: 768px) {
-    justify-content: space-between;
-    width: 100%; 
-  } */
-
   .title {
     display: flex;
     padding: 5px 30px;
@@ -272,12 +271,23 @@ const NotificationButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
-  display: flex;
-  align-items: center;
+  position: relative; // 주홍색 점을 아이콘에 상대적으로 위치시키기 위해 relative로 설정
 
   img {
     width: 30px;  /* 이미지 크기 조정 */
     height: 30px;
+  }
+
+  &::after {
+    content: ''; // 점을 생성하기 위해 사용
+    position: absolute; // 아이콘에 절대적으로 위치
+    top: -5px; // 아이콘의 위쪽으로 이동
+    right: -5px; // 아이콘의 오른쪽으로 이동
+    width: 8px; // 점의 너비
+    height: 8px; // 점의 높이
+    border-radius: 50%; // 점을 원형으로 만들기
+    background-color: #f6601b; // 점의 색상 (주홍색)
+    display: ${({ unseen }) => (unseen ? 'block' : 'none')}; // 확인하지 않은 알림이 없으면 숨김
   }
 `;
 // 모달 배경 및 컨테이너 스타일 정의
