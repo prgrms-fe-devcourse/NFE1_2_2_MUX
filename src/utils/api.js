@@ -327,3 +327,77 @@ export const fetchPostsByAuthor = async (authorId, offset = 0, limit = 10) => {
     throw error; // 에러가 발생하면 throw
   }
 };
+
+// 알림 관련 api들
+export const getNotifications = async (token) => {
+  const response = await fetch('/api/notifications', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json', // JSON 형식으로 요청
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text(); // 응답 텍스트 읽기
+    console.error('Error fetching notifications:', errorText); // 에러 로그
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json(); // JSON으로 변환하여 반환
+};
+
+// 알림 읽음 처리
+export const markNotificationsAsSeen = async (token) => {
+  try {
+    const response = await axios.put(
+      '/api/notifications/seen', // 경로가 맞는지 확인
+      {}, // 본문은 비어 있음
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // 토큰을 헤더에 포함
+        },
+      },
+    );
+    return response.data; // 응답 데이터 반환
+  } catch (error) {
+    console.error(
+      'Error marking notifications as seen:',
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+};
+
+// 알림 생성
+export const createNotification = async (
+  notificationType,
+  notificationTypeId,
+  userId,
+  postId,
+  token,
+) => {
+  try {
+    const response = await axios.post(
+      '/api/notifications/create',
+      {
+        notificationType,
+        notificationTypeId,
+        userId,
+        postId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // JWT 토큰을 헤더에 추가
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error('Error Response Data:', error.response.data);
+    } else if (error.request) {
+      console.error('Error Request:', error.request);
+    }
+  }
+};
