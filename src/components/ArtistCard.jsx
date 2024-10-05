@@ -151,6 +151,24 @@ const CardContainer = styled.div`
   caret-color: transparent;
   margin-bottom: 30px;
   -webkit-overflow-scrolling: touch;
+
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ ) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const PostWrapper = styled.div`
@@ -167,6 +185,24 @@ const PostWrapper = styled.div`
 
   &:hover {
     transform: scale(1.02);
+  }
+
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ ) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    width: 260px;
+    height: 420px;
+  }
+
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 240px;
+    height: 400px;
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 100%;
+    height: 380px;
   }
 `;
 
@@ -216,6 +252,12 @@ const CardImage = styled.img`
   height: 100%;
   object-fit: cover;
   border-radius: 10px;
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 100%;
+    height: 240px;
+  }
 `;
 
 const PlayPauseButton = styled.div`
