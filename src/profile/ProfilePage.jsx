@@ -194,19 +194,15 @@ const ProfileHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   position: relative;
+  margin-bottom: 20px; /* ProfileHeader와 Bio 사이의 기본 간격 */
 
   h2 {
     font-size: 1.3rem;
     font-weight: 600;
-    margin: 3px;
-
-    @media (max-width: 767px) {
-      position: absolute;
-    }
+    margin-top: 10px;
   }
 
   @media (max-width: 767px) {
-    position: relative;
     flex-direction: column;
     align-items: flex-start;
   }
@@ -219,12 +215,11 @@ const EditButton = styled.button`
   border: none;
   font-size: 0.8rem;
   cursor: pointer;
-  position: absolute;
-  left: 170px;
-  top: 5px;
+  position: relative; /* absolute에서 relative로 변경 */
+  margin-left: 10px; /* 위치를 명확히 조정 */
 
   @media (max-width: 767px) {
-    position: relative;
+    margin-left: 20px; /* 작은 화면에서 패딩 조정 */
   }
 `;
 
@@ -235,13 +230,11 @@ const LogoutButton = styled.button`
   border: none;
   font-size: 0.8rem;
   cursor: pointer;
-  position: absolute;
-  left: 165px;
-  top: -15px;
-
+  position: relative; /* absolute에서 relative로 변경 */
+  margin-left: 10px; /* 위치를 명확히 조정 */
   @media (max-width: 767px) {
-    position: relative;
-    top: -40px;
+    margin-left: 120px; /* 작은 화면에서 패딩 조정 */
+    margin-top: -27px;
   }
 `;
 
@@ -250,6 +243,7 @@ const Bio = styled.div`
   width: 300px;
   height: 80px;
   border-radius: 10px;
+  margin-top: 15px; /* ProfileHeader와 일정한 간격 유지 */
 
   p {
     font-size: 0.9rem;
@@ -261,8 +255,8 @@ const Bio = styled.div`
   @media (max-width: 767px) {
     width: 110%;
     height: auto;
+    margin-top: 15px;
     position: relative;
-    top: -20px;
   }
 `;
 
