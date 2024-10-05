@@ -7,7 +7,6 @@ const NotificationModal = ({ show, onClose }) => {
   const [notifications, setNotifications] = useState([]); // 알림 데이터를 저장하는 상태
   const [loading, setLoading] = useState(true); // 로딩 상태를 관리하는 상태
   const [error, setError] = useState(''); // 오류 메시지를 저장하는 상태
-  const [unseenNotifications, setUnseenNotifications] = useState(false); // 확인하지 않은 알림 상태 추가
 
   // 알림 데이터를 서버에서 불러오는 함수
   const fetchNotifications = async () => {
@@ -17,10 +16,6 @@ const NotificationModal = ({ show, onClose }) => {
       const fetchedNotifications = await getNotifications(token); // API를 통해 알림 데이터를 가져옴
       console.log('Fetched Notifications:', fetchedNotifications);
       setNotifications(fetchedNotifications); // 알림 데이터를 상태에 저장
-
-      // 확인하지 않은 알림이 있는지 체크
-      const hasUnseen = fetchedNotifications.some(notification => !notification.seen);
-      setUnseenNotifications(hasUnseen); // 주홍색 점 표시 여부 업데이트
     } catch (error) {
       console.error('Error fetching notifications:', error); // 에러 발생 시 콘솔에 에러를 출력
       setError('알림을 불러오는 데 실패했습니다.'); // 사용자에게 표시할 오류 메시지 설정
@@ -52,15 +47,10 @@ const NotificationModal = ({ show, onClose }) => {
           notification._id === notificationId ? { ...notification, seen: true } : notification
         )
       ); // 클릭한 알림을 '본 것으로' 처리하여 UI 업데이트
-
-      // 확인하지 않은 알림 상태 업데이트
-      const updatedUnseen = prevNotifications.some(notification => !notification.seen);
-      setUnseenNotifications(updatedUnseen);
     } catch (error) {
       console.error('Error marking notification as seen:', error);
     }
   };
-  
 
   // 알림 작성자의 이름을 가져오는 함수 (닉네임이 없을 경우 전체 이름 또는 'Unknown'을 반환)
   const getAuthorName = (author) => {
