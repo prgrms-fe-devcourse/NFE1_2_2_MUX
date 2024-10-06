@@ -44,52 +44,67 @@
 
 
 ### 로그인
-<img width="403" alt="스크린샷 2024-10-06 오후 9 36 51" src="https://github.com/user-attachments/assets/10ab415b-92e7-46da-a64a-2215409213ed">
+![login](./imgs/login.png)
 
 
 
 ### 회원가입
-<img width="445" alt="스크린샷 2024-10-06 오후 9 37 03" src="https://github.com/user-attachments/assets/ba08b5bf-1174-4246-80fd-c2dbc78c794c">
+![signup](./imgs/signup.png)
 
 
 
 ### 메인 페이지
-![Vite-React](https://github.com/user-attachments/assets/1fa33916-0684-4813-9d16-6d342a486211)
-
+![main](./imgs/main.png)
 
 
 ### 자작곡 업로드
-<img width="649" alt="스크린샷 2024-10-06 오후 9 14 54" src="https://github.com/user-attachments/assets/ea170573-964d-4792-9697-8df638029150">
+![upload1](./imgs/uploadsong1.png)
 
-<img width="648" alt="스크린샷 2024-10-06 오후 9 45 37" src="https://github.com/user-attachments/assets/22e242f6-b168-44a7-b862-564153b1d9c6">
+![upload2](./imgs/uploadsong2.png)
 
 
 
 ### 추천 포스트 업로드
-<img width="648" alt="스크린샷 2024-10-06 오후 9 15 19" src="https://github.com/user-attachments/assets/42ea1ef1-c1e1-416d-b3cb-1c4657950e2e">
+![upload3](./imgs/uploadrec.png)
 
 
 
 ### 자작곡 상세 페이지
-<img width="844" alt="스크린샷 2024-10-06 오후 9 41 49" src="https://github.com/user-attachments/assets/b9e29583-b075-4430-b3f5-fbcb65ac3b18">
+![songdetail](./imgs/songdetail.png)
 
 
 
 ### 추천 포스트 상세 페이지
-<img width="839" alt="스크린샷 2024-10-06 오후 9 36 16" src="https://github.com/user-attachments/assets/21d67867-dafa-4e2a-a381-2cdac1272907">
+![songdetail](./imgs/recdetail.png)
+
+
+
+### 자작곡 & 추천 플레이리스트 피드
+![artistcuration](./imgs/artist-curation.png)
+
+
+
+### 추천곡 피드
+![postfeed](./imgs/postfeed.png)
 
 
 
 ### 알림
-<img width="321" alt="스크린샷 2024-10-06 오후 9 29 41" src="https://github.com/user-attachments/assets/c21fd557-fe38-4039-9d00-442cc7e00f67">
+![alert](./imgs/alert.png)
+
 
 
 ### 마이페이지
-![Vite-React (4)](https://github.com/user-attachments/assets/a040e75a-11b1-437d-963c-65a933497fc9)
+![mypage](./imgs/mypage.png)
 
 
 
-## 기술스택⚒
+### 정보 수정
+![modify](./imgs/modify.png)
+
+
+
+## 기술스택
 <table>
 <tr>
  <td align="center">Language</td>
