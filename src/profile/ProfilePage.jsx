@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { fetchPostsByAuthor, logout } from '../utils/api'; 
+import { fetchPostsByAuthor, logout } from '../utils/api';
 import PostCard from '../components/PostCard';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
 import defaultProfileImage from '../assets/images/default-profile.png';
+import HorizontalArtistCard from '../components/HorizontalArtistCard';
 
 const ProfilePage = ({ user, isMyPage }) => {
   const [posts, setPosts] = useState([]);
@@ -31,14 +32,18 @@ const ProfilePage = ({ user, isMyPage }) => {
     const loadUserPosts = async () => {
       if (user?._id) {
         try {
-          console.log("Fetching posts for user:", user._id);
+          console.log('Fetching posts for user:', user._id);
           const fetchedPosts = await fetchPostsByAuthor(user._id);
-          console.log("Fetched posts:", fetchedPosts);
+          console.log('Fetched posts:', fetchedPosts);
           setPosts(fetchedPosts);
 
           // 채널 ID에 따라 포스트 필터링
-          const postsInChannelA = fetchedPosts.filter(post => post.channel._id === CHANNEL_ID_A);
-          const postsInChannelB = fetchedPosts.filter(post => post.channel._id === CHANNEL_ID_B);
+          const postsInChannelA = fetchedPosts.filter(
+            (post) => post.channel._id === CHANNEL_ID_A,
+          );
+          const postsInChannelB = fetchedPosts.filter(
+            (post) => post.channel._id === CHANNEL_ID_B,
+          );
 
           setFilteredPosts(postsInChannelA);
           setFilteredMusicPosts(postsInChannelB);
@@ -75,9 +80,10 @@ const ProfilePage = ({ user, isMyPage }) => {
   // 유저의 fullName을 JSON 파싱
   let userFullName = {};
   try {
-    userFullName = typeof user.fullName === 'string' 
-      ? JSON.parse(user.fullName)
-      : user.fullName || {};
+    userFullName =
+      typeof user.fullName === 'string'
+        ? JSON.parse(user.fullName)
+        : user.fullName || {};
   } catch (err) {
     console.error('fullName 파싱 실패:', err);
   }
@@ -91,8 +97,12 @@ const ProfilePage = ({ user, isMyPage }) => {
             <h2>{userFullName.nickName || '이름 없음'}</h2>
             {isMyPage && (
               <>
-                <EditButton onClick={handleOpenModal}>✏️ 회원정보 수정</EditButton>
-                <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>🚪 로그아웃</LogoutButton>
+                <EditButton onClick={handleOpenModal}>
+                  ✏️ 회원정보 수정
+                </EditButton>
+                <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>
+                  🚪 로그아웃
+                </LogoutButton>
               </>
             )}
           </ProfileHeader>
@@ -115,13 +125,15 @@ const ProfilePage = ({ user, isMyPage }) => {
             )}
           </div>
         </PostSection>
-        <Separator><div></div></Separator>
+        <Separator>
+          <div></div>
+        </Separator>
         <MusicSection>
           <h2>{userFullName.nickName || '이름 없음'}의 음원</h2>
           <div>
             {filteredMusicPosts.length > 0 ? (
               filteredMusicPosts.map((post) => (
-                <PostCard key={post._id} post={post} />
+                <HorizontalArtistCard key={post._id} post={post} />
               ))
             ) : (
               <p>음원이 없습니다.</p>
@@ -163,7 +175,7 @@ const Header = styled.div`
     align-items: center;
     height: auto;
   }
-`; 
+`;
 
 const ProfileImage = styled.img`
   width: 160px;
@@ -288,8 +300,8 @@ const PostSection = styled.div`
     justify-content: flex-start; /* 왼쪽 정렬 */
     gap: 10px; /* 카드 사이의 간격 */
     @media (max-width: 708px) {
-          justify-content: center; /* 포스트들을 중앙으로 정렬 */
-        }
+      justify-content: center; /* 포스트들을 중앙으로 정렬 */
+    }
   }
 
   @media (max-width: 1023px) {
@@ -316,8 +328,8 @@ const MusicSection = styled.div`
     justify-content: flex-start; /* 왼쪽 정렬 */
     gap: 10px; /* 카드 사이의 간격 */
     @media (max-width: 708px) {
-          justify-content: center; /* 포스트들을 중앙으로 정렬 */
-        }
+      justify-content: center; /* 포스트들을 중앙으로 정렬 */
+    }
   }
 
   @media (max-width: 1023px) {

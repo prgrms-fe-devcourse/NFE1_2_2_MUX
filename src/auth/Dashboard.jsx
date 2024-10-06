@@ -2,11 +2,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import ProfileEditModal from '../components/modals/ProfileEditModal';
-import { getUserData } from '../utils/api';
+import { getPosts, getUserData } from '../utils/api';
 import UserCard from '../components/UserCard';
 import CurationCard from '../components/CurationCard';
 import ReactionCount from '../components/ReactionCount'; // 리액션 카운트 컴포넌트
 import ArtistCard from '../components/ArtistCard';
+import HorizontalArtistCard from '../components/HorizontalArtistCard';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -14,7 +15,22 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await getPosts();
+        setPosts(response); // API 응답 구조에 따라 response.data 대신 response를 사용할 수 있습니다.
+      } catch (error) {
+        console.error('Failed to fetch posts:', error);
+        setError('Failed to load posts. Please try again later.');
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   const fetchUserData = useCallback(async () => {
     const userData = localStorage.getItem('user');
@@ -70,6 +86,16 @@ const Dashboard = () => {
   const openModalHandler = () => setIsModalOpen(true);
   const closeModalHandler = () => setIsModalOpen(false);
 
+  const handleLikeUpdate = (postId, isLiked, newLikeCount) => {
+    // 여기에 좋아요 업데이트 로직을 구현합니다
+    console.log('Like updated:', postId, isLiked, newLikeCount);
+  };
+
+  const handleTrackDelete = async (postId) => {
+    // 여기에 트랙 삭제 로직을 구현합니다
+    console.log('Track deleted:', postId);
+  };
+
   if (isLoading) return <LoadingMessage>Loading...</LoadingMessage>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!user)
@@ -121,6 +147,14 @@ const Dashboard = () => {
       )}
       <CurationCard />
       <ArtistCard />
+      {posts.map((post) => (
+        <HorizontalArtistCard
+          key={post._id}
+          post={post}
+          onLikeUpdate={handleLikeUpdate}
+          onTrackDelete={handleTrackDelete}
+        />
+      ))}
     </DashboardContainer>
   );
 };
