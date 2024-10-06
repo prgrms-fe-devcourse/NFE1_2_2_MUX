@@ -48,7 +48,6 @@ const ProfilePage = ({ user, isMyPage }) => {
           setFilteredPosts(postsInChannelA);
           setFilteredMusicPosts(postsInChannelB);
         } catch (err) {
-          setError('포스트를 불러오는 데 실패했습니다.');
         }
       }
     };
@@ -95,7 +94,11 @@ const ProfilePage = ({ user, isMyPage }) => {
         <ProfileInfo>
           <ProfileHeader>
             <h2>{userFullName.nickName || '이름 없음'}</h2>
-            {isMyPage && (
+          </ProfileHeader>
+          <Bio>
+            <p>{userFullName.bio || '자기소개 없음'}</p>
+          </Bio>
+          {isMyPage && (
               <>
                 <EditButton onClick={handleOpenModal}>
                   ✏️ 회원정보 수정
@@ -105,10 +108,6 @@ const ProfilePage = ({ user, isMyPage }) => {
                 </LogoutButton>
               </>
             )}
-          </ProfileHeader>
-          <Bio>
-            <p>{userFullName.bio || '자기소개 없음'}</p>
-          </Bio>
         </ProfileInfo>
       </Header>
       <Content>
@@ -205,18 +204,41 @@ const ProfileHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  margin-bottom: 20px; /* ProfileHeader와 Bio 사이의 기본 간격 */
+  position: relative; /* ProfileHeader와 Bio 사이의 기본 간격 */
 
   h2 {
     font-size: 1.3rem;
     font-weight: 600;
-    margin-top: 10px;
+    margin-top: 20px;
   }
 
   @media (max-width: 767px) {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+  }
+`;
+
+const Bio = styled.div`
+  background-color: #ffffff;
+  width: 300px;
+  height: 80px;
+  border-radius: 10px;
+
+  p {
+    font-size: 0.9rem;
+    padding: 10px;
+    font-weight: 400;
+    margin-top: -5px;
+  }
+
+  @media (max-width: 767px) {
+    width: 110%;
+    min-height: 60px;
+    height: auto;
+    position: relative;
+    text-align: left;
+    margin-right: 20px;
+    margin-top:-10px;
   }
 `;
 
@@ -228,10 +250,16 @@ const EditButton = styled.button`
   font-size: 0.8rem;
   cursor: pointer;
   position: relative; /* absolute에서 relative로 변경 */
-  margin-left: 10px; /* 위치를 명확히 조정 */
+  margin-top: 5px;
+  margin-left: 35px; /* 위치를 명확히 조정 */
+
+  &:hover {
+    color: #141314;; /* 호버 시 글자색 변경 (예: 핑크색) */
+  }
 
   @media (max-width: 767px) {
     margin-left: 20px; /* 작은 화면에서 패딩 조정 */
+    margin-top: 5px;
   }
 `;
 
@@ -243,32 +271,15 @@ const LogoutButton = styled.button`
   font-size: 0.8rem;
   cursor: pointer;
   position: relative; /* absolute에서 relative로 변경 */
-  margin-left: 10px; /* 위치를 명확히 조정 */
-  @media (max-width: 767px) {
-    margin-left: 120px; /* 작은 화면에서 패딩 조정 */
-    margin-top: -27px;
-  }
-`;
+  margin-left: 40px; /* 위치를 명확히 조정 */
 
-const Bio = styled.div`
-  background-color: #ffffff;
-  width: 300px;
-  height: 80px;
-  border-radius: 10px;
-  margin-top: 15px; /* ProfileHeader와 일정한 간격 유지 */
-
-  p {
-    font-size: 0.9rem;
-    padding: 10px;
-    font-weight: 400;
-    margin-top: 10px;
+  &:hover {
+    color: #141314; /* 호버 시 글자색 변경 (예: 핑크색) */
   }
 
   @media (max-width: 767px) {
-    width: 110%;
-    height: auto;
-    margin-top: 15px;
-    position: relative;
+    margin-left: 10px; /* 작은 화면에서 패딩 조정 */
+    margin-top: 5px;
   }
 `;
 
@@ -295,17 +306,33 @@ const PostSection = styled.div`
   }
 
   > div {
-    display: flex; /* Flexbox로 설정 */
-    flex-wrap: wrap; /* 아이템이 공간 부족 시 다음 줄로 감김 */
-    justify-content: flex-start; /* 왼쪽 정렬 */
-    gap: 10px; /* 카드 사이의 간격 */
+    display: flex;
+    flex-direction: row; /* 카드들을 가로로 나열 */
+    flex-wrap: nowrap; /* 한 줄에 카드들이 넘칠 경우 줄바꿈 방지 */
+    overflow-x: auto; /* 가로 스크롤 적용 */
+    gap: 10px;
+    padding-bottom: 10px; /* 스크롤바와 내용 사이 간격 */
+    width: 700px;
+    height: 430px;
+
+    /* 스크롤바 숨기기 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > * {
+      flex-shrink: 0;
+      width: 280px;
+      height: 420px;
+    }
+
     @media (max-width: 708px) {
-      justify-content: center; /* 포스트들을 중앙으로 정렬 */
+      justify-content: center;
     }
   }
 
   @media (max-width: 1023px) {
-    padding-right: 0; /* 오른쪽 패딩 제거 */
+    padding-right: 0;
   }
 `;
 
@@ -313,7 +340,6 @@ const MusicSection = styled.div`
   flex: 1;
   min-width: 250px;
   padding-left: 20px;
-
   > h2 {
     font-size: 20px;
     font-weight: 400;
@@ -323,29 +349,48 @@ const MusicSection = styled.div`
   }
 
   > div {
-    display: flex; /* Flexbox로 설정 */
-    flex-wrap: wrap; /* 아이템이 공간 부족 시 다음 줄로 감김 */
-    justify-content: flex-start; /* 왼쪽 정렬 */
-    gap: 10px; /* 카드 사이의 간격 */
-    @media (max-width: 708px) {
-      justify-content: center; /* 포스트들을 중앙으로 정렬 */
+    display: flex;
+    flex-direction: column; /* 카드들을 세로로 나열 */
+    overflow-y: auto;
+    gap: 17px;
+    padding-bottom: 10px;
+    width: 400px;
+    height: 420px;
+
+    /* 스크롤바 숨기기 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > * {
+      flex-shrink: 0;
+      width: 400px;
+      height: 80px;
+    }
+
+    @media (max-width: 1228px) {
+      justify-content: center;
     }
   }
 
   @media (max-width: 1023px) {
-    padding-left: 10px; /* 작은 화면에서 패딩 조정 */
+    padding-left: 10px;
   }
 
   @media (max-width: 767px) {
-    padding-left: 0; /* 더 작은 화면에서 패딩 제거 */
-    border-left: none; /* 더 작은 화면에서 경계 제거 */
+    padding-left: 0;
+    border-left: none;
   }
 `;
 
 const Separator = styled.div`
   width: 1px;
   background-color: #000000;
-  height: auto;
+  height: 520px;
+
+  @media (max-width: 1023px) {
+    display: none; /* 모바일에서는 구분선 숨김 */
+  }
 
   @media (max-width: 768px) {
     display: none; /* 모바일에서는 구분선 숨김 */
