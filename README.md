@@ -45,7 +45,7 @@
 
 |로그인|회원가입|
 |:--:|:--:|
-|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- <br/>- 비밀번호 확인 인증|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- fullName에 json으로 닉네임 입력 <br/>- 비밀번호 확인 인증|
 |<img width="350" alt="로그인" src="./imgs/login.png">|<img width="350" alt="회원가입" src="./imgs/signup.png">|
 
 
