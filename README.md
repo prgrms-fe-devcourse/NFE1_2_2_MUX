@@ -44,6 +44,10 @@
 
 
 ### 로그인
+|로그인|회원가입|
+|:--:|:--:|
+|- 회원 정보 이메일을 통한 아이디<br/>-숫자 및 영문과 특수문자 조합 PW<br/> |- 이메일 인증<br/>- 비밀번호 확인 인증|
+|<img width="350" alt="로그인" src="./imgs/login.png">|<img width="350" alt="회원가입" src="https://github.com/CSID-DGU/2024-1-OSSProj-Questionmark-07/assets/112611541/48c775af-134a-4855-a5c0-82a2f4215ab2">|
 ![login](./imgs/login.png)
 
 
