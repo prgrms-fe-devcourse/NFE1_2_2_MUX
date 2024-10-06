@@ -39,7 +39,7 @@
 
 
 ### 랜딩 페이지
-![landing](/imgs/Landing)
+![landing](./imgs/Landing.png)
 
 
 
