@@ -112,7 +112,7 @@ const ModalBackground = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: transparent;// 반투명 검정색 배경
+  background-color: rgba(0, 0, 0, 0.5); // 반투명 검정색 배경
   display: ${({ show }) => (show ? 'block' : 'none')}; // show가 true일 때만 모달을 표시
   z-index: 999; /* 모달 백그라운드도 다른 요소보다 위에 나타나도록 설정 */
 `;
@@ -131,6 +131,11 @@ const ModalContainer = styled.div`
   overflow-y: auto; /* 내용이 많으면 스크롤 추가 */
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
   z-index: 1000; /* 다른 요소보다 위에 나타나도록 z-index 설정 */
+
+  /* 스크롤바 숨기기 */
+  &::-webkit-scrollbar {
+    display: none; /* 기본적으로 스크롤바 숨기기 */
+  }
 
   h2 {
     font-size: 20px;
@@ -172,4 +177,6 @@ const CloseButton = styled.button`
   font-size: 15px;
   position: absolute;
 `;
+
+
 

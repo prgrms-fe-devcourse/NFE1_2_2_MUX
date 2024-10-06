@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import Navigation from './components/main/Navigation';
 import PostFeed from './pages/PostFeed/PostFeed';
 import ProfilePage from '../src/profile/ProfilePage.jsx';
+import MainPage from './pages/Main/MainPage';
 import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
 import NotificationModal from './components/modals/NotificationModal.jsx';
 import PostDetailModal from './components/modals/PostDetailModal.jsx';
@@ -27,6 +28,7 @@ const App = () => {
       </div>
       <Container>
         <Nav>
+          <NavLink to="/mainpage">홈</NavLink>  {/* 메인 페이지로 가는 링크 추가 */}
           <NavLink to="/login">로그인</NavLink>
           <NavLink to="/signup">회원가입</NavLink>
           <NavLink to="/dashboard">대시보드</NavLink>
@@ -35,6 +37,7 @@ const App = () => {
         </Nav>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="mainpage/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />

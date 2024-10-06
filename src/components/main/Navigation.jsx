@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
-// 버튼 이미지 파일
 import HomeIcon from '../../assets/icons/Home.png';
 import CurationArtistIcon from '../../assets/icons/CurationArtist.png';
 import PostFeedIcon from '../../assets/icons/PostFeed.png';
@@ -10,66 +8,84 @@ import BellIcon from '../../assets/icons/Bell.png';
 import DefaultProfileImage from '../../assets/images/default-profile.png';
 import SearchIcon from '../../assets/icons/Search.png';
 import LogoImage from '../../assets/images/Logo.png';
-//모달 파일
-import UploadModal from '../modals/UploadModal'; 
+import UploadModal from '../modals/UploadModal';
 import NotificationModal from '../modals/NotificationModal';
-
+import { getNotifications } from '../../utils/api.js'; // API 호출을 위한 함수 가져오기
 
 const Navigation = () => {
-  const [searchTerm, setSearchTerm] = useState(''); // 검색어 상태
-  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
-  const [user, setUser] = useState(null); // 유저 상태
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [unseenNotifications, setUnseenNotifications] = useState(false); // 초기값을 false로 설정
+  const navigate = useNavigate();
 
+// 알림을 가져오는 함수
+const fetchNotifications = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return; // 토큰이 없으면 종료
 
-  const handleNotificationClick = () => { setShowModal(true); };
-  const handleCloseModal = () => { setShowModal(false); };
+  try {
+    const fetchedNotifications = await getNotifications(token); // API를 통해 알림 데이터를 가져옴
 
-  // 모달 열기/닫기 함수
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+    // 확인되지 않은 알림의 수를 계산합니다.
+    const unseenNotifications = fetchedNotifications.filter(notification => !notification.seen);
+    const unseenCount = unseenNotifications.length; // 확인되지 않은 알림의 수
 
-  // 로컬 스토리지에서 유저 정보 가져오기
+    setUnseenNotifications(unseenCount); // 상태 업데이트: 확인되지 않은 알림의 수
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    // 여기서 사용자에게 알림 오류를 알려줄 수 있는 로직을 추가할 수 있습니다.
+    setError('알림을 불러오는 데 실패했습니다.'); // 오류 메시지 상태 업데이트
+  }
+};
+
+  // 컴포넌트가 마운트될 때 알림을 가져옴
+  useEffect(() => {
+    fetchNotifications(); // 알림을 가져옴
+  }, []); // 빈 배열을 넣어 컴포넌트가 처음 렌더링될 때 한 번만 실행
+
+  const handleNotificationClick = () => {
+    setShowModal(true);
+    setUnseenNotifications(false); // 모달 열 때 도트 숨김
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser)); // 로컬 스토리지에서 가져온 유저 정보 파싱
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  // 프로필 클릭 시 해당 유저 페이지로 이동
   const handleProfileClick = () => {
     if (user && user._id) {
-      navigate(`/user/${user._id}`); // 유저의 _id를 기반으로 이동
+      navigate(`/user/${user._id}`);
     }
   };
 
   return (
     <>
       <HeaderContainer>
-        {/* 로고 섹션 */}
         <Logo>
           <img src={LogoImage} alt="로고" />
         </Logo>
 
-        {/* 네비게이션 바 섹션 */}
         <Navbar>
-          {/* 홈 아이콘 */}
-          <NavItem href="/main">
+          <NavItem href="/mainpage">
             <img src={HomeIcon} alt="Home" />
           </NavItem>
-          {/* 큐레이션 및 아티스트 트랙 아이콘 */}
           <NavItem href="/curationart">
             <img src={CurationArtistIcon} alt="큐레이션 & 아티스트 트랙" />
           </NavItem>
-          {/* 포스트 피드 아이콘 */}
           <NavItem as={Link} to="/postfeed">
             <img src={PostFeedIcon} alt="포스트" />
           </NavItem>
         </Navbar>
 
-        {/* 검색창 및 업로드 버튼 섹션 */}
         <SearchUploadContainer>
           <SearchBar>
             <input
@@ -83,19 +99,16 @@ const Navigation = () => {
             </a>
           </SearchBar>
 
-          {/* 업로드 버튼 */}
           <Upload>
-            <RoundButton onClick={openModal}>
+            <RoundButton onClick={() => setIsModalOpen(true)}>
               <a>Upload</a>
             </RoundButton>
           </Upload>
         </SearchUploadContainer>
 
-        {/* 프로필 및 알림 섹션 */}
         <ProfileSection>
           <div className="title">칭호 없음</div>
 
-          {/* 프로필 클릭 시 유저 페이지로 이동 */}
           <a onClick={handleProfileClick}>
             <img
               className="profile"
@@ -104,20 +117,18 @@ const Navigation = () => {
             />
           </a>
 
-          {/* 알림 아이콘 */}
-          <NotificationButton onClick={handleNotificationClick}>
-        <img src={BellIcon} alt="알림" />
-      </NotificationButton>
-         <NotificationModal show={showModal} onClose={handleCloseModal} />
+          <NotificationButton onClick={handleNotificationClick} unseen={unseenNotifications}>
+            <img src={BellIcon} alt="알림" />
+          </NotificationButton>
+          <NotificationModal show={showModal} onClose={handleCloseModal} />
         </ProfileSection>
       </HeaderContainer>
 
-      {/* 업로드 모달 */}
       {isModalOpen && (
         <>
           <ModalBackground />
           <ModalContainer>
-            <UploadModal onClose={closeModal} />
+            <UploadModal onClose={() => setIsModalOpen(false)} />
           </ModalContainer>
         </>
       )}
@@ -146,7 +157,6 @@ const Logo = styled.div`
 const Navbar = styled.nav`
   display: flex;
   gap: 20px;
-
 `;
 
 const NavItem = styled.a`
@@ -232,11 +242,6 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: 15px;
 
-  /* @media (max-width: 768px) {
-    justify-content: space-between;
-    width: 100%; 
-  } */
-
   .title {
     display: flex;
     padding: 5px 30px;
@@ -272,12 +277,23 @@ const NotificationButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
-  display: flex;
-  align-items: center;
+  position: relative; // 주홍색 점을 아이콘에 상대적으로 위치시키기 위해 relative로 설정
 
   img {
     width: 30px;  /* 이미지 크기 조정 */
     height: 30px;
+  }
+
+  &::after {
+    content: ''; // 점을 생성하기 위해 사용
+    position: absolute; // 아이콘에 절대적으로 위치
+    top: -5px; // 아이콘의 위쪽으로 이동
+    right: -5px; // 아이콘의 오른쪽으로 이동
+    width: 8px; // 점의 너비
+    height: 8px; // 점의 높이
+    border-radius: 50%; // 점을 원형으로 만들기
+    background-color: #f6601b; // 점의 색상 (주홍색)
+    display: ${({ unseen }) => (unseen ? 'block' : 'none')}; // 확인하지 않은 알림이 없으면 숨김
   }
 `;
 // 모달 배경 및 컨테이너 스타일 정의
