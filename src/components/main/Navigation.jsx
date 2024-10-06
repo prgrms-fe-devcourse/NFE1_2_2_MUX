@@ -75,7 +75,7 @@ const fetchNotifications = async () => {
         </Logo>
 
         <Navbar>
-          <NavItem href="/main">
+          <NavItem href="/mainpage">
             <img src={HomeIcon} alt="Home" />
           </NavItem>
           <NavItem href="/curationart">
