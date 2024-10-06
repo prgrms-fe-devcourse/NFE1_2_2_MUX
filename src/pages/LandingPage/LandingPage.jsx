@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import img1 from '../../assets/images/musician-349790_1280.jpg';
-import img2 from '../../assets/images/guitar-3943201_1280.jpg';
-import img3 from '../../assets/images/adult-3086307_1280.jpg';
-import ipod from '../../assets/images/KakaoTalk_Image_2024-09-28-19-59-52.png';
-import logo from '../../assets/images/Chat (7).png';
+import img1 from '../../assets/images/girl.jpg';
+import img2 from '../../assets/images/girl-2.jpg';
+import img3 from '../../assets/images/girl-3.jpg';
+import ipod from '../../assets/images/ipod.png';
+import logo from '../../assets/images/logo-2.png';
 import play from '../../assets/images/landing-play.png';
 import anim1 from '../../assets/images/image 1.png';
 import anim2 from '../../assets/images/image 2.png';
