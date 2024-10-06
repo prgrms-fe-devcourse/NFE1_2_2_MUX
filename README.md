@@ -38,34 +38,24 @@
 
 
 
-### 랜딩 페이지
-![landing](./imgs/Landing.png)
-
-
-
 |로그인|회원가입|
 |:--:|:--:|
-|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- fullName에 json으로 닉네임 입력 <br/>- 비밀번호 확인 인증|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
 |<img width="350" alt="로그인" src="./imgs/login.png">|<img width="350" alt="회원가입" src="./imgs/signup.png">|
 
 
+|랜딩 페이지|메인 페이지|
+|:--:|:--:|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
+|<img width="350" alt="랜딩 페이지" src="./imgs.Landing.png">|<img width="350" alt="메인 페이지" src="./imgs/main.png">|
 
 
 
 
-### 메인 페이지
-![main](./imgs/main.png)
-
-
-### 자작곡 업로드
-![upload1](./imgs/uploadsong1.png)
-
-![upload2](./imgs/uploadsong2.png)
-
-
-
-### 추천 포스트 업로드
-![upload3](./imgs/uploadrec.png)
+|자작곡 업로드|추천 포스트 업로드|
+|:--:|:--:|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
+|<img width="350" alt="랜딩 페이지" src="./imgs/uploadsong1.png"><img width="350" alt="자작곡 업로드" src="./imgs/uploadsong2.png">|<img width="350" alt="추천 포스트 업로드" src="./imgs/uploadrec.png">|
 
 
 
