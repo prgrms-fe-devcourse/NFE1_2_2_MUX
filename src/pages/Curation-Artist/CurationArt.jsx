@@ -16,7 +16,7 @@ const CurationArt = () => {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
-  const scrollDistance = useRef(0); 
+  const scrollDistance = useRef(0);
 
   const channelId = '66fb53f9ed2d3c14a64eb9ea';
   const token = localStorage.getItem('token');
@@ -129,15 +129,15 @@ const CurationArt = () => {
   const handleHintClick = () => {
     setShowHint(false);
   };
-  
+
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
     <PageContainer>
       <Section>
         <SectionTitle>
-          새로운 아티스트들의 멋진 앨범을 <br />
-          확인해 보세요!
+          새로운 아티스트들의 <br />
+          멋진 앨범을 확인해 보세요!
         </SectionTitle>
         <ArtistContainer
           ref={artistContainerRef}
@@ -166,8 +166,7 @@ const CurationArt = () => {
       </Section>
       <Section>
         <SectionTitle>
-          당신의 취향에 맞는 <br />
-          음악을 추천해 드릴게요
+          지금 뜨고 있는 <br />이 음악은 어떠신가요?
         </SectionTitle>
         <CurationCard onClick={handleHintClick}>
           {showHint && (
@@ -303,10 +302,10 @@ const HintMessage = styled.div`
   padding: 10px 20px;
   border-radius: 8px;
   z-index: 11;
-  animation: blink 2s infinite; 
+  animation: blink 2s infinite;
 
   @keyframes blink {
-    0%  {
+    0% {
       opacity: 1;
     }
     100% {
