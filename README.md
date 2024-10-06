@@ -16,7 +16,7 @@
 | 팀장 | 이희주 | lhj2778@naver.com |
 | 팀원 | 김현빈 | hyunbin6548@gmail.com |
 | 팀원 | 이승현 | diakehfgnl08@gmail.com |
-| 팀원 | 전나영 | jny200067@gmail.com|
+| 팀원 | 전나영 | jny200067@gmail.com|
 | 팀원 | 정해량 | nyangpc@gmail.com|
 
 
