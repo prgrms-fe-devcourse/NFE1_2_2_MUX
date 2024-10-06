@@ -49,8 +49,8 @@ const LandingApp = () => {
               creating a community where inspiration thrives.
             </Description>
             <Buttons>
-              <Button href="/login">Login</Button>
-              <Button href="/signup">Sign Up</Button>
+              <Button href="#sign-in">Sign In</Button>
+              <Button href="#sign-up">Sign Up</Button>
             </Buttons>
           </TextContent>
           <ImageSection>
@@ -135,16 +135,16 @@ const Logo = styled.div`
 `;
 
 const LogoImg = styled.img`
-  width: 220px;
+  width: 200px;
   height: auto;
   object-fit: contain;
 
   @media (max-width: 1023px) {
-    width: 200px; // 태블릿에서 크기 조정
+    width: 180px;
   }
 
   @media (max-width: 767px) {
-    width: 110px; // 모바일에서 크기 조정
+    width: 100px;
   }
 `;
 
@@ -167,14 +167,10 @@ const ContentContainer = styled.div`
   align-items: center;
 
   @media (max-width: 1023px) {
-    max-width: 90%; // 태블릿에서 전체 너비 줄임
-  }
-
-  @media (max-width: 767px) {
     flex-direction: column;
-    align-items: flex-start;
     top: 10%;
     transform: translate(-50%, 0);
+    align-items: center; // 중앙 정렬을 위해 추가
   }
 `;
 
@@ -184,13 +180,22 @@ const TextContent = styled.div`
   align-items: flex-start;
   text-align: left;
   max-width: 50%;
-  padding-left: 0;
+
+  @media (max-width: 1023px) {
+    max-width: 100%;
+    align-items: flex-start; // 왼쪽 정렬로 변경
+    text-align: left; // 텍스트 왼쪽 정렬
+  }
 `;
 
 const TitleRow = styled.div`
   display: flex;
   align-items: center;
   white-space: nowrap;
+
+  @media (max-width: 767px) {
+    justify-content: flex-start; // 왼쪽 정렬
+  }
 `;
 
 const Title = styled.div`
@@ -200,7 +205,11 @@ const Title = styled.div`
   margin-bottom: 10px;
 
   @media (max-width: 1023px) {
-    font-size: 68px; // 태블릿에서 크기 줄임
+    font-size: 68px;
+  }
+
+  @media (max-width: 767px) {
+    font-size: 48px;
   }
 `;
 
@@ -213,7 +222,16 @@ const Subtitle = styled.div`
   white-space: nowrap;
 
   @media (max-width: 1023px) {
-    font-size: 68px; // 태블릿에서 크기 줄임
+    font-size: 68px;
+    align-self: flex-start; // 왼쪽 정렬
+    text-align: left; // 텍스트 왼쪽 정렬
+  }
+
+  @media (max-width: 767px) {
+    font-size: 36px;
+    white-space: normal;
+    align-self: flex-start; // 왼쪽 정렬
+    text-align: left; // 텍스트 왼쪽 정렬
   }
 `;
 
@@ -226,7 +244,16 @@ const Description = styled.div`
   white-space: nowrap;
 
   @media (max-width: 1023px) {
-    font-size: 20px; // 태블릿에서 크기 줄임
+    font-size: 20px;
+    white-space: normal;
+    align-self: flex-start; // 왼쪽 정렬
+    text-align: left; // 텍스트 왼쪽 정렬
+  }
+
+  @media (max-width: 767px) {
+    font-size: 18px;
+    align-self: flex-start; // 왼쪽 정렬
+    text-align: left; // 텍스트 왼쪽 정렬
   }
 `;
 
@@ -235,7 +262,8 @@ const Buttons = styled.div`
   gap: 20px;
 
   @media (max-width: 767px) {
-    gap: 10px;
+    width: calc(100% - 40px); // 좌우 패딩 고려
+    justify-content: flex-start; // 왼쪽 정렬
   }
 `;
 
@@ -261,8 +289,8 @@ const Button = styled.a`
 
   @media (max-width: 1023px) {
     padding: 10px 20px;
-    font-size: 14px; // 태블릿에서 글자 크기 줄임
-    width: 140px; // 버튼 너비 약간 줄임
+    font-size: 16px;
+    width: 160px;
   }
 
   @media (max-width: 767px) {
@@ -278,6 +306,12 @@ const ImageSection = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
+
+  @media (max-width: 1023px) {
+    width: 100%;
+    justify-content: center;
+    margin-top: 30px;
+  }
 `;
 
 const IpodContainer = styled.div`
@@ -289,10 +323,13 @@ const IpodContainer = styled.div`
 
   @media (max-width: 1023px) {
     max-width: 300px;
+    margin-left: -100px; // -20px에서 -30px로 변경
   }
 
   @media (max-width: 767px) {
     max-width: 250px;
+    margin: 0 auto;
+    margin-left: 175px; // -15px에서 -25px로 변경
   }
 `;
 
