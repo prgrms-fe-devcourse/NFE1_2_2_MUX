@@ -70,10 +70,11 @@ const fetchNotifications = async () => {
   return (
     <>
       <HeaderContainer>
-        <Logo>
-          <img src={LogoImage} alt="로고" />
+        <Logo >
+          <a href="/mainpage" >
+          <img src={LogoImage} alt="로고"/>
+          </a>
         </Logo>
-
         <Navbar>
           <NavItem href="/mainpage">
             <img src={HomeIcon} alt="Home" />

@@ -9,8 +9,7 @@ import PostFeed from './pages/PostFeed/PostFeed';
 import ProfilePage from '../src/profile/ProfilePage.jsx';
 import MainPage from './pages/Main/MainPage';
 import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
-import NotificationModal from './components/modals/NotificationModal.jsx';
-import PostDetailModal from './components/modals/PostDetailModal.jsx';
+import LandingPage from './pages/LandingPage/LandingPage.jsx'
 const App = () => {
   const [user, setUser] = useState(null);
 
@@ -27,24 +26,18 @@ const App = () => {
         <Navigation />
       </div>
       <Container>
-        <Nav>
-          <NavLink to="/mainpage">홈</NavLink>  {/* 메인 페이지로 가는 링크 추가 */}
-          <NavLink to="/login">로그인</NavLink>
-          <NavLink to="/signup">회원가입</NavLink>
-          <NavLink to="/dashboard">대시보드</NavLink>
-          <NavLink to="/postfeed">포스트 피드</NavLink>
-          <NavLink to="/curationart">큐레이션-아티스트</NavLink>
-        </Nav>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="mainpage/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
+          <Route path="/" element={<LandingPage/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+        <Routes>
+          <Route path="mainpage/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
           <Route path="/postfeed" element={<PostFeed />} />
           <Route path="/curationart" element={<CurationArt />} />
           {/* 유저 페이지/마이페이지 */}
           <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Container>
     </Router>
@@ -86,20 +79,4 @@ export default App;
 const Container = styled.div`
 /* min-width: 700px; */
   padding: 20px;
-`;
-
-const Nav = styled.nav`
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-`;
-
-const NavLink = styled(Link)`
-  padding: 10px 20px;
-  color: #333;
-  text-decoration: none;
-
-  &:hover {
-    background-color: #eee;
-  }
 `;
