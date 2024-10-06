@@ -16,7 +16,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(user));
       console.log('로그인 성공:', user);
       console.log('로그인 성공:', token);
-      navigate('/postfeed');
+      navigate('/mainpage');
     } catch (error) {
       console.error('로그인 실패:', error);
     }

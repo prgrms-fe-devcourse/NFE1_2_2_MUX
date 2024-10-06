@@ -64,7 +64,7 @@ const ProfilePage = ({ user, isMyPage }) => {
       await logout();
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('로그아웃 실패:', error);
     } finally {
