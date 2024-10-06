@@ -5,7 +5,8 @@ import { getUsers, getPosts } from '../../utils/api';
 import UserProfile from '../../components/UserProfile';
 import PostCard from '../../components/PostCard';
 import AlbumCurationCard from '../../components/CurationCard';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import LeftButton from '../../assets/icons/LeftButton.png';
+import RightButton from '../../assets/icons/RightButton.png';
 
 const CardSection = ({ cards, cardWidth, isUserProfile = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,7 +25,7 @@ const CardSection = ({ cards, cardWidth, isUserProfile = false }) => {
   return (
     <CardContainerWrapper isUserProfile={isUserProfile}>
       <PrevButton onClick={prevCards} disabled={currentIndex === 0}>
-        <ChevronLeft />
+        <img src={LeftButton} alt="Previous" />
       </PrevButton>
       <CardContainer>
         <CardWrapper currentIndex={currentIndex} visibleCards={visibleCards}>
@@ -39,7 +40,7 @@ const CardSection = ({ cards, cardWidth, isUserProfile = false }) => {
         onClick={nextCards} 
         disabled={currentIndex >= cards.length - visibleCards}
       >
-        <ChevronRight />
+        <img src={RightButton} alt="Next" />
       </NextButton>
     </CardContainerWrapper>
   );
@@ -75,15 +76,15 @@ const MainPage = () => {
 
   const postCards = posts.map((post) => (
     <PostCard 
-      key={post._id} 
-      post={post} 
+key={post._id} 
+post={post} 
       onLikeUpdate={(postId, isLiked, newLikeCount) => {
         // Handle like update logic here
       }}
       onPostDelete={(postId) => {
         // Handle post delete logic here
       }}
-    />
+/>
   ));
 
   return (
@@ -91,7 +92,7 @@ const MainPage = () => {
       <Section>
         <SectionHeader>
           <Title>지금 가장 핫한 아티스트의 음원을 확인해보세요.</Title>
-          <MoreLink>More <ChevronRight className="w-4 h-4 ml-1" /></MoreLink>
+          <MoreLink>More <img src={RightButton} alt="More" style={{ width: '16px', height: '16px', marginLeft: '4px' }} /></MoreLink>
         </SectionHeader>
         <Underline />
         <CardSection 
@@ -104,7 +105,7 @@ const MainPage = () => {
       <Section>
         <SectionHeader>
           <Title>사람들이 가장 공감하고 있는 노래는 무엇일까요?</Title>
-          <MoreLink as={Link} to="/postfeed">More <ChevronRight className="w-4 h-4 ml-1" /></MoreLink>
+          <MoreLink as={Link} to="/postfeed">More <img src={RightButton} alt="More" style={{ width: '16px', height: '16px', marginLeft: '4px' }} /></MoreLink>
         </SectionHeader>
         <Underline />
         <CardSection 
@@ -186,13 +187,17 @@ const PrevButton = styled.button`
   left: -40px;
   top: 50%;
   transform: translateY(-50%);
-  background-color: white;
-  border-radius: 50%;
-  padding: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: none;
+  border: none;
+  cursor: pointer;
   z-index: 10;
   &:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
+  }
+  img {
+    width: 50px;
+    height: 50px;
   }
 `;
 
