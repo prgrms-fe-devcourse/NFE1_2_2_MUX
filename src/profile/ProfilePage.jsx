@@ -285,6 +285,8 @@ const PostSection = styled.div`
   flex: 2;
   padding-right: 20px;
   position: relative;
+  width: 750px;
+  height: 300px;
 
   > h2 {
     font-size: 20px;
@@ -295,17 +297,31 @@ const PostSection = styled.div`
   }
 
   > div {
-    display: flex; /* Flexbox로 설정 */
-    flex-wrap: wrap; /* 아이템이 공간 부족 시 다음 줄로 감김 */
-    justify-content: flex-start; /* 왼쪽 정렬 */
-    gap: 10px; /* 카드 사이의 간격 */
+    display: flex;
+    flex-direction: row; /* 카드들을 가로로 나열 */
+    flex-wrap: nowrap; /* 한 줄에 카드들이 넘칠 경우 줄바꿈 방지 */
+    overflow-x: auto; /* 가로 스크롤 적용 */
+    gap: 10px;
+    padding-bottom: 10px; /* 스크롤바와 내용 사이 간격 */
+
+    /* 스크롤바 숨기기 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > * {
+      flex-shrink: 0;
+      width: 280px;
+      height: 420px;
+    }
+
     @media (max-width: 708px) {
-      justify-content: center; /* 포스트들을 중앙으로 정렬 */
+      justify-content: center;
     }
   }
 
   @media (max-width: 1023px) {
-    padding-right: 0; /* 오른쪽 패딩 제거 */
+    padding-right: 0;
   }
 `;
 
@@ -313,7 +329,8 @@ const MusicSection = styled.div`
   flex: 1;
   min-width: 250px;
   padding-left: 20px;
-
+  width: 400px;
+  height: 300px;
   > h2 {
     font-size: 20px;
     font-weight: 400;
@@ -323,29 +340,43 @@ const MusicSection = styled.div`
   }
 
   > div {
-    display: flex; /* Flexbox로 설정 */
-    flex-wrap: wrap; /* 아이템이 공간 부족 시 다음 줄로 감김 */
-    justify-content: flex-start; /* 왼쪽 정렬 */
-    gap: 10px; /* 카드 사이의 간격 */
+    display: flex;
+    flex-direction: column; /* 카드들을 세로로 나열 */
+    overflow-y: auto;
+    gap: 17px;
+    padding-bottom: 10px;
+    height: 420px;
+
+    /* 스크롤바 숨기기 */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > * {
+      flex-shrink: 0;
+      width: auto;
+      height: auto;
+    }
+
     @media (max-width: 708px) {
-      justify-content: center; /* 포스트들을 중앙으로 정렬 */
+      justify-content: center;
     }
   }
 
   @media (max-width: 1023px) {
-    padding-left: 10px; /* 작은 화면에서 패딩 조정 */
+    padding-left: 10px;
   }
 
   @media (max-width: 767px) {
-    padding-left: 0; /* 더 작은 화면에서 패딩 제거 */
-    border-left: none; /* 더 작은 화면에서 경계 제거 */
+    padding-left: 0;
+    border-left: none;
   }
 `;
 
 const Separator = styled.div`
   width: 1px;
   background-color: #000000;
-  height: auto;
+  height: 520px;
 
   @media (max-width: 768px) {
     display: none; /* 모바일에서는 구분선 숨김 */
