@@ -6,7 +6,13 @@ import ReactionCount from '../components/ReactionCount';
 import ArtistTrackDetailModal from './modals/ArtistTrackDetailModal';
 import { getPostDetails } from '../utils/api';
 
-const HorizontalArtistCard = ({ post, onLikeUpdate, onTrackDelete }) => {
+const HorizontalArtistCard = ({
+  post,
+  onLikeUpdate,
+  onPostDelete,
+  isAuthor,
+  currentUser,
+}) => {
   if (!post || !post.author) {
     return null;
   }
@@ -98,9 +104,11 @@ const HorizontalArtistCard = ({ post, onLikeUpdate, onTrackDelete }) => {
         <ArtistTrackDetailModal
           track={selectedPost}
           onClose={handleCloseModal}
-          onLikeUpdate={handleLikeUpdate}
-          onTrackDelete={handleTrackDelete}
+          onLikeUpdate={onLikeUpdate}
+          onTrackDelete={onPostDelete}
           onCommentUpdate={handleCommentUpdate}
+          isAuthor={isAuthor}
+          currentUser={currentUser}
         />
       )}
     </>
