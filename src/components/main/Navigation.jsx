@@ -145,7 +145,8 @@ const HeaderContainer = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 5px 10px;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
+  margin-top: -25px;
 `;
 
 const Logo = styled.div`

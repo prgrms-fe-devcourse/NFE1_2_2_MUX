@@ -22,22 +22,20 @@ const App = () => {
 
   return (
     <Router>
-      <div>
-        <Navigation />
-      </div>
       <Container>
         <Routes>
+          {/* 기본 경로로 LandingPage 설정 */}
           <Route path="/" element={<LandingPage/>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
+
+        <Navigation />
         <Routes>
-          <Route path="mainpage/" element={<MainPage />} />  {/* 메인 페이지 라우트 추가 */}
+          <Route path="mainpage/" element={<MainPage />} /> 
           <Route path="/postfeed" element={<PostFeed />} />
           <Route path="/curationart" element={<CurationArt />} />
-          {/* 유저 페이지/마이페이지 */}
           <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Container>
     </Router>
