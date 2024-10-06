@@ -1,97 +1,149 @@
-작성일: 2024/09/24 
+# MUX
 
-작성자: 전나영
 
-MUX 협업을 위한 가이드
+## 소개
 
-초기 작업 : 깃 허브 홈페이지에서 이슈 생성 및 GitHub 리포지토리를 자신의 로컬 환경에 클론
 
-```
-git clone https://github.com/prgrms-fe-devcourse/NFE1_2_MUX.git
-```
+단순히 음악을 듣는 있는 플랫폼이 아닌, 
+다른 사용자들과 연결되어 음악을 **경험**할 수 있는 **커뮤니티**
 
-: 클론 후 해당 디렉터리로 이동하여 설치 진행
 
-```
-cd NFE1_2_MUX
 
-git checkout develop
+### 멤버
 
-git pull
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀원 : 김현빈</b></sub></a><br /></td>
+      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀원 : 이승현 </b></sub></a><br /></td>
+      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀장 : 이희주</b></sub></a><br /></td>
+     <tr/>
+      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀원 : 전나영 </b></sub></a><br /></td>
+      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b>BE 팀원 : 정해량</b></sub></a><br /></td>
+    </tr>
+  </tbody>
+</table>
 
-npm install
 
-npm install vite --save-dev
 
-npm i --save-dev prettier
+### 개발기간
 
-npm install react-router-dom --save
 
-npm install axios
+24.09.~04.10.07
 
-npm install styled-components
 
-npm run dev
 
-```
-1. prettier code formatter 확장 설치
-2. settings.json 열기
-- Windows/Linux: Ctrl + Shift + P
-- Mac: Cmd + Shift + P
-검색창에 settings.json 입력
-아래 쪽으로 내려서
-```
-    "[css]": {
-        "editor.formatOnSave": true, //추가
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[html]": {
-        "editor.formatOnSave": true, //추가
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "git.suggestSmartCommit": false,
-    "explorer.confirmDelete": false,
-    "explorer.confirmDragAndDrop": false,
-    "git.openRepositoryInParentFolders": "never",
-    "[javascript]": {
-        "editor.formatOnSave": true, //추가
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-```
 
-협업 예시
+## MUX의 기능
 
-1.작업을 시작하기 전에, 각 팀원은 새로운 브랜치를 생성하여 작업
 
-```
-git checkout -b feature/자신이 생성한 이슈 번호(ex. #1)
-```
 
-2.필요한 기능이나 수정 사항을 작업한 후, 변경 사항을 커밋
+### 랜딩 페이지
+<img width="1440" alt="스크린샷 2024-10-06 오후 9 07 37" src="https://github.com/user-attachments/assets/1f94aa96-6ca4-4e33-8664-fba1f996be71">
 
-```
-git add .
-git commit -m "작업 내용 설명"
-```
 
-3.로컬 브랜치를 원격 리포지토리로 푸시
 
-```
-git push -u origin feature/자신이 생성한 이슈 번호(ex. #1)
-```
+### 로그인
+<img width="403" alt="스크린샷 2024-10-06 오후 9 36 51" src="https://github.com/user-attachments/assets/10ab415b-92e7-46da-a64a-2215409213ed">
 
-4.풀 리퀘스트 생성: : GitHub에서 자신의 브랜치를 main 브랜치로 병합하기 위한 풀 리퀘스트를 생성
 
-5.작업이 완료되면, 불필요한 브랜치를 삭제 (혹시 모르니 걍 냅둬도 ㄱㅊ)
 
-```
-git branch -d feature/자신이 생성한 이슈 번호(ex. #1)  # 로컬에서 삭제
-git push origin --delete feature/자신이 생성한 이슈 번호(ex. #1)  # 원격에서 삭제
-```
+### 회원가입
+<img width="445" alt="스크린샷 2024-10-06 오후 9 37 03" src="https://github.com/user-attachments/assets/ba08b5bf-1174-4246-80fd-c2dbc78c794c">
 
-6.다른 팀원들의 작업 내용을 주기적으로 받아오기 위해 main 브랜치를 최신 상태로 유지
 
-```
-git checkout develop
-git pull origin develop
-```
+
+### 메인 페이지
+![Vite-React](https://github.com/user-attachments/assets/1fa33916-0684-4813-9d16-6d342a486211)
+
+
+
+### 자작곡 업로드
+<img width="649" alt="스크린샷 2024-10-06 오후 9 14 54" src="https://github.com/user-attachments/assets/ea170573-964d-4792-9697-8df638029150">
+
+<img width="648" alt="스크린샷 2024-10-06 오후 9 45 37" src="https://github.com/user-attachments/assets/22e242f6-b168-44a7-b862-564153b1d9c6">
+
+
+
+### 추천 포스트 업로드
+<img width="648" alt="스크린샷 2024-10-06 오후 9 15 19" src="https://github.com/user-attachments/assets/42ea1ef1-c1e1-416d-b3cb-1c4657950e2e">
+
+
+
+### 자작곡 상세 페이지
+<img width="844" alt="스크린샷 2024-10-06 오후 9 41 49" src="https://github.com/user-attachments/assets/b9e29583-b075-4430-b3f5-fbcb65ac3b18">
+
+
+
+### 추천 포스트 상세 페이지
+<img width="839" alt="스크린샷 2024-10-06 오후 9 36 16" src="https://github.com/user-attachments/assets/21d67867-dafa-4e2a-a381-2cdac1272907">
+
+
+
+### 알림
+<img width="321" alt="스크린샷 2024-10-06 오후 9 29 41" src="https://github.com/user-attachments/assets/c21fd557-fe38-4039-9d00-442cc7e00f67">
+
+
+### 마이페이지
+![Vite-React (4)](https://github.com/user-attachments/assets/a040e75a-11b1-437d-963c-65a933497fc9)
+
+
+
+## 기술스택⚒
+<table>
+<tr>
+ <td align="center">Language</td>
+ <td>
+  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"> 
+ </td>
+</tr>
+<tr>
+ <td align="center">Library</td>
+ <td>
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=ffffff"/>&nbsp  
+ <img src="https://img.shields.io/badge/ReactDom-FF4154?style=for-the-badge&logo=ReactQuery&logoColor=white"/>&nbsp  
+<img src="https://img.shields.io/badge/Axios-6028e0?style=for-the-badge&logo=Axios&logoColor=ffffff"/>&nbsp 
+  </td>
+</tr>
+<tr>
+ <td align="center">Package</td>
+ <td>
+    <img src="https://img.shields.io/badge/NPM-CB3837?style=for-the-badge&logo=Npm&logoColor=white"/>&nbsp 
+  </td>
+</tr>
+<tr>
+ <td align="center">Bundler</td>
+ <td>
+    <img src="https://img.shields.io/badge/vite-646CFF?style=for-the-badge&logo=Vite&logoColor=white"/>&nbsp 
+  </td>
+</tr>
+<tr>
+ <td align="center">Formatter</td>
+ <td>
+  <img src="https://img.shields.io/badge/Prettier-373338?style=for-the-badge&logo=Prettier&logoColor=ffffff"/>&nbsp 
+ </td>
+</tr>
+<tr>
+ <td align="center">Deploy</td>
+ <td>
+    <img src="https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white"/>&nbsp
+ </td>
+</tr>
+
+<tr>
+  <td align="center">Tools</td>
+ <td>
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white"/>&nbsp 
+    <img src="https://img.shields.io/badge/Notion-5a5d69?style=for-the-badge&logo=Notion&logoColor=white"/>&nbsp
+    <img src="https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=Slack&logoColor=white"/>&nbsp 
+    <img src="https://img.shields.io/badge/Figma-d90f42?style=for-the-badge&logo=Figma&logoColor=white"/>&nbsp  
+ </td>
+</tr>
+<tr>
+ <td align="center">IDE</td>
+ <td>
+    <img src="https://img.shields.io/badge/VSCode-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white"/>&nbsp
+</tr>
+</table>
+<br>
+<br>
