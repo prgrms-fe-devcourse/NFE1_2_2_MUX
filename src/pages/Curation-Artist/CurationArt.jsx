@@ -218,13 +218,13 @@ const Section = styled.div`
 
 const SectionTitle = styled.p`
   color: black;
-  margin-bottom: 20px;
-  font-size: 14px;
+  margin-bottom: 2rem;
+  font-size: 1.15rem;
   text-align: left;
   display: inline-block;
-  border-bottom: 3px solid black;
+  border-bottom: 2.8px solid black;
   padding-bottom: 10px;
-  font-weight: bold;
+  font-weight: 600;
   width: 250px;
 
   @media all and (min-width: 1024px) and (max-width: 1279px) {

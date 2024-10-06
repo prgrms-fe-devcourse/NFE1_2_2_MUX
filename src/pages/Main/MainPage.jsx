@@ -82,7 +82,7 @@ const MainPage = () => {
     <PageContainer>
       <Section>
         <SectionHeader>
-          <Title>지금 가장 핫한 아티스트의 음원을 확인해보세요.</Title>
+          <Title>지금 가장 핫한 아티스트의 음원을 확인해 보세요!</Title>
           <MoreLink>More <img src={RightButton} alt="More" style={{ width: '16px', height: '16px', marginLeft: '4px' }} /></MoreLink>
         </SectionHeader>
         <Underline />
@@ -95,7 +95,7 @@ const MainPage = () => {
 
       <Section>
         <SectionHeader>
-          <Title>사람들이 가장 공감하고 있는 노래는 무엇일까요?</Title>
+          <Title>많은 사람들이 공감하는 노래는 무엇일까요?</Title>
           <MoreLink as={Link} to="/postfeed">More <img src={RightButton} alt="More" style={{ width: '16px', height: '16px', marginLeft: '4px' }} /></MoreLink>
         </SectionHeader>
         <Underline />
@@ -107,7 +107,7 @@ const MainPage = () => {
 
       <Section>
         <SectionHeader>
-          <Title>지금 가장 주목받고 있는 노래들은 무엇일까요?</Title>
+          <Title>세계에서 주목받고 있는 음악을 만나보세요!</Title>
         </SectionHeader>
         <Underline />
         <AlbumCurationCard />
@@ -120,17 +120,43 @@ export default MainPage;
 
 // Styled Components
 const PageContainer = styled.div`
-  padding: 1.5rem;
+  padding: 20px;
+  min-width: 1024px;
+  max-width: 1279px;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
+
+@media all and (min-width: 1024px) and (max-width: 1279px) {
+  padding: 18px;
+}
+
+@media all and (min-width: 768px) and (max-width: 1023px) {
+  padding: 16px;
+}
+
+@media all and (min-width: 480px) and (max-width: 767px) {
+  padding: 14px;
+}
 `;
 
 const Section = styled.section`
-  margin-bottom: 3rem;
+  margin-bottom: 40px;
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    margin-bottom: 45px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    margin-bottom: 40px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    margin-bottom: 35px;
+  }
 `;
 
 const SectionHeader = styled.div`
+margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -138,22 +164,28 @@ const SectionHeader = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 500;
+  font-size: 1.15rem;
+  font-weight: 600;
 `;
 
 const Underline = styled.div`
-  width: 35%;
-  height: 2px;
-  background-color: black;
+  color: black;
+  margin-top: -23px;
   margin-bottom: 2rem;
+  font-size: 1.15rem;
+  text-align: left;
+  display: inline-block;
+  border-bottom: 2.8px solid black;
+  padding-bottom: 10px;
+  font-weight: 600;
+  width: 400px;
 `;
 
 const MoreLink = styled(Link)`
   display: flex;
   align-items: center;
   color: #6b7280;
-  font-size: 0.875rem;
+  font-size: 1.1rem;
   text-decoration: none;
   cursor: pointer;
 
@@ -165,7 +197,8 @@ const MoreLink = styled(Link)`
 const CardContainerWrapper = styled.div`
   position: relative;
   width: 100%;
-  margin-top: ${props => props.isUserProfile ? '4rem' : '1rem'};
+  margin-top: ${props => props.isUserProfile ? '1rem' : '1rem'};
+  margin-bottom: 1rem;
 `;
 
 const CardContainer = styled.div`
@@ -202,6 +235,7 @@ const CardWrapper = styled.div`
   transition: transform 0.3s ease-in-out;
   transform: ${({ currentIndex, visibleCards }) => 
     `translateX(-${currentIndex * (100 / visibleCards)}%)`};
+    margin-bottom: 1rem;
 `;
 
 const Card = styled.div`
