@@ -2,18 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { uploadProfileImage, updateUser } from '../../utils/api';
 import UpdatePasswordModal from '../modals/UpdatePasswordModal';
+import defaultProfileImage from '../../assets/images/default-profile.png';
 
 const ProfileEditModal = ({ user, token, onClose, setUser }) => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const openPasswordModalHandler = () => {
-    console.log('비밀번호 모달 열기');
-    setIsPasswordModalOpen(true);
-  };
-  const closePasswordModalHandler = () => {
-    console.log('비밀번호 모달 닫기');
-    setIsPasswordModalOpen(false);
-  };
-
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -21,21 +13,35 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
     nickname: '',
     bio: '',
   });
-
+  
   const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef();
 
   useEffect(() => {
     if (user) {
-      console.log('User data in modal:', user); // 사용자 데이터 로깅
+      let parsedFullName = {};
+      if (typeof user.fullName === 'string') {
+        try {
+          // fullName이 JSON 문자열일 경우 파싱
+          parsedFullName = JSON.parse(user.fullName || '{}');
+        } catch (error) {
+          console.error('fullName JSON 파싱 오류:', error);
+        }
+      } else if (typeof user.fullName === 'object') {
+        // 이미 객체일 경우 그대로 사용
+        parsedFullName = user.fullName;
+      }
+  
       setFormData({
-        fullName: user.fullName?.fullName || '',
+        fullName: parsedFullName.fullName || '',
         email: user.email,
         password: '****',
-        nickname: user.fullName?.nickName || '',
-        bio: user.fullName?.bio || '',
+        nickname: parsedFullName.nickName || '',
+        bio: parsedFullName.bio || '',
       });
-      setProfileImage(user.profileImage);
+  
+      // user.image를 먼저 확인하고, 없으면 defaultProfileImage 사용
+      setProfileImage(user.image || defaultProfileImage);
     }
   }, [user]);
 
@@ -43,14 +49,11 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
     const imageFile = e.target.files[0];
 
     // 파일 형식 및 크기 제한
-    const allowedTypes = ['image/jpeg', 'image/png'];
-    if (!allowedTypes.includes(imageFile.type)) {
+    if (!['image/jpeg', 'image/png'].includes(imageFile.type)) {
       alert('jpg 또는 png 형식의 파일만 업로드 가능합니다.');
       return;
     }
-
-    const maxSizeInMB = 2;
-    if (imageFile.size > maxSizeInMB * 1024 * 1024) {
+    if (imageFile.size > 2 * 1024 * 1024) {
       alert('파일 크기는 최대 2MB까지 허용됩니다.');
       return;
     }
@@ -61,32 +64,25 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
 
     try {
       const response = await uploadProfileImage(formData, token);
-      const imageUrl = response.image;
-      if (!imageUrl) {
-        console.error('이미지 URL이 없습니다.', response);
-        alert('프로필 이미지 업로드에 실패했습니다.');
-        return;
+
+      if (response.image) {
+        // image URL을 업데이트
+        const imageUrl = response.image;
+
+        // 프로필 이미지 URL을 상태와 user 정보에 저장
+        const updatedUser = { ...user, profileImage: imageUrl };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setProfileImage(imageUrl);  // 새로운 이미지 URL을 화면에 반영
+
+        alert('프로필 이미지가 성공적으로 저장되었습니다.');
+      } else {
+        throw new Error('이미지 URL이 없습니다.');
       }
-
-      const updatedUser = {
-        ...user,
-        profileImage: imageUrl,
-      };
-
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-
-      setProfileImage(imageUrl);
-
-      alert('프로필 이미지가 성공적으로 저장되었습니다.');
     } catch (error) {
       console.error('프로필 이미지를 변경할 수 없습니다.', error);
       alert('프로필 이미지를 변경하는 데 실패했습니다.');
     }
-  };
-
-  const handleImageUploadClick = () => {
-    fileInputRef.current.click();
   };
 
   const handleChange = (e) => {
@@ -106,16 +102,9 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
         fullName: JSON.stringify(updatedFullName),
       });
 
-      const newUser = {
-        ...user,
-        ...updatedUserData,
-        fullName: updatedFullName,
-        profileImage: profileImage, // 이미지 URL 포함
-      };
-
+      const newUser = { ...user, ...updatedUserData, fullName: updatedFullName };
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
-
       alert('회원 정보가 성공적으로 변경되었습니다.');
       onClose();
     } catch (error) {
@@ -128,14 +117,10 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
     <ModalOverlay>
       <ModalContent>
         <CloseBtn onClick={onClose}>X</CloseBtn>
-
         <ProfileSection>
           <ProfileImageWrapper>
-            <ProfileImage
-              src={profileImage || '/path/to/default-image.png'}
-              alt="프로필 이미지"
-            />
-            <ProfileChangeButton onClick={handleImageUploadClick}>
+            <ProfileImage src={profileImage} alt="프로필 이미지" />
+            <ProfileChangeButton onClick={() => fileInputRef.current.click()}>
               프로필 이미지 변경
             </ProfileChangeButton>
             <FileInput
@@ -146,7 +131,6 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             />
           </ProfileImageWrapper>
         </ProfileSection>
-
         <SectionTitle>기본 정보</SectionTitle>
         <Divider />
         <StyledForm>
@@ -160,7 +144,6 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             />
             <FixedLabel>이름</FixedLabel>
           </InputWrapper>
-
           <InputWrapper>
             <InputField
               type="email"
@@ -171,7 +154,6 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             />
             <FixedLabel>이메일</FixedLabel>
           </InputWrapper>
-
           <InputWrapper>
             <InputField
               type="password"
@@ -183,13 +165,11 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             <FixedLabel>비밀번호</FixedLabel>
           </InputWrapper>
         </StyledForm>
-                  <UpdatePasswordButton onClick={openPasswordModalHandler}>
-            비밀번호 수정
-          </UpdatePasswordButton>
-
+        <UpdatePasswordButton onClick={() => setIsPasswordModalOpen(true)}>
+          비밀번호 수정
+        </UpdatePasswordButton>
         <SectionTitle>추가 정보</SectionTitle>
         <Divider />
-
         <StyledForm>
           <InputWrapper>
             <InputField
@@ -200,7 +180,6 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             />
             <FixedLabel>닉네임</FixedLabel>
           </InputWrapper>
-
           <InputWrapper>
             <TextArea
               value={formData.bio}
@@ -211,14 +190,13 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
             <FixedLabel>자기소개</FixedLabel>
           </InputWrapper>
         </StyledForm>
-
         <SaveButton onClick={handleSaveChanges}>회원 정보 수정</SaveButton>
       </ModalContent>
       {isPasswordModalOpen && (
         <UpdatePasswordModal
           isOpen={isPasswordModalOpen}
           token={localStorage.getItem('token')}
-          onClose={closePasswordModalHandler}
+          onClose={() => setIsPasswordModalOpen(false)}
         />
       )}
     </ModalOverlay>
@@ -226,6 +204,7 @@ const ProfileEditModal = ({ user, token, onClose, setUser }) => {
 };
 
 export default ProfileEditModal;
+
 
 // Styled Components
 const ModalOverlay = styled.div`
