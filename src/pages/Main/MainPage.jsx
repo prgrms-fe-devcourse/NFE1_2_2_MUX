@@ -75,16 +75,7 @@ const MainPage = () => {
   ));
 
   const postCards = posts.map((post) => (
-    <PostCard 
-key={post._id} 
-post={post} 
-      onLikeUpdate={(postId, isLiked, newLikeCount) => {
-        // Handle like update logic here
-      }}
-      onPostDelete={(postId) => {
-        // Handle post delete logic here
-      }}
-/>
+    <PostCard key={post._id} post={post} />
   ));
 
   return (
