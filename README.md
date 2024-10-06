@@ -11,26 +11,20 @@
 
 ### 멤버
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀원 : 김현빈</b></sub></a><br /></td>
-      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀원 : 이승현 </b></sub></a><br /></td>
-      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀장 : 이희주</b></sub></a><br /></td>
-     <tr/>
-      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b> 팀원 : 전나영 </b></sub></a><br /></td>
-      <td align="center"><img src="" width="100px;" alt=""/><br /><sub><b>BE 팀원 : 정해량</b></sub></a><br /></td>
-    </tr>
-  </tbody>
-</table>
+| 역할 | 성명 | 이메일 |
+| --- | --- | --- |
+| 팀장 | 이희주 | lhj2778@naver.com |
+| 팀원 | 김현빈 | hyunbin6548@gmail.com |
+| 팀원 | 이승현 | diakehfgnl08@gmail.com |
+| 팀원 | 전나영 | jny200067@gmail.com|
+| 팀원 | 정해량 | nyangpc@gmail.com|
 
 
 
 ### 개발기간
 
 
-24.09.~04.10.07
-
+24.09.23 ~ 24.10.07
 
 
 
