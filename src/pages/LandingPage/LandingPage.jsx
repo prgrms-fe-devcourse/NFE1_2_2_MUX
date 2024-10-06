@@ -49,8 +49,8 @@ const LandingApp = () => {
               creating a community where inspiration thrives.
             </Description>
             <Buttons>
-              <Button href="#sign-in">Sign In</Button>
-              <Button href="#sign-up">Sign Up</Button>
+              <Button href="/login">Login</Button>
+              <Button href="/signup">Sign Up</Button>
             </Buttons>
           </TextContent>
           <ImageSection>

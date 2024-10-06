@@ -119,7 +119,7 @@ const SignupContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #ffffff;
 `;
 
 const Form = styled.form`

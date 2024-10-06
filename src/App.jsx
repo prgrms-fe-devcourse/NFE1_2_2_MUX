@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useParams } from 'react-router-dom';
 import Signup from './auth/Signup';
 import Login from './auth/Login';
 import Dashboard from './auth/Dashboard';
@@ -10,6 +10,7 @@ import ProfilePage from '../src/profile/ProfilePage.jsx';
 import MainPage from './pages/Main/MainPage';
 import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
 import LandingPage from './pages/LandingPage/LandingPage.jsx'
+
 const App = () => {
   const [user, setUser] = useState(null);
 
@@ -23,22 +24,38 @@ const App = () => {
   return (
     <Router>
       <Container>
-        <Routes>
-          {/* 기본 경로로 LandingPage 설정 */}
-          <Route path="/" element={<LandingPage/>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
-
-        <Navigation />
-        <Routes>
-          <Route path="mainpage/" element={<MainPage />} /> 
-          <Route path="/postfeed" element={<PostFeed />} />
-          <Route path="/curationart" element={<CurationArt />} />
-          <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
-        </Routes>
+        <AppRoutes user={user} />
       </Container>
     </Router>
+  );
+};
+
+const AppRoutes = ({ user }) => {
+  const location = useLocation(); // Router 내부에서 경로 가져오기
+
+  // 특정 경로에서는 네비게이션바 숨기기
+  const hideNavOnPaths = ["/", "/login", "/signup"];
+  const shouldShowNav = !hideNavOnPaths.includes(location.pathname);
+
+  return (
+    <>
+      {/* 기본 경로로 LandingPage 설정 */}
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+
+      {/* 네비게이션바 조건부 렌더링 */}
+      {shouldShowNav && <Navigation />}
+
+      <Routes>
+        <Route path="mainpage/" element={<MainPage />} /> 
+        <Route path="/postfeed" element={<PostFeed />} />
+        <Route path="/curationart" element={<CurationArt />} />
+        <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
+      </Routes>
+    </>
   );
 };
 
@@ -75,6 +92,5 @@ export default App;
 
 // Styled Components
 const Container = styled.div`
-/* min-width: 700px; */
   padding: 20px;
 `;
