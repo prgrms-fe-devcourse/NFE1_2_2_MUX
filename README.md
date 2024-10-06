@@ -39,7 +39,7 @@
 
 
 ### 랜딩 페이지
-<img width="1440" alt="스크린샷 2024-10-06 오후 9 07 37" src="https://github.com/user-attachments/assets/1f94aa96-6ca4-4e33-8664-fba1f996be71">
+![landing](./imgs/Landing)
 
 
 
