@@ -47,7 +47,7 @@
 |랜딩 페이지|메인 페이지|
 |:--:|:--:|
 |- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
-|<img width="350" alt="랜딩 페이지" src="./imgs.Landing.png">|<img width="350" alt="메인 페이지" src="./imgs/main.png">|
+|<img width="350" alt="랜딩 페이지" src="./imgs/Landing.png">|<img width="350" alt="메인 페이지" src="./imgs/main.png">|
 
 
 
@@ -64,33 +64,25 @@
 |<img width="350" alt="추천 포스트 업로드" src="./imgs/uploadrec.png">|
 
 
-### 자작곡 상세 페이지
-![songdetail](./imgs/songdetail.png)
+
+|자작곡 상세 페이지|추천 포스트 상세 페이지|
+|:--:|:--:|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
+|<img width="350" alt="자작곡 상세 페이지" src="./imgs/songdetail.png">|<img width="350" alt="추천 포스트 상세 페이지" src="./imgs/recdetail.png">|
 
 
 
-### 추천 포스트 상세 페이지
-![songdetail](./imgs/recdetail.png)
+|자작곡-추천 플레이리스트 피드|추천곡 피드|
+|:--:|:--:|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
+|<img width="350" alt="자작곡-추천 플레이리스트 피드" src="./imgs/artist-curation.png">|<img width="350" alt="추천곡 피드" src="./imgs/postfeed.png">|
 
 
 
-### 자작곡 & 추천 플레이리스트 피드
-![artistcuration](./imgs/artist-curation.png)
-
-
-
-### 추천곡 피드
-![postfeed](./imgs/postfeed.png)
-
-
-
-### 마이페이지
-![mypage](./imgs/mypage.png)
-
-
-
-### 정보 수정
-![modify](./imgs/modify.png)
+|마이페이지|정보 수정|
+|:--:|:--:|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
+|<img width="350" alt="마이페이지" src="./imgs/mypage.png">|<img width="350" alt="정보 수정" src="./imgs/modify.png">|
 
 
 
