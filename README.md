@@ -52,11 +52,16 @@
 
 
 
-|자작곡 업로드|추천 포스트 업로드|
+|자작곡 업로드 1|자작곡 업로드 2|
 |:--:|:--:|
 |- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |- 이메일 형식 확인 <br/>- 비밀번호 확인 인증|
-|<img width="350" alt="랜딩 페이지" src="./imgs/uploadsong1.png"><img width="350" alt="자작곡 업로드" src="./imgs/uploadsong2.png">|<img width="350" alt="추천 포스트 업로드" src="./imgs/uploadrec.png">|
+|<img width="350" alt="랜딩 페이지" src="./imgs/uploadsong1.png">|<img width="350" alt="자작곡 업로드" src="./imgs/uploadsong2.png">|
 
+
+|추천 포스트 업로드|
+|:--:|
+|- 회원 정보 이메일 ID<br/>-숫자, 영문, 특수문자 조합 PW<br/> |
+|<img width="350" alt="추천 포스트 업로드" src="./imgs/uploadrec.png">|
 
 
 ### 자작곡 상세 페이지
