@@ -4,7 +4,7 @@ import ArtistCard from '../../components/ArtistCard';
 import styled from 'styled-components';
 import { deletePost, getChannelPosts } from '../../utils/api';
 
-const CurationArt = () => {
+const CurationArt = ({ onPlayTrack }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
@@ -16,7 +16,7 @@ const CurationArt = () => {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
-  const scrollDistance = useRef(0); 
+  const scrollDistance = useRef(0);
 
   const channelId = '66fb53f9ed2d3c14a64eb9ea';
   const token = localStorage.getItem('token');
@@ -96,6 +96,13 @@ const CurationArt = () => {
     }
   };
 
+  const handlePlayTrack = (track) => {
+    setPlayingPostId(track.id);
+    if (onPlayTrack) {
+      onPlayTrack(track);
+    }
+  };
+
   const handleMouseDown = (e) => {
     isDragging.current = true;
     startX.current = e.pageX - artistContainerRef.current.offsetLeft;
@@ -126,10 +133,14 @@ const CurationArt = () => {
     fetchPosts();
   }, [fetchPosts]);
 
-  const handleHintClick = () => {
+  const handleHintClickArt = () => {
     setShowHint(false);
   };
-  
+
+  const handleHintClickCur = () => {
+    setShowHint(false);
+  };
+
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
@@ -145,11 +156,11 @@ const CurationArt = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
-          onClick={handleHintClick}>
+          onClick={handleHintClickArt}>
           {showHint && (
-            <HintOverlay>
-              <HintMessage>좌우로 스와이프</HintMessage>
-            </HintOverlay>
+            <ArtHintOverlay>
+              <ArtHintMessage>좌우로 스와이프</ArtHintMessage>
+            </ArtHintOverlay>
           )}
           {posts.map((post) => (
             <div key={post._id}>
@@ -157,6 +168,7 @@ const CurationArt = () => {
                 post={post}
                 isPlaying={playingPostId === post._id}
                 onPlayPause={() => handlePlayPause(post._id)}
+                onPlayTrack={handlePlayTrack}
                 onLikeUpdate={handleLikeUpdate}
                 onTrackDelete={handlePostDelete}
               />
@@ -169,13 +181,14 @@ const CurationArt = () => {
           당신의 취향에 맞는 <br />
           음악을 추천해 드릴게요
         </SectionTitle>
-        <CurationCard onClick={handleHintClick}>
+        <CurationContainer onClick={handleHintClickCur}>
           {showHint && (
-            <HintOverlay>
-              <HintMessage>좌우로 스와이프</HintMessage>
-            </HintOverlay>
+            <CurHintOverlay>
+              <CurHintMessage>좌우로 스와이프</CurHintMessage>
+            </CurHintOverlay>
           )}
-        </CurationCard>
+          <CurationCard onPlayTrack={handlePlayTrack}/>
+        </CurationContainer>
       </Section>
     </PageContainer>
   );
@@ -282,7 +295,42 @@ const ArtistContainer = styled.div`
   }
 `;
 
-const HintOverlay = styled.div`
+const CurationContainer = styled.div`
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  gap: 20px;
+  padding-bottom: 20px;
+  caret-color: transparent;
+  margin-bottom: 30px;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+  position: relative;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    gap: 18px;
+    padding-bottom: 18px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    gap: 15px;
+    padding-bottom: 16px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    gap: 12px;
+    padding-bottom: 14px;
+  }
+`;
+
+const ArtHintOverlay = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -295,7 +343,7 @@ const HintOverlay = styled.div`
   z-index: 10;
 `;
 
-const HintMessage = styled.div`
+const ArtHintMessage = styled.div`
   color: #d6cbf5;
   font-size: 80px;
   font-weight: bold;
@@ -303,10 +351,42 @@ const HintMessage = styled.div`
   padding: 10px 20px;
   border-radius: 8px;
   z-index: 11;
-  animation: blink 2s infinite; 
+  animation: blink 2s infinite;
 
   @keyframes blink {
-    0%  {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+`;
+const CurHintOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(46, 45, 45, 0.7);
+  z-index: 10;
+`;
+
+const CurHintMessage = styled.div`
+  color: #d6cbf5;
+  font-size: 80px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 11;
+  animation: blink 2s infinite;
+
+  @keyframes blink {
+    0% {
       opacity: 1;
     }
     100% {

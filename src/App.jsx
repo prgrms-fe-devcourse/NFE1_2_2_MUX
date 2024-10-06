@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useParams,
+} from 'react-router-dom';
 import Signup from './auth/Signup';
 import Login from './auth/Login';
 import Dashboard from './auth/Dashboard';
@@ -10,8 +16,15 @@ import ProfilePage from '../src/profile/ProfilePage.jsx';
 import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
 import NotificationModal from './components/modals/NotificationModal.jsx';
 import PostDetailModal from './components/modals/PostDetailModal.jsx';
+import MusicPlayer from './components/main/MusicPlayer.jsx';
+
 const App = () => {
   const [user, setUser] = useState(null);
+  const [currentTrack, setCurrentTrack] = useState(null);
+
+  const handlePlayTrack = (track) => {
+    setCurrentTrack(track);
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -38,12 +51,23 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/postfeed" element={<PostFeed />} />
-          <Route path="/curationart" element={<CurationArt />} />
+          <Route
+            path="/postfeed"
+            element={<PostFeed onPlayTrack={handlePlayTrack} />}
+          />
+          <Route
+            path="/curationart"
+            element={<CurationArt onPlayTrack={handlePlayTrack} />}
+          />
           {/* 유저 페이지/마이페이지 */}
-          <Route path="/user/:userId" element={<ProfilePageWrapper user={user} />} />
+          <Route
+            path="/user/:userId"
+            element={<ProfilePageWrapper user={user} />}
+          />
         </Routes>
       </Container>
+      {/* MusicPlayer에 현재 트랙 전달 */}
+      <MusicPlayer currentTrack={currentTrack} />
     </Router>
   );
 };
@@ -65,7 +89,8 @@ const ProfilePageWrapper = ({ user }) => {
       }
     };
 
-    if (!isMyPage) {  // 마이페이지가 아니라면, 유저 데이터를 불러옵니다.
+    if (!isMyPage && userId) {
+      // 마이페이지가 아니라면, 유저 데이터를 불러옵니다.
       fetchUserData();
     }
   }, [userId, isMyPage]);
@@ -81,7 +106,7 @@ export default App;
 
 // Styled Components
 const Container = styled.div`
-/* min-width: 700px; */
+  /* min-width: 700px; */
   padding: 20px;
 `;
 
