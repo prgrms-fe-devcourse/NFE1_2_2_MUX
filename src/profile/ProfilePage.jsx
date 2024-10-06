@@ -322,8 +322,8 @@ const PostSection = styled.div`
 
     > * {
       flex-shrink: 0;
-      width: auto;
-      height: auto;
+      width: 280px;
+      height: 420px;
     }
 
     @media (max-width: 708px) {
@@ -362,11 +362,15 @@ const MusicSection = styled.div`
       display: none;
     }
 
-    /* > * {
+    > * {
       flex-shrink: 0;
-      width: auto;
-      height: auto;
-    } */
+      width: 400px;
+      height: 80px;
+    }
+
+    @media (max-width: 1228px) {
+      justify-content: center;
+    }
   }
 
   @media (max-width: 1023px) {
