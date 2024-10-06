@@ -7,6 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -14,11 +15,9 @@ const Login = () => {
       const { token, user } = await login(email, password); // API 호출
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      console.log('로그인 성공:', user);
-      console.log('로그인 성공:', token);
       navigate('/mainpage');
     } catch (error) {
-      console.error('로그인 실패:', error);
+      setErrorMessage('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
     }
   };
 
@@ -41,6 +40,7 @@ const Login = () => {
           required
         />
         <Button type="submit">로그인</Button>
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>} {/* 오류 메시지 표시 */}
       </Form>
     </LoginContainer>
   );
@@ -111,3 +111,10 @@ const Button = styled.button`
     background-color: #d3d3d3;
   }
 `;
+
+const ErrorMessage = styled.p`
+  color: red;
+  margin-top: 10px;
+  text-align: center;
+`;
+
