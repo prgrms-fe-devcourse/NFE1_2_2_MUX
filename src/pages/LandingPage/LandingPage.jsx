@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import img1 from '../../assets/images/musician-349790_1280.jpg';
-import img2 from '../../assets/images/guitar-3943201_1280.jpg';
-import img3 from '../../assets/images/adult-3086307_1280.jpg';
-import ipod from '../../assets/images/KakaoTalk_Image_2024-09-28-19-59-52.png';
-import logo from '../../assets/images/Chat (7).png';
+import img1 from '../../assets/images/girl.jpg';
+import img2 from '../../assets/images/girl-2.jpg';
+import img3 from '../../assets/images/girl-3.jpg';
+import img4 from '../../assets/images/ocean.jpg';
+import img5 from '../../assets/images/smile.jpg';
+import img6 from '../../assets/images/trees.jpg';
+import ipod from '../../assets/images/ipod.png';
+import logo from '../../assets/images/logo-2.png';
 import play from '../../assets/images/landing-play.png';
 import anim1 from '../../assets/images/image 1.png';
 import anim2 from '../../assets/images/image 2.png';
@@ -13,7 +16,7 @@ import anim4 from '../../assets/images/image 4.png';
 
 const LandingApp = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const images = [img1, img2, img3];
+  const images = [img1, img2, img3, img4, img5, img6];
   const totalImages = images.length;
   const animImages = [anim1, anim2, anim3, anim4];
 
@@ -25,8 +28,7 @@ const LandingApp = () => {
     return () => clearInterval(interval);
   }, [totalImages]);
 
-  const offset = (-currentIndex * 100) / totalImages;
-
+  const offset = -currentIndex * (100 / totalImages);
   return (
     <AppContainer>
       <GlobalStyle />
@@ -65,12 +67,14 @@ const LandingApp = () => {
               <IpodImage src={ipod} alt="ipod" />
               <Screen>
                 <SliderContainer
-                  style={{ transform: `translateX(${offset}%)` }}>
+                  style={{ transform: `translateX(${offset}%)` }}
+                  totalImages={totalImages}>
                   {images.map((src, index) => (
                     <SliderImage
                       key={index}
                       src={src}
                       alt={`슬라이드 이미지 ${index + 1}`}
+                      totalImages={totalImages}
                     />
                   ))}
                 </SliderContainer>
@@ -88,14 +92,15 @@ export default LandingApp;
 const SliderContainer = styled.div`
   display: flex;
   transition: transform 0.5s ease-in-out;
-  width: 300%;
+  width: ${(props) => props.totalImages * 100}%;
   height: 100%;
 `;
 
 const SliderImage = styled.img`
-  width: 33.33%;
+  width: ${(props) => 100 / props.totalImages}%;
   height: 100%;
   object-fit: cover;
+  flex-shrink: 0;
 `;
 
 const AppContainer = styled.div`
