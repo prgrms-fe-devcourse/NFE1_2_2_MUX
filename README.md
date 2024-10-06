@@ -43,8 +43,13 @@
 
 
 
-### 로그인 / 회원가입
-![login](./imgs/login.png)  ![signup](./imgs/signup.png)
+### 로그인
+![login](./imgs/login.png)
+
+
+
+### 회원가입
+![signup](./imgs/signup.png)
 
 
 
