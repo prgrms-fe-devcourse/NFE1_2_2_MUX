@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { getUsers, getPosts } from '../../utils/api';
+import { getUsers, getPosts, fetchPostsByChannel } from '../../utils/api';
 import UserProfile from '../../components/UserProfile';
 import PostCard from '../../components/PostCard';
 import AlbumCurationCard from '../../components/CurationCard';
@@ -49,18 +49,21 @@ const CardSection = ({ cards, cardWidth, isUserProfile = false }) => {
 const MainPage = () => {
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
+  const channelID = '66fb541ced2d3c14a64eb9ee';
+  const token = localStorage.getItem('token');
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [fetchedUsers, fetchedPosts] = await Promise.all([
           getUsers(),
-          getPosts()
+          fetchPostsByChannel(channelID, 0, 10, token) // 특정 채널 ID로 포스트 불러오기
         ]);
-        
+  
         const sortedUsers = fetchedUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setUsers(sortedUsers.slice(0, 10));
-
+  
         const sortedPosts = fetchedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setPosts(sortedPosts.slice(0, 10));
       } catch (error) {
@@ -96,7 +99,7 @@ const MainPage = () => {
 
       <Section>
         <SectionHeader>
-          <Title>많은 사람들이 공감하는 음악은 무엇일까요?</Title>
+          <Title>많은 사람들이 공감하는 노래는 무엇일까요?</Title>
           <MoreLink as={Link} to="/postfeed">More <img src={RightButton} alt="More" style={{ width: '16px', height: '16px', marginLeft: '4px' }} /></MoreLink>
         </SectionHeader>
         <Underline />
@@ -121,18 +124,43 @@ export default MainPage;
 
 // Styled Components
 const PageContainer = styled.div`
-  padding: 1.5rem;
+  padding: 20px;
+  min-width: 1024px;
+  max-width: 1279px;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
+
+@media all and (min-width: 1024px) and (max-width: 1279px) {
+  padding: 18px;
+}
+
+@media all and (min-width: 768px) and (max-width: 1023px) {
+  padding: 16px;
+}
+
+@media all and (min-width: 480px) and (max-width: 767px) {
+  padding: 14px;
+}
 `;
 
 const Section = styled.section`
-  margin-bottom: 3rem;
+  margin-bottom: 40px;
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    margin-bottom: 45px;
+  }
+
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    margin-bottom: 40px;
+  }
+
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    margin-bottom: 35px;
+  }
 `;
 
 const SectionHeader = styled.div`
-  margin-top: 10px;
+margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -211,6 +239,7 @@ const CardWrapper = styled.div`
   transition: transform 0.3s ease-in-out;
   transform: ${({ currentIndex, visibleCards }) => 
     `translateX(-${currentIndex * (100 / visibleCards)}%)`};
+    margin-bottom: 1rem;
 `;
 
 const Card = styled.div`

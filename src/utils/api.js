@@ -197,6 +197,19 @@ export const getChannelPosts = async (
   }
 };
 
+export const fetchPostsByChannel = async (channelId, offset, limit, token) => {
+  try {
+    const response = await axios.get(`/api/posts/channel/${channelId}`, {
+      params: { offset, limit },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch posts:', error);
+    throw error;
+  }
+};
+
 // 특정 포스트 상세 정보 가져오기
 export const getPostDetails = async (postId, token) => {
   try {
