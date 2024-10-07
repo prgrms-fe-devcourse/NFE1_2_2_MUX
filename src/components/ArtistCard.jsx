@@ -10,10 +10,10 @@ import ArtistTrackDetailModal from './modals/ArtistTrackDetailModal';
 
 const ArtistCard = ({
   post,
-  isPlaying,
   onPlayPause,
   onLikeUpdate,
   onTrackDelete,
+  onPlayTrack,
 }) => {
   if (!post || !post.author) {
     return null;
@@ -26,7 +26,6 @@ const ArtistCard = ({
   const [comments, setComments] = useState(
     post.comments ? post.comments.length : 0,
   );
-  const audioRef = useRef(null);
   const navigate = useNavigate();
 
   let parsedTitle, albums, description, nickName;
@@ -53,15 +52,6 @@ const ArtistCard = ({
     navigate(`/user/${author._id}`);
   };
 
-  useEffect(() => {
-    if (isPlaying && audioRef.current) {
-      audioRef.current.play();
-    } else if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  }, [isPlaying]);
-
   const handleCardClick = async (e, post) => {
     if (
       !e.target.closest('.profile-area') &&
@@ -86,6 +76,15 @@ const ArtistCard = ({
 
   const handlePlayPauseClick = (e) => {
     e.stopPropagation();
+    
+    // 트랙 정보 상위로 전달 (onPlayTrack 호출)
+    if (onPlayTrack && firstAlbum) {
+      onPlayTrack({
+        title: parsedTitle,
+        artist: nickName,
+        audioUrl: firstAlbum.videoUrl, // 오디오 URL이 있으면 전달
+      });
+    }
     onPlayPause();
   };
 
@@ -131,7 +130,7 @@ const ArtistCard = ({
               />
               <PlayPauseButton onClick={handlePlayPauseClick}>
                 <img
-                  src={isPlaying ? stopButtonIcon : playButtonIcon}
+                  src={playButtonIcon}
                   alt="play-pause"
                 />
               </PlayPauseButton>
@@ -146,10 +145,7 @@ const ArtistCard = ({
               <ReactionCount likes={likes} comments={comments} />
             </ReactionCountWrapper>
           </CardContent>
-          {firstAlbum && firstAlbum.videoId && (
-            <audio ref={audioRef} src={firstAlbum.videoUrl} />
-          )}
-        </PostWrapper>
+        </PostWrapper>  
       </CardContainer>
       {isModalOpen && selectedPost && (
         <ArtistTrackDetailModal

@@ -8,7 +8,6 @@ import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import TrashBtn from '../../assets/icons/trash-button.png';
 import CommentIcon from '../../assets/icons/Comment.png';
-import YouTube from 'react-youtube';
 
 import {
   addLike,
@@ -26,10 +25,10 @@ const PostDetailModal = ({
   onLikeUpdate,
   onPostDelete,
   onCommentUpdate,
+  onPlayTrack,
 }) => {
   const [currentAlbumIndex, setCurrentAlbumIndex] = useState(0);
   const [comment, setComment] = useState('');
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -37,17 +36,16 @@ const PostDetailModal = ({
   const [currentUser, setCurrentUser] = useState(null);
   const [post, setPost] = useState(initialPost);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [commentCount, setCommentCount] = useState(initialPost.comments.length);
   const token = localStorage.getItem('token');
-  const playerRef = useRef(null);
   const navigate = useNavigate();
-
+  
   const handleProfileClick = () => {
     console.log('Profile clicked, navigating to:', `/user/${post.author._id}`);
     onClose(); // 모달을 닫습니다.
     navigate(`/user/${post.author._id}`);
   };
-
   const fetchPostDetails = useCallback(async () => {
     if (isDeleted) return; // 게시글이 삭제되었다면 데이터를 가져오지 않음
 
@@ -128,7 +126,7 @@ const PostDetailModal = ({
       // 즉시 UI 업데이트
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
-
+  
       if (isLiked) {
         const likeToRemove = post.likes.find(
           (like) => like.user === currentUser._id,
@@ -236,33 +234,25 @@ const PostDetailModal = ({
   };
 
   const handlePlayPause = () => {
-    const videoId = albums[currentAlbumIndex]?.videoId;
+    const videoId = currentVideoId;
     if (!videoId) return;
-
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-      } else {
-        playerRef.current.loadVideoById(videoId);
-        playerRef.current.playVideo();
-      }
-      setIsPlaying(!isPlaying);
+  
+    const currentTrack = {
+      title: albums[currentAlbumIndex]?.title,
+      artist: albums[currentAlbumIndex]?.artist,
+      videoId: videoId,
+      coverUrl: albums[currentAlbumIndex]?.coverUrl,
+    };
+  
+    if (onPlayTrack) {
+      onPlayTrack(currentTrack);
     }
+    setIsPlaying(!isPlaying);
   };
-
-  const handleStateChange = (event) => {
-    if (event.data === YouTube.PlayerState.PLAYING) {
-      setIsPlaying(true);
-    } else if (
-      event.data === YouTube.PlayerState.PAUSED ||
-      event.data === YouTube.PlayerState.ENDED
-    ) {
-      setIsPlaying(false);
-    }
-  };
-
+  
   useEffect(() => {
-    setCurrentVideoId(albums[currentAlbumIndex]?.videoId);
+    const videoId = albums[currentAlbumIndex]?.videoId;
+    setCurrentVideoId(videoId);
   }, [currentAlbumIndex, albums]);
 
   const handleDeletePost = async () => {
@@ -312,11 +302,8 @@ const PostDetailModal = ({
               src={albums[currentAlbumIndex]?.coverUrl}
               alt={albums[currentAlbumIndex]?.title}
             />
-            <PlayOverlay $isPlaying={isPlaying}>
-              <PlayPauseIcon
-                src={isPlaying ? StopBtn : PlayBtn}
-                alt={isPlaying ? 'Pause' : 'Play'}
-              />
+            <PlayOverlay>
+              <PlayPauseIcon src={isPlaying? StopBtn : PlayBtn} alt="Play" />
             </PlayOverlay>
           </AlbumImageContainer>
           <AlbumNavButton onClick={handleNextAlbum}>
@@ -412,22 +399,6 @@ const PostDetailModal = ({
             );
           })}
         </CommentSection>
-
-        <YouTube
-          videoId={currentVideoId}
-          opts={{
-            height: '0',
-            width: '0',
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-            },
-          }}
-          onReady={(event) => {
-            playerRef.current = event.target;
-          }}
-          onStateChange={handleStateChange}
-        />
       </ModalContainer>
     </ModalOverlay>
   );

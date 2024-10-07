@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import YouTube from 'react-youtube';
 import axios from 'axios';
 import playButtonIcon from '../assets/icons/play-button.png';
 import stopButtonIcon from '../assets/icons/stop-button.png';
 
-const AlbumCurationCard = () => {
+const AlbumCurationCard = ({ onPlayTrack }) => {
   const [albums, setAlbums] = useState([]);
   const [playingVideoId, setPlayingVideoId] = useState(null);
-  const playerRef = useRef(null);
   const cardContainerRef = useRef(null);
   const isDown = useRef(false);
   const startX = useRef(0);
@@ -22,8 +20,7 @@ const AlbumCurationCard = () => {
         params: { query: '2024 j-pop playlist' },
         params: { query: '2024 k-pop playlist' },
         headers: {
-          'x-rapidapi-key':
-            '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
+          'x-rapidapi-key': '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
           'x-rapidapi-host': 'yt-api.p.rapidapi.com',
         },
       };
@@ -51,28 +48,17 @@ const AlbumCurationCard = () => {
     fetchTopAlbums();
   }, []);
 
-  const onPlayerReady = (event) => {
-    playerRef.current = event.target;
-  };
-
-  const handlePlayPause = (videoId) => {
-    if (playingVideoId === videoId) {
-      playerRef.current.pauseVideo();
+  const handlePlayPause = (album) => {
+    if (playingVideoId === album.videoId) {
       setPlayingVideoId(null);
     } else {
-      setPlayingVideoId(videoId);
-      playerRef.current.loadVideoById(videoId);
-      playerRef.current.playVideo();
+      setPlayingVideoId(album.videoId);
+      onPlayTrack({
+        videoId: album.videoId,
+        title: album.title,
+        artist: album.artist,
+      });
     }
-  };
-
-  const youtubeOptions = {
-    height: '0',
-    width: '0',
-    playerVars: {
-      autoplay: 1,
-      origin: window.location.origin,
-    },
   };
 
   const handleMouseDown = (e) => {
@@ -106,7 +92,7 @@ const AlbumCurationCard = () => {
         <AlbumContainer key={album.videoId}>
           <AlbumCover src={album.coverUrl} alt={album.title} />
           <PlayPauseButtonContainer>
-            <PlayPauseButton onClick={() => handlePlayPause(album.videoId)}>
+            <PlayPauseButton onClick={() => handlePlayPause(album)}>
               <img
                 src={
                   playingVideoId === album.videoId
@@ -116,13 +102,6 @@ const AlbumCurationCard = () => {
                 alt="Play/Pause Button"
               />
             </PlayPauseButton>
-            {playingVideoId === album.videoId && (
-              <YouTube
-                videoId={album.videoId}
-                opts={youtubeOptions}
-                onReady={onPlayerReady}
-              />
-            )}
           </PlayPauseButtonContainer>
           <AlbumInfo>
             <AlbumTitle>{album.title}</AlbumTitle>

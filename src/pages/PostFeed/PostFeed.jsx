@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { getChannelPosts, deletePost } from '../../utils/api.js';
 import PostCard from '../../components/PostCard.jsx';
 
-const PostFeed = () => {
+const PostFeed = ({ onPlayTrack }) => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
@@ -98,7 +98,7 @@ const PostFeed = () => {
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
-
+  
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
@@ -113,6 +113,7 @@ const PostFeed = () => {
                 post={post}
                 onLikeUpdate={handleLikeUpdate}
                 onPostDelete={handlePostDelete}
+                onPlayTrack={onPlayTrack}
               />
             </div>
           ))}

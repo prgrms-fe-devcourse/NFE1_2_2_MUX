@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import PlayBtn from '../../assets/icons/play-button-2.png';
-import StopBtn from '../../assets/icons/stop-button-2.png';
 import LikeIcon from '../../assets/icons/Like.png';
 import TrashBtn from '../../assets/icons/trash-button.png';
 import CommentIcon from '../../assets/icons/Comment.png';
@@ -23,9 +22,9 @@ const ArtistTrackDetailModal = ({
   onLikeUpdate,
   onTrackDelete,
   onCommentUpdate,
+  onPlayTrack,
 }) => {
   const [comment, setComment] = useState('');
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialTrack.likes.length);
   const [comments, setComments] = useState(initialTrack.comments);
@@ -36,7 +35,6 @@ const ArtistTrackDetailModal = ({
   );
   const [isDeleted, setIsDeleted] = useState(false);
   const token = localStorage.getItem('token');
-  const audioRef = useRef(null);
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
@@ -231,33 +229,20 @@ const ArtistTrackDetailModal = ({
   };
 
   const handlePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
+    const audioUrl = albums?.videoUrl; audioUrl
+    if (!audioUrl) return;
+
+    const currentTrack = {
+      title: albums?.title,
+      artist: albums?.artist,
+      audioUrl: audioUrl,
+      coverUrl: albums?.coverUrl,
+    };
+
+    if (onPlayTrack) {
+      onPlayTrack(currentTrack);
     }
   };
-
-  useEffect(() => {
-    const audioElement = audioRef.current;
-    if (audioElement) {
-      const handlePlay = () => setIsPlaying(true);
-      const handlePause = () => setIsPlaying(false);
-      const handleEnded = () => setIsPlaying(false);
-
-      audioElement.addEventListener('play', handlePlay);
-      audioElement.addEventListener('pause', handlePause);
-      audioElement.addEventListener('ended', handleEnded);
-
-      return () => {
-        audioElement.removeEventListener('play', handlePlay);
-        audioElement.removeEventListener('pause', handlePause);
-        audioElement.removeEventListener('ended', handleEnded);
-      };
-    }
-  }, []);
 
   const handleDeleteTrack = async () => {
     if (window.confirm('정말로 이 트랙을 삭제하시겠습니까?')) {
@@ -306,10 +291,10 @@ const ArtistTrackDetailModal = ({
 
         <AlbumImageContainer onClick={handlePlayPause}>
           <AlbumImage src={album?.coverUrl} alt={album?.title} />
-          <PlayOverlay $isPlaying={isPlaying}>
+          <PlayOverlay>
             <PlayPauseIcon
-              src={isPlaying ? StopBtn : PlayBtn}
-              alt={isPlaying ? 'Pause' : 'Play'}
+              src={PlayBtn}
+              alt='Play'
             />
           </PlayOverlay>
         </AlbumImageContainer>
@@ -376,12 +361,6 @@ const ArtistTrackDetailModal = ({
             </CommentItem>
           ))}
         </CommentSection>
-
-        <audio
-          ref={audioRef}
-          src={album?.videoUrl}
-          onEnded={() => setIsPlaying(false)}
-        />
       </ModalContainer>
     </ModalOverlay>
   );

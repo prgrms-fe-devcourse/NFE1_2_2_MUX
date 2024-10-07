@@ -9,19 +9,13 @@ import PostDetailModal from '../components/modals/PostDetailModal';
 import { getPostDetails } from '../utils/api';
 import ReactionCount from '../components/ReactionCount'; // ReactionCount 컴포넌트 import
 
-// 정적 변수로 현재 재생 중인 플레이어 관리
-let currentPlayingPlayer = null;
-
-const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
+const PostCard = ({ post, onPlayTrack, onLikeUpdate, onPostDelete }) => {
   const { author } = post;
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [likes, setLikes] = useState(post.likes.length);
   const [comments, setComments] = useState(post.comments.length);
-  const playerRef = useRef(null);
   const navigate = useNavigate();
 
   let parsedTitle, albums, description, nickName;
@@ -43,71 +37,16 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
 
   const firstAlbum = albums && albums.length > 0 ? albums[0] : null;
 
-  const handlePlayPause = (e) => {
-    e.stopPropagation();
-    if (
-      firstAlbum &&
-      firstAlbum.videoId &&
-      isPlayerReady &&
-      playerRef.current
-    ) {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-        setIsPlaying(false);
-        currentPlayingPlayer = null;
-      } else {
-        if (
-          currentPlayingPlayer &&
-          currentPlayingPlayer !== playerRef.current
-        ) {
-          currentPlayingPlayer.pauseVideo();
-        }
-        playerRef.current.playVideo();
-        setIsPlaying(true);
-        currentPlayingPlayer = playerRef.current;
-      }
-    } else if (!isPlayerReady) {
-      alert('플레이어가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
+  const handlePlayPause = () => {
+    if (firstAlbum && firstAlbum.videoId) {
+      const track = {
+        title: parsedTitle,
+        artist: nickName,
+        videoId: firstAlbum.videoId,
+      };
+      onPlayTrack(track);
     }
   };
-
-  const handleStateChange = (event) => {
-    switch (event.data) {
-      case YouTube.PlayerState.PLAYING:
-        setIsPlaying(true);
-        currentPlayingPlayer = playerRef.current;
-        break;
-      case YouTube.PlayerState.PAUSED:
-      case YouTube.PlayerState.ENDED:
-        setIsPlaying(false);
-        if (currentPlayingPlayer === playerRef.current) {
-          currentPlayingPlayer = null;
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleReady = (event) => {
-    playerRef.current = event.target;
-    setIsPlayerReady(true);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (playerRef.current && playerRef.current.stopVideo) {
-        try {
-          playerRef.current.stopVideo();
-        } catch (error) {
-          console.error('Error stopping video:', error);
-        }
-        if (currentPlayingPlayer === playerRef.current) {
-          currentPlayingPlayer = null;
-        }
-      }
-    };
-  }, []);
 
   const handleCardClick = async (e) => {
     // 프로필 영역이나 재생 버튼 클릭 시 모달 열지 않음
@@ -177,12 +116,9 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
           {firstAlbum && (
             <PostImage src={firstAlbum.coverUrl} alt={parsedTitle} />
           )}
-          {(isHovered || isPlaying) && (
+          {isHovered && (
             <PlayButton className="play-button" onClick={handlePlayPause}>
-              <PlayButtonImage
-                src={isPlaying ? pauseButtonIcon : playButtonIcon}
-                alt={isPlaying ? 'Pause' : 'Play'}
-              />
+              <PlayButtonImage src={playButtonIcon} alt="Play" />
             </PlayButton>
           )}
         </ImageContainer>
@@ -193,22 +129,6 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
             <ReactionCount likes={likes} comments={comments} />
           </ReactionCountWrapper>
         </CardContent>
-        {firstAlbum && firstAlbum.videoId && (
-          <YouTubePlayerContainer>
-            <YouTube
-              videoId={firstAlbum.videoId}
-              opts={{
-                height: '0',
-                width: '0',
-                playerVars: {
-                  autoplay: 0,
-                },
-              }}
-              onReady={handleReady}
-              onStateChange={handleStateChange}
-            />
-          </YouTubePlayerContainer>
-        )}
       </Card>
       {isModalOpen && selectedPost && (
         <PostDetailModal
@@ -217,6 +137,7 @@ const PostCard = ({ post, onLikeUpdate, onPostDelete }) => {
           onLikeUpdate={handleLikeUpdate}
           onPostDelete={handlePostDelete}
           onCommentUpdate={handleCommentUpdate}
+          onPlayTrack={handlePlayPause}
         />
       )}
     </>
