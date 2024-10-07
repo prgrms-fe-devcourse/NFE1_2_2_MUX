@@ -67,14 +67,20 @@ const fetchNotifications = async () => {
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
   return (
     <>
       <HeaderContainer>
-        <Logo >
-          <a href="/mainpage" >
-          <img src={LogoImage} alt="로고"/>
-          </a>
+        <Logo>
+          <img src={LogoImage} alt="로고" />
         </Logo>
+
         <Navbar>
           <NavItem href="/mainpage">
             <img src={HomeIcon} alt="Home" />
@@ -88,16 +94,16 @@ const fetchNotifications = async () => {
         </Navbar>
 
         <SearchUploadContainer>
-          <SearchBar>
+          <SearchBar onSubmit={handleSearch}>
             <input
               type="text"
               placeholder="검색"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <a href={`/search/${searchTerm}`}>
+            <button type="submit">
               <img className="search" src={SearchIcon} alt="돋보기" />
-            </a>
+            </button>
           </SearchBar>
 
           <Upload>
@@ -108,6 +114,8 @@ const fetchNotifications = async () => {
         </SearchUploadContainer>
 
         <ProfileSection>
+          <div className="title">칭호 없음</div>
+
           <a onClick={handleProfileClick}>
             <img
               className="profile"
@@ -143,34 +151,19 @@ const HeaderContainer = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 5px 10px;
-  background-color: #ffffff;
-  margin-top: -25px;
+  background-color: #f8f9fa;
 `;
 
 const Logo = styled.div`
   img {
-    margin-left: 10px;
-    margin-top: 3px;
+    margin-right: 0;
     height: 40px;
-
   }
 `;
 
 const Navbar = styled.nav`
   display: flex;
-  gap: 30px;
-  position: relative;
-  margin-left: 30px;
-
-  @media (max-width: 1023px) {
-    gap: 15px;
-    margin-right: 5px;
-    }
-
-  @media (max-width: 767px) {
-    gap: 5px;
-    margin-left: 15px;
-    }
+  gap: 20px;
 `;
 
 const NavItem = styled.a`
@@ -183,7 +176,7 @@ const NavItem = styled.a`
   img {
     width: 24px;
     height: 24px;
-    margin-right: 20px;
+    margin-right: 5px;
   }
 `;
 
@@ -193,13 +186,19 @@ const SearchUploadContainer = styled.div`
   gap: 15px;
 `;
 
-const SearchBar = styled.div`
+const SearchBar = styled.form`
   display: flex;
   align-items: center;
   background-color: #d9d9d9;
   border-radius: 2px;
   padding: 5px;
   width: 100%; /* 전체 폭 사용 */
+
+  
+  button {
+    background-color: #d9d9d9;
+    border: 0;
+  }
 
   img.search {
     width: 20px;
@@ -220,20 +219,15 @@ const SearchBar = styled.div`
       outline: none;
     }
 
-    @media (max-width: 1023px) {
-      width: calc(100% - 10px); /* 1005px 이하에서 너비 줄이기 */
-      min-width: 200px; /* 최소 너비 설정 */
-    
+    @media (max-width: 1005px) {
+      width: calc(100% - 30px); /* 1005px 이하에서 너비 줄이기 */
+      min-width: 150px; /* 최소 너비 설정 */
     }
 
     @media (max-width: 768px) {
       width: 150px; /* 모바일에서는 최소 너비 */
     }
   }
-
-  @media (max-width: 700px) {
-      display: none; /* 모바일에서는 최소 너비 */
-    }
 `;
 
 const Upload = styled.div`
@@ -260,7 +254,19 @@ const ProfileSection = styled.div`
   display: flex;
   align-items: center;
   gap: 15px;
-  cursor: pointer;
+
+  .title {
+    display: flex;
+    padding: 5px 30px;
+    background: #ede4db;
+    border-radius: 35px;
+    font-size: 14px;
+    color: #474150;
+
+    @media (max-width: 790px) {
+      display: none; /* 790px 이하에서 사라짐 */
+    }
+  }
 
   img {
     border-radius: 50%;

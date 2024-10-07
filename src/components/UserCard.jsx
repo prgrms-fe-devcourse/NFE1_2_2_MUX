@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import ExampleImage from '../assets/images/default-profile.png';
-import { useNavigate } from 'react-router-dom';
-import { getUsers } from '../utils/api'; 
 
 const UserCard = ({ user, navigate }) => {
   const { image, fullName, role, _id } = user;
@@ -38,43 +36,13 @@ const UserCard = ({ user, navigate }) => {
       <ProfileImage src={image || ExampleImage} alt={nickName} /> {/* 프로필 이미지 */}
       <UserInfo>
         <UserName>{nickName}</UserName> {/* 유저 이름 */}
-        <UserTitle>{role}</UserTitle> {/* 유저 역할 */}
         <UserBio>{Introduce}</UserBio> {/* 유저 자기소개 */}
       </UserInfo>
     </Card>
   );
 };
 
-const App = () => {
-  const [users, setUsers] = useState([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const usersData = await getUsers(); // getUsers 호출
-        setUsers(usersData); // 상태 업데이트
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
-    fetchUsers(); // 유저 데이터 가져오기
-  }, []);
-
-  return (
-    <div>
-      <h1>유저 카드 리스트</h1>
-      <UserList>
-        {users.map((user) => (
-          <UserCard key={user._id} user={user} navigate={navigate} /> // navigate 전달
-        ))}
-      </UserList>
-    </div>
-  );
-};
-
-export default App;
+export default UserCard;
 
 // Styled Components
 const Card = styled.div`
@@ -83,12 +51,19 @@ const Card = styled.div`
   width: 420px;
   border-radius: 16px;
   padding: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
 `;
 
 const ProfileImage = styled.img`
   width: 80px;
   height: 80px;
   border-radius: 50%;
+  object-fit: cover;
 `;
 
 const UserInfo = styled.div`
@@ -96,12 +71,17 @@ const UserInfo = styled.div`
   flex-direction: column;
   align-items: flex-start;
   margin-left: 17px;
+  width: calc(100% - 97px);
 `;
 
 const UserName = styled.h2`
   font-size: 1em;
   margin: 0;
   color: #333;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const UserTitle = styled.p`
@@ -114,7 +94,7 @@ const UserTitle = styled.p`
   border-radius: 35px;
   font-size: 12px;
   color: #474150;
-  white-space: nowrap; /* 긴 텍스트가 줄 바꿈되지 않도록 */
+  white-space: nowrap;
 `;
 
 const UserBio = styled.p`
@@ -127,10 +107,7 @@ const UserBio = styled.p`
   border-radius: 5px;
   font-size: 13px;
   color: white;
-`;
-
-const UserList = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;

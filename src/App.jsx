@@ -17,6 +17,7 @@ import MainPage from './pages/Main/MainPage';
 import CurationArt from './pages/Curation-Artist/CurationArt.jsx';
 import MusicPlayer from './components/main/MusicPlayer.jsx';
 import LandingPage from './pages/LandingPage/LandingPage.jsx';
+import SearchPage from './pages/search/SearchPage.jsx';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -73,6 +74,7 @@ const AppRoutes = ({ user }) => {
           path="/curationart"
           element={<CurationArt onPlayTrack={handlePlayTrack} />}
         />
+        <Route path="/search" element={<SearchPage />} />
         <Route
           path="/user/:userId"
           element={<ProfilePageWrapper user={user} />}

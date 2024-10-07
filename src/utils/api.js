@@ -414,3 +414,55 @@ export const createNotification = async (
     }
   }
 };
+
+export const searchArtistPosts = async (
+  query,
+  token,
+  offset = 0,
+  limit = 10,
+) => {
+  const channelId = '66fb53f9ed2d3c14a64eb9ea'; // 추천 포스트 채널 ID
+  try {
+    const response = await axios.get(`/api/posts/channel/${channelId}`, {
+      params: { offset, limit, query }, // query 파라미터 추가
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching recommended posts:', error);
+    throw error;
+  }
+};
+
+export const searchRecommendedPosts = async (
+  query,
+  token,
+  offset = 0,
+  limit = 10,
+) => {
+  const channelId = '66fb541ced2d3c14a64eb9ee'; // 추천 포스트 채널 ID
+  try {
+    const response = await axios.get(`/api/posts/channel/${channelId}`, {
+      params: { offset, limit, query }, // query 파라미터 추가
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching recommended posts:', error);
+    throw error;
+  }
+};
+
+export const searchUsers = async (query, token) => {
+  try {
+    const response = await axios.get(`/api/search/all/${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // (User | Post)[] 반환
+  } catch (error) {
+    console.error('Error performing search:', error);
+    throw error;
+  }
+};
