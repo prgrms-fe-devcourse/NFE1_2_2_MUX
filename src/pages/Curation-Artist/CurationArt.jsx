@@ -147,8 +147,8 @@ const CurationArt = ({ onPlayTrack }) => {
     <PageContainer>
       <Section>
         <SectionTitle>
-          새로운 아티스트들의 멋진 앨범을 <br />
-          확인해 보세요!
+          새로운 아티스트들의 <br />
+          멋진 앨범을 확인해 보세요!
         </SectionTitle>
         <ArtistContainer
           ref={artistContainerRef}
@@ -178,8 +178,7 @@ const CurationArt = ({ onPlayTrack }) => {
       </Section>
       <Section>
         <SectionTitle>
-          당신의 취향에 맞는 <br />
-          음악을 추천해 드릴게요
+          지금 뜨고 있는 <br />이 음악은 어떠신가요?
         </SectionTitle>
         <CurationContainer onClick={handleHintClickCur}>
           {showHint && (
@@ -232,13 +231,13 @@ const Section = styled.div`
 
 const SectionTitle = styled.p`
   color: black;
-  margin-bottom: 20px;
-  font-size: 14px;
+  margin-bottom: 2rem;
+  font-size: 1.15rem;
   text-align: left;
   display: inline-block;
-  border-bottom: 3px solid black;
+  border-bottom: 2.8px solid black;
   padding-bottom: 10px;
-  font-weight: bold;
+  font-weight: 600;
   width: 250px;
 
   @media all and (min-width: 1024px) and (max-width: 1279px) {

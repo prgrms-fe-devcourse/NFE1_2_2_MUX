@@ -20,7 +20,7 @@ const AlbumCurationCard = ({ onPlayTrack }) => {
         params: { query: '2024 j-pop playlist' },
         params: { query: '2024 k-pop playlist' },
         headers: {
-          'x-rapidapi-key': '',
+          'x-rapidapi-key': '44e584cb92msh419c63d530f9731p198f8ejsn087035d40a78',
           'x-rapidapi-host': 'yt-api.p.rapidapi.com',
         },
       };

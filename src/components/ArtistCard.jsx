@@ -74,7 +74,6 @@ const ArtistCard = ({
     }
   };
 
-  
   const handlePlayPauseClick = (e) => {
     e.stopPropagation();
     
@@ -297,10 +296,6 @@ const CardImageWrapper = styled.div`
   height: 300px;
   margin-top: 10px;
 
-  &:hover div {
-    opacity: 1;
-  }
-
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     width: 250px;
     height: 280px;
@@ -323,6 +318,11 @@ const CardImage = styled.img`
   object-fit: cover;
   border-radius: 10px;
   pointer-events: none;
+  transition: filter 0.3s ease;
+
+  ${CardImageWrapper}:hover & {
+    filter: brightness(70%);
+  }
 `;
 
 const PlayPauseButton = styled.div`
@@ -335,7 +335,7 @@ const PlayPauseButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1;
+  opacity: 0;
   transition: opacity 0.3s ease-in-out;
   cursor: pointer;
 

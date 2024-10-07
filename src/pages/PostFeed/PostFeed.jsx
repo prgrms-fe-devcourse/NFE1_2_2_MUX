@@ -135,14 +135,37 @@ const PageContainer = styled.div`
 
 const MainContent = styled.main`
   flex: 1;
-  padding: 20px;
+  padding: 30px;
+  max-width: 1400px;
+  margin: 10px auto;
 `;
 
 const PostGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); // 기본 4개
+
+  gap: 80px;
   justify-content: center;
+
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ 1279px) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); // 한줄에 3개
+  }
+
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); // 한줄에 2개
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    grid-template-columns: repeat(1, minmax(0, 1fr)); // 한줄에 1개
+  }
+
+  /* 모바일 세로 (해상도 480px 이하) */
+  @media all and (max-width: 479px) {
+    grid-template-columns: repeat(1, minmax(0, 1fr)); // 한줄에 1개
+  }
 `;
 
 const ErrorMessage = styled.div`

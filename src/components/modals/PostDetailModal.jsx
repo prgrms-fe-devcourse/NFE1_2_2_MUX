@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import PreviousBtn from '../../assets/icons/Previous-Btn.png';
 import NextBtn from '../../assets/icons/Next-Btn.png';
@@ -15,7 +16,7 @@ import {
   deleteComment,
   getAuthUserData,
   getPostDetails,
-  createNotification
+  createNotification,
 } from '../../utils/api.js';
 
 const PostDetailModal = ({
@@ -38,7 +39,13 @@ const PostDetailModal = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [commentCount, setCommentCount] = useState(initialPost.comments.length);
   const token = localStorage.getItem('token');
-
+  const navigate = useNavigate();
+  
+  const handleProfileClick = () => {
+    console.log('Profile clicked, navigating to:', `/user/${post.author._id}`);
+    onClose(); // 모달을 닫습니다.
+    navigate(`/user/${post.author._id}`);
+  };
   const fetchPostDetails = useCallback(async () => {
     if (isDeleted) return; // 게시글이 삭제되었다면 데이터를 가져오지 않음
 
@@ -119,7 +126,7 @@ const PostDetailModal = ({
       // 즉시 UI 업데이트
       setIsLiked(!isLiked);
       setLikeCount((prevCount) => (isLiked ? prevCount - 1 : prevCount + 1));
-
+  
       if (isLiked) {
         const likeToRemove = post.likes.find(
           (like) => like.user === currentUser._id,
@@ -269,10 +276,19 @@ const PostDetailModal = ({
         <CloseButton onClick={onClose}>&times;</CloseButton>
 
         <Header>
-          <AuthorImage src={authorImage} alt={authorNickname} />
+          <AuthorImage
+            src={authorImage}
+            alt={authorNickname}
+            onClick={handleProfileClick}
+            style={{ cursor: 'pointer' }}
+          />
           <HeaderText>
             <PostTitle>{title || 'Untitled'}</PostTitle>
-            <AuthorName>{authorNickname}</AuthorName>
+            <AuthorName
+              onClick={handleProfileClick}
+              style={{ cursor: 'pointer' }}>
+              {authorNickname}
+            </AuthorName>
           </HeaderText>
         </Header>
         <Divider />
@@ -419,15 +435,32 @@ const ModalContainer = styled.div`
 
   position: relative;
 
-  @media (max-width: 768px) {
+  /* 노트북 & 테블릿 가로 (해상도 1024px ~ 1279px) */
+  @media all and (min-width: 1024px) and (max-width: 1279px) {
     width: 90%;
-    height: 90vh;
+    max-width: 750px;
   }
 
-  @media (max-width: 480px) {
+  /* 테블릿 가로 (해상도 768px ~ 1023px) */
+  @media all and (min-width: 768px) and (max-width: 1023px) {
+    width: 85%;
+    max-width: 700px;
+    height: 85vh;
+  }
+
+  /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px) */
+  @media all and (min-width: 480px) and (max-width: 767px) {
+    width: 90%;
+    height: 80vh;
+    padding: 15px;
+  }
+
+  /* 모바일 세로 (해상도 ~ 479px) */
+  @media all and (max-width: 479px) {
     width: 100%;
     height: 100vh;
     border-radius: 0;
+    padding: 10px;
   }
 `;
 
@@ -453,6 +486,12 @@ const AuthorImage = styled.img`
   border-radius: 50%;
   margin-right: 10px;
   border: 1px solid lightgray;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const HeaderText = styled.div`
@@ -468,6 +507,12 @@ const PostTitle = styled.h2`
 const AuthorName = styled.span`
   font-size: 14px;
   color: #666;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #444;
+  }
 `;
 
 const Divider = styled.hr`
