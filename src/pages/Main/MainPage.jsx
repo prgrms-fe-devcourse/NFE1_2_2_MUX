@@ -82,7 +82,8 @@ const MainPage = () => {
     <PageContainer>
       <Section>
         <SectionHeader>
-          <Title>지금 가장 핫한 아티스트의 음원을 확인해 보세요!</Title>
+          <Title>취향이 비슷한 사용자가 있을지도 몰라요!<br/>
+          프로필을 눌러 확인해보세요</Title>
           <MoreLink>More <img src={RightButton} alt="More" style={{ width: '16px', height: '16px', marginLeft: '4px' }} /></MoreLink>
         </SectionHeader>
         <Underline />
